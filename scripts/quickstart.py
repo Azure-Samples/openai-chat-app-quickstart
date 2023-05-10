@@ -1,11 +1,18 @@
-#Note: The openai-python library support for Azure OpenAI is in preview.
-#test
 import os
 import openai
+
 openai.api_type = "azure"
 openai.api_base = os.getenv("AZURE_OPENAI_ENDPOINT") 
 openai.api_version = "2023-03-15-preview"
 openai.api_key = os.getenv("AZURE_OPENAI_KEY")
+
+"""
+from azure.identity import DefaultAzureCredential
+default_credential = DefaultAzureCredential()
+token = default_credential.get_token("https://cognitiveservices.azure.com/.default")
+openai.api_type = "azure_ad"
+openai.api_key = token.token
+"""
 
 response = openai.ChatCompletion.create(
     engine="chatgpt", # engine = "deployment_name".
