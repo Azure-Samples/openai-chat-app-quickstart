@@ -1,0 +1,17 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
+
+name: chatgpt-quickstart
+metadata:
+  template: chatgpt-quickstart@0.0.1-beta
+hooks:
+    postprovision:
+      windows:
+        shell: pwsh
+        run: ./scripts/prep.ps1
+        interactive: true
+        continueOnError: false
+      posix:
+        shell: sh
+        run: ./scripts/prep.sh
+        interactive: true
+        continueOnError: false
