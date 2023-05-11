@@ -1,1 +1,2 @@
 # BYO Chat Application using Azure OpenAI
+This repository shows you the basic code of how to use the OpenAI SDK for Python to build your own chat application with Azure OpenAI. Explore this quickstart to get started: [Quickstart: Get started generating text using Azure OpenAI Service](https://learn.microsoft.com/en-us/azure/cognitive-services/openai/quickstart?pivots=programming-language-python&tabs=command-line)
