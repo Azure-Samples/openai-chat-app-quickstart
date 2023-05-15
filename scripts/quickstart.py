@@ -18,7 +18,6 @@ else:
     openai.api_type = "azure_ad"
     openai.api_key = token.token
 
-# https://cog-kg52cb6gl24k4.openai.azure.com/openai/deployments/chatgpt/chat/completions?api-version=2023-03-15-preview
 response = openai.ChatCompletion.create(
     engine="chatgpt", # engine = "deployment_name".
     messages=[
