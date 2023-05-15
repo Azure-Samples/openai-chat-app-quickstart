@@ -20,7 +20,7 @@ If you're not using one of those options for opening the project, then you'll ne
 
 ## Deployment
 
-This repository is set up for deployment on Azure App Service (w/PostgreSQL flexible server) using the configuration files in the `infra` folder.
+This repository is set up for deployment using the configuration files in the `infra` folder.
 
 1. Sign up for a [free Azure account](https://azure.microsoft.com/free/) and create an Azure Subscription.
 2. Install the [Azure Developer CLI](https://learn.microsoft.com/azure/developer/azure-developer-cli/install-azd). (If you open this repository in Codespaces or with the VS Code Dev Containers extension, that part will be done for you.)
@@ -36,13 +36,10 @@ This repository is set up for deployment on Azure App Service (w/PostgreSQL flex
     azd up
     ```
 
-    It will prompt you to provide an `azd` environment name (like "azure-openai-app"), select a subscription from your Azure account, and select a location (like "eastus"). Then it will provision the resources in your account and deploy the latest code. 
-    ```
-    python manage.py createsuperuser
-    ```
+    It will prompt you to provide an `azd` environment name (like "azure-openai-app"), select a subscription from your Azure account, and select a location (like "eastus"). Then it will provision the resources in your account and deploy the latest code. As a final step, it copies variables into a local `.env` file.
 
-5. When you've made any changes to the app code, you can just run:
+5. Run the quickstart:
 
-    ```shell
-    azd deploy
+    ```
+    python3 scripts/quickstart.py
     ```
