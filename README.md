@@ -41,5 +41,5 @@ This repository is set up for deployment using the configuration files in the `i
 5. Run the quickstart:
 
     ```
-    python3 scripts/quickstart.py
+    python3 quickstart.py
     ```
