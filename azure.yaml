@@ -1,8 +1,13 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
 
-name: chatgpt-quickstart
+name: simple-flask-container-app
 metadata:
-  template: chatgpt-quickstart@0.0.1-beta
+  template: simple-flask-container-app@0.0.1-beta
+services:
+  aca:
+    project: ./src
+    language: py
+    host: containerapp
 hooks:
     postprovision:
       windows:

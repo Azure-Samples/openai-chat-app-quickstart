@@ -1,3 +1,4 @@
 .env
 .azure
 .pyc
+__pycache__/
