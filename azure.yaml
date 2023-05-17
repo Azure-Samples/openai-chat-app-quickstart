@@ -7,11 +7,11 @@ hooks:
     postprovision:
       windows:
         shell: pwsh
-        run: ./scripts/prep.ps1
+        run: $output = azd env get-values; Add-Content -Path .env -Value $output;
         interactive: true
         continueOnError: false
       posix:
         shell: sh
-        run: ./scripts/prep.sh
+        run: azd env get-values > .env
         interactive: true
         continueOnError: false
