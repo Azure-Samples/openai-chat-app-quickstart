@@ -1,0 +1,5 @@
+Flask==2.3.2
+gunicorn==20.1.0
+openai==0.27.6
+azure-identity==1.13.0
+python-dotenv==1.0.0
