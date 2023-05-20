@@ -6,6 +6,7 @@
             "IMAGE": "python:3.11"
         }
     },
+    "forwardPorts": [50505],
     "features": {
         "ghcr.io/devcontainers/features/powershell:1.1.0": {},
         "ghcr.io/devcontainers/features/docker-in-docker:2": {},
