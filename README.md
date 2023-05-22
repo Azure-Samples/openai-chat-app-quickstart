@@ -1,4 +1,4 @@
-# ChatGPT chat app
+# Build your own ChatGPT app
 
 This repository includes a simple Python Flask app that streams responses from ChatGPT
 to an HTML/JS frontend using [server-sent events](https://developer.mozilla.org/docs/Web/API/Server-sent_events/Using_server-sent_events).
