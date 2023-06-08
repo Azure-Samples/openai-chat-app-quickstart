@@ -91,7 +91,7 @@ and see them instantly.
     docker-compose up --build
     ```
 
-4. Click 'http://0.0.0.0:50505' in the terminal, which should open a new tab in the browser.
+4. Click 'http://0.0.0.0:50505' in the terminal, which should open a new tab in the browser. You may need to navigate to 'http://localhost:50505' if that URL doesn't work.
 
 
 ## Getting help
