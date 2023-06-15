@@ -34,30 +34,47 @@ If you're not using one of those options for opening the project, then you'll ne
 
 This repo is set up for deployment on Azure Container Apps using the configuration files in the `infra` folder.
 
-Steps for deployment:
+#### Prerequisites for deployment
 
 1. Sign up for a [free Azure account](https://azure.microsoft.com/free/) and create an Azure Subscription.
 2. Request access to Azure OpenAI Service by completing the form at [https://aka.ms/oai/access](https://aka.ms/oai/access) and awaiting approval.
 2. Install the [Azure Developer CLI](https://learn.microsoft.com/azure/developer/azure-developer-cli/install-azd). (If you open this repository in Codespaces or with the VS Code Dev Containers extension, that part will be done for you.)
-3. Login to Azure:
+
+#### Deployment from scratch
+
+1. Login to Azure:
 
     ```shell
     azd auth login
     ```
 
-4. Provision and deploy all the resources:
+2. Provision and deploy all the resources:
 
     ```shell
     azd up
     ```
     It will prompt you to provide an `azd` environment name (like "flask-app"), select a subscription from your Azure account, and select a [location where OpenAI is available](https://azure.microsoft.com/explore/global-infrastructure/products-by-region/?products=cognitive-services&regions=all) (like "francecentral"). Then it will provision the resources in your account and deploy the latest code. If you get an error or timeout with deployment, changing the location can help, as there may be availability constraints for the OpenAI resource.
 
-5. When `azd` has finished deploying, you'll see an endpoint URI in the command output. Visit that URI, and you should see the chat app! 🎉
-6. When you've made any changes to the app code, you can just run:
+3. When `azd` has finished deploying, you'll see an endpoint URI in the command output. Visit that URI, and you should see the chat app! 🎉
+4. When you've made any changes to the app code, you can just run:
 
     ```shell
     azd deploy
     ```
+
+#### Deployment with existing resources
+
+If you already have an OpenAI resource and would like to re-use it, first follow these steps.
+
+1. Run `azd env new` to create a new environment. Provide a name that will be used in the name of *new* resources that are created.
+2. Run `azd env set` to specify the values for the existing OpenAI resource.
+
+   ```
+   azd env set AZURE_OPENAI_RESOURCE {name of OpenAI resource}
+   azd env set AZURE_OPENAI_RESOURCE_GROUP {name of resource group that it's inside}
+   azd env set AZURE_OPENAI_SKU_NAME {name of the SKU, like "S0"}
+   ```
+3. Then follow the steps for deployment above.
 
 ### Costs
 
@@ -91,7 +108,7 @@ and see them instantly.
     docker-compose up --build
     ```
 
-4. Click 'http://0.0.0.0:50505' in the terminal, which should open a new tab in the browser.
+4. Click 'http://0.0.0.0:50505' in the terminal, which should open a new tab in the browser. You may need to navigate to 'http://localhost:50505' if that URL doesn't work.
 
 
 ## Getting help
