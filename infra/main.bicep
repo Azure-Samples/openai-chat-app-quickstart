@@ -16,7 +16,7 @@ param acaExists bool = false
 
 param openAiResourceName string = ''
 param openAiResourceGroupName string = ''
-param openAiResourceGroupLocation string = location
+param openAiResourceGroupLocation string = ''
 param openAiSkuName string = ''
 
 var resourceToken = toLower(uniqueString(subscription().id, name, location))
@@ -40,7 +40,7 @@ module openAi 'core/ai/cognitiveservices.bicep' = {
   scope: openAiResourceGroup
   params: {
     name: !empty(openAiResourceName) ? openAiResourceName : '${resourceToken}-cog'
-    location: openAiResourceGroupLocation
+    location: !empty(openAiResourceGroupLocation) ? openAiResourceGroupLocation : location
     tags: tags
     sku: {
       name: !empty(openAiSkuName) ? openAiSkuName : 'S0'
@@ -132,7 +132,7 @@ output AZURE_OPENAI_KEY string = openAi.outputs.key
 output AZURE_OPENAI_RESOURCE string = openAi.outputs.name
 output AZURE_OPENAI_RESOURCE_GROUP string = openAiResourceGroup.name
 output AZURE_OPENAI_SKU_NAME string = openAi.outputs.skuName
-output AZURE_OPENAI_RESOURCE_GROUP_LOCATION string = openAiResourceGroupLocation
+output AZURE_OPENAI_RESOURCE_GROUP_LOCATION string = openAiResourceGroup.location
 
 output SERVICE_ACA_IDENTITY_PRINCIPAL_ID string = aca.outputs.SERVICE_ACA_IDENTITY_PRINCIPAL_ID
 output SERVICE_ACA_NAME string = aca.outputs.SERVICE_ACA_NAME
