@@ -11,6 +11,18 @@
       "principalId": {
         "value": "${AZURE_PRINCIPAL_ID}"
       },
+      "openAiResourceName": {
+        "value": "${AZURE_OPENAI_RESOURCE}"
+      },
+      "openAiResourceGroupName": {
+        "value": "${AZURE_OPENAI_RESOURCE_GROUP}"
+      },
+      "openAiResourceGroupLocation": {
+        "value": "${AZURE_OPENAI_RESOURCE_GROUP_LOCATION}"
+      },
+      "openAiSkuName": {
+        "value": "${AZURE_OPENAI_SKU_NAME}"
+      },
       "acaExists": {
         "value": "${SERVICE_ACA_RESOURCE_EXISTS=false}"
       }
