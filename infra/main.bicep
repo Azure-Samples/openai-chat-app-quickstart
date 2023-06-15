@@ -18,6 +18,7 @@ param openAiResourceName string = ''
 param openAiResourceGroupName string = ''
 param openAiResourceGroupLocation string = ''
 param openAiSkuName string = ''
+param openAiDeploymentCapacity int = 30
 
 var resourceToken = toLower(uniqueString(subscription().id, name, location))
 var tags = { 'azd-env-name': name }
@@ -53,9 +54,7 @@ module openAi 'core/ai/cognitiveservices.bicep' = {
           name: 'gpt-35-turbo'
           version: '0301'
         }
-        scaleSettings: {
-          scaleType: 'Standard'
-        }
+        capacity: openAiDeploymentCapacity
       }
     ]
   }
