@@ -14,6 +14,11 @@ param principalId string = ''
 
 param acaExists bool = false
 
+param openAiResourceName string = ''
+param openAiResourceGroupName string = ''
+param openAiResourceGroupLocation string = location
+param openAiSkuName string = ''
+
 var resourceToken = toLower(uniqueString(subscription().id, name, location))
 var tags = { 'azd-env-name': name }
 
@@ -23,18 +28,22 @@ resource resourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   tags: tags
 }
 
+resource openAiResourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' existing = if (!empty(openAiResourceGroupName)) {
+  name: !empty(openAiResourceGroupName) ? openAiResourceGroupName : resourceGroup.name
+}
+
 var prefix = '${name}-${resourceToken}'
 
 var openAiDeploymentName = 'chatgpt'
 module openAi 'core/ai/cognitiveservices.bicep' = {
   name: 'openai'
-  scope: resourceGroup
+  scope: openAiResourceGroup
   params: {
-    name: '${resourceToken}-cog'
-    location: location
+    name: !empty(openAiResourceName) ? openAiResourceName : '${resourceToken}-cog'
+    location: openAiResourceGroupLocation
     tags: tags
     sku: {
-      name: 'S0'
+      name: !empty(openAiSkuName) ? openAiSkuName : 'S0'
     }
     deployments: [
       {
@@ -95,7 +104,7 @@ module aca 'aca.bicep' = {
 
 
 module openAiRoleUser 'core/security/role.bicep' = {
-  scope: resourceGroup
+  scope: openAiResourceGroup
   name: 'openai-role-user'
   params: {
     principalId: principalId
@@ -106,7 +115,7 @@ module openAiRoleUser 'core/security/role.bicep' = {
 
 
 module openAiRoleBackend 'core/security/role.bicep' = {
-  scope: resourceGroup
+  scope: openAiResourceGroup
   name: 'openai-role-backend'
   params: {
     principalId: aca.outputs.SERVICE_ACA_IDENTITY_PRINCIPAL_ID
@@ -120,6 +129,10 @@ output AZURE_LOCATION string = location
 output AZURE_OPENAI_CHATGPT_DEPLOYMENT string = openAiDeploymentName
 output AZURE_OPENAI_ENDPOINT string = openAi.outputs.endpoint
 output AZURE_OPENAI_KEY string = openAi.outputs.key
+output AZURE_OPENAI_RESOURCE string = openAi.outputs.name
+output AZURE_OPENAI_RESOURCE_GROUP string = openAiResourceGroup.name
+output AZURE_OPENAI_SKU_NAME string = openAi.outputs.skuName
+output AZURE_OPENAI_RESOURCE_GROUP_LOCATION string = openAiResourceGroupLocation
 
 output SERVICE_ACA_IDENTITY_PRINCIPAL_ID string = aca.outputs.SERVICE_ACA_IDENTITY_PRINCIPAL_ID
 output SERVICE_ACA_NAME string = aca.outputs.SERVICE_ACA_NAME
