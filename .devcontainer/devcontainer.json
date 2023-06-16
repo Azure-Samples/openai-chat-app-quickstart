@@ -15,10 +15,11 @@
     "customizations": {
         "vscode": {
             "extensions": [
-                "ms-azuretools.azure-dev",
-                "ms-azuretools.vscode-bicep",
-                "ms-python.python"
-            ]
+				"ms-azuretools.azure-dev",
+				"ms-azuretools.vscode-bicep",
+				"ms-python.python",
+				"GitHub.vscode-github-actions"
+			]
         }
     },
     "postCreateCommand": "python3 -m pip install -r requirements-dev.txt",

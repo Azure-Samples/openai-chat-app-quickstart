@@ -23,6 +23,9 @@
       "openAiSkuName": {
         "value": "${AZURE_OPENAI_SKU_NAME}"
       },
+      "createRoleForUser": {
+        "value": "${CREATE_ROLE_FOR_USER=true}"
+      },
       "acaExists": {
         "value": "${SERVICE_ACA_RESOURCE_EXISTS=false}"
       }
