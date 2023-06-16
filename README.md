@@ -30,17 +30,17 @@ If you're not using one of those options for opening the project, then you'll ne
     pre-commit install
     ```
 
-### Deployment
+## Deployment
 
 This repo is set up for deployment on Azure Container Apps using the configuration files in the `infra` folder.
 
-#### Prerequisites for deployment
+### Prerequisites for deployment
 
 1. Sign up for a [free Azure account](https://azure.microsoft.com/free/) and create an Azure Subscription.
 2. Request access to Azure OpenAI Service by completing the form at [https://aka.ms/oai/access](https://aka.ms/oai/access) and awaiting approval.
 2. Install the [Azure Developer CLI](https://learn.microsoft.com/azure/developer/azure-developer-cli/install-azd). (If you open this repository in Codespaces or with the VS Code Dev Containers extension, that part will be done for you.)
 
-#### Deployment from scratch
+### Deployment from scratch
 
 1. Login to Azure:
 
@@ -62,7 +62,7 @@ This repo is set up for deployment on Azure Container Apps using the configurati
     azd deploy
     ```
 
-#### Deployment with existing resources
+### Deployment with existing resources
 
 If you already have an OpenAI resource and would like to re-use it, first follow these steps.
 
@@ -76,6 +76,16 @@ If you already have an OpenAI resource and would like to re-use it, first follow
    azd env set AZURE_OPENAI_SKU_NAME {name of the SKU, defaults to "S0"}
    ```
 3. Then follow the steps for deployment above.
+
+### CI/CD pipeline
+
+This project includes a Github workflow for deploying the resources to Azure
+on every push to main. That workflow requires several Azure-related authentication secrets
+to be stored as Github action secrets. To set that up, run:
+
+```shell
+azd pipeline config
+```
 
 ### Costs
 

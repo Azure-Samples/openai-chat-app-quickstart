@@ -17,7 +17,8 @@
             "extensions": [
                 "ms-azuretools.azure-dev",
                 "ms-azuretools.vscode-bicep",
-                "ms-python.python"
+                "ms-python.python",
+                "GitHub.vscode-github-actions"
             ]
         }
     },
