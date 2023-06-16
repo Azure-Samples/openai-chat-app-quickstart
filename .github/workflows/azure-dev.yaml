@@ -54,7 +54,7 @@ jobs:
 
       - name: Provision Infrastructure
         run: |
-          azd env set CREATE_ROLE_FOR_USER false
+          azd env set CREATE_ROLE_FOR_USER false --no-prompt
           azd provision --no-prompt
         env:
           AZURE_ENV_NAME: ${{ vars.AZURE_ENV_NAME }}
