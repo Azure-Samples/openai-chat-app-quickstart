@@ -1,15 +1,10 @@
 {
     "name": "Azure Developer CLI",
-    "build": {
-        "dockerfile": "Dockerfile",
-        "args": {
-            "IMAGE": "python:3.11"
-        }
-    },
+    "image": "mcr.microsoft.com/devcontainers/python:3.11-bullseye",
     "forwardPorts": [50505],
     "features": {
         "ghcr.io/devcontainers/features/powershell:1.1.0": {},
-        "ghcr.io/devcontainers/features/docker-in-docker:2": {},
+        "ghcr.io/devcontainers/features/docker-in-docker:2.2.1": {},
         "ghcr.io/devcontainers/features/azure-cli:1": {}
     },
     "customizations": {
