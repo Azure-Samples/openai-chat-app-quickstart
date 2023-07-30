@@ -5,6 +5,6 @@ services:
     env_file:
       - .env
     ports:
-      - 50505:50505
+      - 50506:50505
     volumes:
       - ./src:/code
