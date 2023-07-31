@@ -28,9 +28,9 @@ def index():
     return render_template("index.html")
 
 
-@bp.get("/chat")
+@bp.post("/chat")
 def chat_handler():
-    request_message = request.args.get("message")
+    request_message = request.json["message"]
 
     @stream_with_context
     def response_stream():
@@ -44,13 +44,6 @@ def chat_handler():
         )
         for event in response:
             current_app.logger.info(event)
-            if event["choices"][0]["delta"].get("role") == "assistant":
-                yield "event:start\ndata: stream\n\n"
-            if event["choices"][0]["delta"].get("content") is not None:
-                response_message = event["choices"][0]["delta"]["content"]
-                current_app.logger.info("Sending '%s'", response_message)
-                json_data = json.dumps({"text": response_message, "sender": "assistant"})
-                yield f"event:message\ndata: {json_data}\n\n"
-        yield "event: end\ndata: stream\n\n"
+            yield json.dumps(event).replace("\n", "\\n") + "\n"
 
     return Response(response_stream(), mimetype="text/event-stream")

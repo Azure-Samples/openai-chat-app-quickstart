@@ -1,7 +1,7 @@
 # Build your own ChatGPT app
 
 This repository includes a simple Python Flask app that streams responses from ChatGPT
-to an HTML/JS frontend using [server-sent events](https://developer.mozilla.org/docs/Web/API/Server-sent_events/Using_server-sent_events).
+to an HTML/JS frontend using [NDJSON](http://ndjson.org/) over a [ReadableStream](https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream).
 
 The repository is designed for use with [Docker containers](https://www.docker.com/), both for local development and deployment, and includes infrastructure files for deployment to [Azure Container Apps](https://learn.microsoft.com/azure/container-apps/overview). 🐳
 
