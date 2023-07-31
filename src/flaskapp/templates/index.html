@@ -66,6 +66,40 @@
 	</main>
     <script src="https://cdn.jsdelivr.net/npm/showdown@2.1.0/dist/showdown.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ndjson-readablestream@1.0.1/dist/ndjson-readablestream.umd.js"></script>
-    <script src="/static/index.js"></script>
+    <script>
+        let eventSource;
+        const form = document.getElementById("chat-form");
+        const messageInput = document.getElementById("message");
+        const targetContainer = document.getElementById("messages");
+        const userTemplate = document.querySelector('#message-template-user');
+        const assistantTemplate = document.querySelector('#message-template-assistant');
+        const converter = new showdown.Converter();
+
+        form.addEventListener("submit", async function(e) {
+            e.preventDefault();
+            const message = messageInput.value;
+
+            const userTemplateClone = userTemplate.content.cloneNode(true);
+            userTemplateClone.querySelector(".message-content").innerText = message;
+            targetContainer.appendChild(userTemplateClone);
+
+            const assistantTemplateClone = assistantTemplate.content.cloneNode(true);
+            let messageDiv = assistantTemplateClone.querySelector(".message-content");
+            targetContainer.appendChild(assistantTemplateClone);
+
+            const response = await fetch(`/chat?message=${message}`);
+            messageDiv.innerHTML = "";
+            let answer = "";
+            for await (const event of readNDJSONStream(response.body)) {
+                if (event["choices"][0]["delta"]["content"]) {
+                    answer += event["choices"][0]["delta"]["content"];
+                    messageDiv.innerHTML = converter.makeHtml(answer);
+                    messageDiv.scrollIntoView();
+                }
+            }
+
+            messageInput.value = "";
+        });
+    </script>
 </body>
 </html>
