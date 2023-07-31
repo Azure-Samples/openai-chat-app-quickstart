@@ -87,7 +87,14 @@
             let messageDiv = assistantTemplateClone.querySelector(".message-content");
             targetContainer.appendChild(assistantTemplateClone);
 
-            const response = await fetch(`/chat?message=${message}`);
+            const response = await fetch(`/chat`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({message: message})
+            });
+
             messageDiv.innerHTML = "";
             let answer = "";
             for await (const event of readNDJSONStream(response.body)) {

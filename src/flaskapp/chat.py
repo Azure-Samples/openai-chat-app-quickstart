@@ -28,9 +28,9 @@ def index():
     return render_template("index.html")
 
 
-@bp.get("/chat")
+@bp.post("/chat")
 def chat_handler():
-    request_message = request.args.get("message")
+    request_message = request.json["message"]
 
     @stream_with_context
     def response_stream():
