@@ -10,4 +10,4 @@ COPY . .
 
 EXPOSE 50505
 
-ENTRYPOINT ["gunicorn", "flaskapp:create_app()"]
+ENTRYPOINT ["gunicorn", "app:app"]
