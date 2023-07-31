@@ -87,7 +87,7 @@
             let messageDiv = assistantTemplateClone.querySelector(".message-content");
             targetContainer.appendChild(assistantTemplateClone);
 
-            const response = await fetch(`/chat`, {
+            const response = await fetch("/chat", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
