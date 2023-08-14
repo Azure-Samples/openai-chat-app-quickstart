@@ -46,4 +46,4 @@ def chat_handler():
             current_app.logger.info(event)
             yield json.dumps(event).replace("\n", "\\n") + "\n"
 
-    return Response(response_stream(), mimetype="text/event-stream")
+    return Response(response_stream())
