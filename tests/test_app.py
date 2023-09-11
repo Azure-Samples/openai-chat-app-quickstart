@@ -21,7 +21,7 @@ async def test_chat_stream_text(client):
     result = await response.get_data()
     assert (
         result
-        == b'{"choices": [{"delta": {"content": "The"}}]}\n{"choices": [{"delta": {"content": "capital"}}]}\n{"choices": [{"delta": {"content": "of"}}]}\n{"choices": [{"delta": {"content": "France"}}]}\n{"choices": [{"delta": {"content": "is"}}]}\n{"choices": [{"delta": {"content": "Paris."}}]}\n' # noqa
+        == b'{"choices": [{"delta": {"content": "The"}}]}\n{"choices": [{"delta": {"content": "capital"}}]}\n{"choices": [{"delta": {"content": "of"}}]}\n{"choices": [{"delta": {"content": "France"}}]}\n{"choices": [{"delta": {"content": "is"}}]}\n{"choices": [{"delta": {"content": "Paris."}}]}\n'  # noqa
     )
 
 
