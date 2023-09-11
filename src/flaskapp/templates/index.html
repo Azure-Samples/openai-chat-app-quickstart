@@ -94,10 +94,14 @@
                 body: JSON.stringify({message: message})
             });
 
-            messageDiv.innerHTML = "";
+
             let answer = "";
             for await (const event of readNDJSONStream(response.body)) {
                 if (event["choices"][0]["delta"]["content"]) {
+                    // Clear out the DIV if its the first answer chunk we've received
+                    if (answer == "") {
+                        messageDiv.innerHTML = "";
+                    }
                     answer += event["choices"][0]["delta"]["content"];
                     messageDiv.innerHTML = converter.makeHtml(answer);
                     messageDiv.scrollIntoView();
