@@ -1,14 +1,14 @@
 import logging
 import os
 
-from flask import Flask
+from quart import Quart
 
 
 def create_app():
     if not os.getenv("RUNNING_IN_PRODUCTION"):
         logging.basicConfig(level=logging.DEBUG)
 
-    app = Flask(__name__)
+    app = Quart(__name__)
 
     from . import chat  # noqa
 

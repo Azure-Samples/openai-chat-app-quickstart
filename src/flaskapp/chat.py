@@ -1,40 +1,42 @@
 import json
 import os
 
-import azure.identity
+import azure.identity.aio
 import openai
-from flask import Blueprint, Response, current_app, render_template, request, stream_with_context
+from quart import Blueprint, Response, current_app, render_template, request, stream_with_context
 
 bp = Blueprint("chat", __name__, template_folder="templates", static_folder="static")
 
-# Configure OpenAI API
-openai.api_base = os.getenv("AZURE_OPENAI_ENDPOINT")
-openai.api_version = "2023-03-15-preview"
-if os.getenv("AZURE_OPENAI_KEY"):
-    openai.api_type = "azure"
-    openai.api_key = os.getenv("AZURE_OPENAI_KEY")
-else:
-    openai.api_type = "azure_ad"
-    if os.getenv("AZURE_OPENAI_CLIENT_ID"):
-        default_credential = azure.identity.ManagedIdentityCredential(client_id=os.getenv("AZURE_OPENAI_CLIENT_ID"))
+
+@bp.before_app_serving
+async def configure_openai():
+    openai.api_base = os.getenv("AZURE_OPENAI_ENDPOINT")
+    openai.api_version = "2023-03-15-preview"
+    if os.getenv("AZURE_OPENAI_KEY"):
+        openai.api_type = "azure"
+        openai.api_key = os.getenv("AZURE_OPENAI_KEY")
     else:
-        default_credential = azure.identity.DefaultAzureCredential(exclude_shared_token_cache_credential=True)
-    token = default_credential.get_token("https://cognitiveservices.azure.com/.default")
-    openai.api_key = token.token
+        openai.api_type = "azure_ad"
+        if client_id := os.getenv("AZURE_OPENAI_CLIENT_ID"):
+            default_credential = azure.identity.aio.ManagedIdentityCredential(client_id=client_id)
+        else:
+            default_credential = azure.identity.aio.DefaultAzureCredential(exclude_shared_token_cache_credential=True)
+        token = await default_credential.get_token("https://cognitiveservices.azure.com/.default")
+        openai.api_key = token.token
 
 
 @bp.get("/")
-def index():
-    return render_template("index.html")
+async def index():
+    return await render_template("index.html")
 
 
 @bp.post("/chat")
-def chat_handler():
-    request_message = request.json["message"]
+async def chat_handler():
+    request_message = (await request.get_json())["message"]
 
     @stream_with_context
-    def response_stream():
-        response = openai.ChatCompletion.create(
+    async def response_stream():
+        chat_coroutine = openai.ChatCompletion.acreate(
             engine=os.getenv("AZURE_OPENAI_CHATGPT_DEPLOYMENT", "chatgpt"),
             messages=[
                 {"role": "system", "content": "You are a helpful assistant."},
@@ -42,7 +44,7 @@ def chat_handler():
             ],
             stream=True,
         )
-        for event in response:
+        async for event in await chat_coroutine:
             current_app.logger.info(event)
             yield json.dumps(event, ensure_ascii=False) + "\n"
 
