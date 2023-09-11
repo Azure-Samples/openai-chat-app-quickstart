@@ -1,6 +1,6 @@
 quart==0.18.4
 gunicorn==21.2.0
 uvicorn[standard]==0.23.2
-openai==0.27.8
+openai==0.28.0
 azure-identity==1.14.0
 python-dotenv==1.0.0 # Pinned due to docker-in-docker issue: https://github.com/devcontainers/features/issues/616
