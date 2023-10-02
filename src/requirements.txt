@@ -1,4 +1,4 @@
-quart==0.18.4
+quart==0.19.2
 gunicorn==21.2.0
 uvicorn[standard]==0.23.2
 openai==0.28.0
