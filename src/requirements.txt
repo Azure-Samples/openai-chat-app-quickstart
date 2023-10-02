@@ -100,7 +100,7 @@ python-dotenv==0.21.1
     # via
     #   -r src/requirements.in
     #   uvicorn
-pyyaml==5.3.1
+pyyaml==6.0.1
     # via
     #   -r src/requirements.in
     #   uvicorn
@@ -129,7 +129,7 @@ watchfiles==0.20.0
     # via uvicorn
 websockets==11.0.3
     # via uvicorn
-werkzeug==2.3.7
+werkzeug==3.0.0
     # via
     #   -r src/requirements.in
     #   quart
