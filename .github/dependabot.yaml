@@ -5,7 +5,19 @@
 
 version: 2
 updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    groups:
+      github-actions:
+        patterns:
+          - "*"
   - package-ecosystem: "pip" # See documentation for possible values
     directory: "/" # Location of package manifests
     schedule:
       interval: "weekly"
+    groups:
+      python-requirements:
+        patterns:
+          - "*"
