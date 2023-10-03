@@ -1,7 +1,7 @@
 # Build your own ChatGPT app
 
 This repository includes a simple Python [Quart](https://quart.palletsprojects.com/en/latest/)
-app that streams responses from ChatGPT to an HTML/JS frontend using [NDJSON](http://ndjson.org/)
+app that streams responses from ChatGPT to an HTML/JS frontend using [JSON Lines](http://jsonlines.org/)
 over a [ReadableStream](https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream).
 
 The repository is designed for use with [Docker containers](https://www.docker.com/), both for local development and deployment, and includes infrastructure files for deployment to [Azure Container Apps](https://learn.microsoft.com/azure/container-apps/overview). 🐳
