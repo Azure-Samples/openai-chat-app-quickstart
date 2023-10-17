@@ -19,7 +19,7 @@ attrs==23.1.0
 azure-core==1.29.4
     # via azure-identity
 azure-identity==1.14.0
-    # via -r src/requirements.in
+    # via -r requirements.in
 blinker==1.5
     # via quart
 certifi==2023.7.22
@@ -44,7 +44,7 @@ frozenlist==1.4.0
     #   aiohttp
     #   aiosignal
 gunicorn==21.2.0
-    # via -r src/requirements.in
+    # via -r requirements.in
 h11==0.14.0
     # via
     #   hypercorn
@@ -85,7 +85,7 @@ multidict==6.0.4
     #   aiohttp
     #   yarl
 openai==0.28.1
-    # via -r src/requirements.in
+    # via -r requirements.in
 packaging==23.2
     # via gunicorn
 portalocker==2.8.2
@@ -98,14 +98,14 @@ pyjwt[crypto]==2.8.0
     # via msal
 python-dotenv==0.21.1
     # via
-    #   -r src/requirements.in
+    #   -r requirements.in
     #   uvicorn
 pyyaml==5.3.1
     # via
-    #   -r src/requirements.in
+    #   -r requirements.in
     #   uvicorn
 quart==0.18.4
-    # via -r src/requirements.in
+    # via -r requirements.in
 requests==2.31.0
     # via
     #   azure-core
@@ -119,10 +119,10 @@ tqdm==4.66.1
     # via openai
 typing-extensions==4.8.0
     # via azure-core
-urllib3==2.0.6
+urllib3==2.0.7
     # via requests
 uvicorn[standard]==0.23.2
-    # via -r src/requirements.in
+    # via -r requirements.in
 uvloop==0.17.0
     # via uvicorn
 watchfiles==0.20.0
@@ -131,7 +131,7 @@ websockets==11.0.3
     # via uvicorn
 werkzeug==2.3.7
     # via
-    #   -r src/requirements.in
+    #   -r requirements.in
     #   quart
 wsproto==1.2.0
     # via hypercorn
