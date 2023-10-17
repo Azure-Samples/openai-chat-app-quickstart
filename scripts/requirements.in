@@ -1,0 +1,4 @@
+azure-identity
+# This is to pull in the same version of httpaio as the one used by the application
+openai
+tenacity

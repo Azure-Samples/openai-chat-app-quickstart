@@ -28,6 +28,21 @@
       },
       "acaExists": {
         "value": "${SERVICE_ACA_RESOURCE_EXISTS=false}"
+      },
+      "useAuthentication": {
+        "value": "${AZURE_USE_AUTHENTICATION=false}"
+      },
+      "clientId": {
+        "value": "${AZURE_CLIENT_APP_ID}"
+      },
+      "clientSecret": {
+        "value": "${AZURE_CLIENT_APP_SECRET}"
+      },
+      "tenantId": {
+        "value": "${TENANT_ID}"
+      },
+      "loginEndpoint": {
+        "value": "${AZURE_LOGIN_ENDPOINT}"
       }
     }
   }

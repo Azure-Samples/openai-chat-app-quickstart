@@ -1,3 +1,4 @@
+import base64
 import json
 import os
 
@@ -67,9 +68,43 @@ async def shutdown_openai():
     await bp.openai_client.close()
 
 
+# Extract the best username for display from the base64 encoded header
+# X-MS-CLIENT-PRINCIPAL. We try to find various claims in the header:
+# - name
+# - preferred_username
+#
+# Fallback to X-MS-CLIENT-PRINCIPAL-NAME if none of the above are found.
+#
+# https://learn.microsoft.com/en-us/azure/app-service/configure-authentication-user-identities#decoding-the-client-principal-header
+#
+def extract_username(headers, default_username="You"):
+    ordered_names = ["name", "preferred_username"]
+
+    #
+    # decoded header is of format:
+    # {
+    #   "claims": [
+    #     {"typ":"foo", "val":"bar"},
+    #      "typ": "baz", "val": "qux" }
+    #   ]
+    # }
+
+    if "X-MS-CLIENT-PRINCIPAL" not in headers:
+        return default_username
+
+    header = json.loads(base64.b64decode(headers.get("X-MS-CLIENT-PRINCIPAL")))
+    claims = {claim["typ"]: claim["val"] for claim in header["claims"]}
+
+    for claim in ordered_names:
+        if claim in claims:
+            return claims[claim]
+    return headers.get("X-MS-CLIENT-PRINCIPAL-NAME", default_username)
+
+
 @bp.get("/")
 async def index():
-    return await render_template("index.html")
+    username = extract_username(request.headers)
+    return await render_template("index.html", username=username)
 
 
 @bp.post("/chat")

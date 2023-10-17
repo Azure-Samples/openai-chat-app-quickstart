@@ -10,6 +10,24 @@ param exists bool
 param openAiDeploymentName string
 param openAiEndpoint string
 
+@description('Enable Auth')
+param useAuthentication bool
+param clientId string
+param tenantId string
+param loginEndpoint string
+
+@secure()
+param clientSecret string
+#disable-next-line secure-secrets-in-params
+param clientSecretName string = 'microsoft-provider-authentication-secret'
+
+var issuerEndpoint = empty(tenantId) ? environment().authentication.loginEndpoint : 'https://${loginEndpoint}'
+
+var secrets = !useAuthentication ? [] : [{
+    name: clientSecretName
+    value: clientSecret
+}]
+
 resource acaIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
   name: identityName
   location: location
@@ -45,6 +63,19 @@ module app 'core/host/container-app-upsert.bicep' = {
       }
     ]
     targetPort: 50505
+    secrets: secrets
+  }
+}
+
+
+module auth 'core/host/container-auth.bicep' = {
+  name: '${serviceName}-container-auth-module'
+  params: {
+    name: app.outputs.name
+    useAuthentication: useAuthentication
+    clientId: clientId
+    clientSecretName: clientSecretName
+    openIdIssuer: '${issuerEndpoint}/${tenantId}/v2.0'
   }
 }
 
