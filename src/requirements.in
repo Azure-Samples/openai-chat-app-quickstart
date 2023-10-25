@@ -1,5 +1,5 @@
 quart==0.18.4
-werkzeug==2.3.7
+werkzeug==3.0.1
 gunicorn
 uvicorn[standard]
 openai
