@@ -6,7 +6,7 @@
 #
 aiofiles==23.2.1
     # via quart
-aiohttp==3.8.5
+aiohttp==3.8.6
     # via openai
 aiosignal==1.3.1
     # via aiohttp
@@ -95,7 +95,9 @@ priority==2.0.0
 pycparser==2.21
     # via cffi
 pyjwt[crypto]==2.8.0
-    # via msal
+    # via
+    #   msal
+    #   pyjwt
 python-dotenv==0.21.1
     # via
     #   -r requirements.in
