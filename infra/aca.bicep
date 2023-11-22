@@ -13,6 +13,7 @@ param openAiEndpoint string
 @description('Enable Auth')
 param useAuthentication bool
 param clientId string
+
 param tenantId string
 param loginEndpoint string
 
@@ -21,7 +22,8 @@ param clientSecret string
 #disable-next-line secure-secrets-in-params
 param clientSecretName string = 'microsoft-provider-authentication-secret'
 
-var issuerEndpoint = empty(tenantId) ? environment().authentication.loginEndpoint : 'https://${loginEndpoint}'
+// the issuer is different depending if we are in a workforce or external tenant
+var openIdIssuer = empty(tenantId) ? '${environment().authentication.loginEndpoint}${tenant().tenantId}/v2.0' : 'https://${loginEndpoint}/${tenantId}/v2.0'
 
 var secrets = !useAuthentication ? [] : [{
     name: clientSecretName
@@ -75,7 +77,7 @@ module auth 'core/host/container-auth.bicep' = {
     useAuthentication: useAuthentication
     clientId: clientId
     clientSecretName: clientSecretName
-    openIdIssuer: '${issuerEndpoint}/${tenantId}/v2.0'
+    openIdIssuer: openIdIssuer
   }
 }
 
@@ -83,3 +85,4 @@ output SERVICE_ACA_IDENTITY_PRINCIPAL_ID string = acaIdentity.properties.princip
 output SERVICE_ACA_NAME string = app.outputs.name
 output SERVICE_ACA_URI string = app.outputs.uri
 output SERVICE_ACA_IMAGE_NAME string = app.outputs.imageName
+

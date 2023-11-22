@@ -39,10 +39,10 @@
         "value": "${AZURE_CLIENT_APP_SECRET}"
       },
       "tenantId": {
-        "value": "${TENANT_ID}"
+        "value": "${AZURE_AUTH_TENANT_ID}"
       },
       "loginEndpoint": {
-        "value": "${AZURE_LOGIN_ENDPOINT}"
+        "value": "${AZURE_AUTH_LOGIN_ENDPOINT}"
       }
     }
   }

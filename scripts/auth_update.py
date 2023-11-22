@@ -16,19 +16,19 @@ async def main():
         print("Not updating authentication...")
         exit(0)
 
-    tenantId = os.getenv("TENANT_ID", None)
+    tenantId = os.getenv("AZURE_AUTH_TENANT_ID", None)
     credential = AzureDeveloperCliCredential(tenant_id=tenantId)
     auth_headers = await get_auth_headers(credential)
-    
+
     uri = os.getenv("SERVICE_ACA_URI", "no-uri")
-    if (uri == "no-uri"):
+    if uri == "no-uri":
         print("No URI set, not updating authentication...")
         exit(0)
     client_app_id = os.getenv("AZURE_CLIENT_APP_ID", None)
     if client_app_id:
         client_object_id = await get_application(auth_headers, client_app_id)
         if client_object_id:
-            print("Updating authentication...")
+            print("Updating client application redirect URIs...")
             # Redirect URIs need to be relative to the deployed application
             payload = {
                 "publicClient": {"redirectUris": []},

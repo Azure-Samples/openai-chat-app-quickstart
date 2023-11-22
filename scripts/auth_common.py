@@ -1,9 +1,11 @@
 import os
 import subprocess
-from typing import Any, Dict, Optional, Tuple
+import time
+from typing import Any, Dict, Optional, List, Tuple
 
 import aiohttp
 from azure.core.credentials_async import AsyncTokenCredential
+
 
 TIMEOUT = 60
 
@@ -11,6 +13,47 @@ TIMEOUT = 60
 async def get_auth_headers(credential: AsyncTokenCredential):
     token_result = await credential.get_token("https://graph.microsoft.com/.default")
     return {"Authorization": f"Bearer {token_result.token}"}
+
+
+async def get_azure_auth_headers(credential: AsyncTokenCredential) -> Dict[str, str]:
+    token_result = await credential.get_token("https://management.core.windows.net/.default")
+    return {"Authorization": f"Bearer {token_result.token}"}
+
+async def get_tenant_details(credential: AsyncTokenCredential, tenant_id: str) -> Tuple[str, str]:
+    if tenant_id == None:
+         return (None, None)
+    auth_headers = await get_azure_auth_headers(credential)
+    async with aiohttp.ClientSession(headers=auth_headers, timeout=aiohttp.ClientTimeout(total=TIMEOUT)) as session:
+        async with session.get(f"https://management.azure.com/tenants?api-version=2022-12-01") as response:
+            response_json = await response.json()
+            if response.status == 200:
+                for tenant in response_json["value"]:
+                    if tenant["tenantId"] == tenant_id:
+                        if "tenantType" not in tenant:
+                            raise Exception(f"tenantType not found in tenant details: {tenant}")
+                        return tenant["tenantType"], tenant["defaultDomain"] 
+            raise Exception(response_json)
+        
+async def get_current_user(auth_headers: Dict[str, str]) -> Optional[str]:
+    async with aiohttp.ClientSession(headers=auth_headers, timeout=aiohttp.ClientTimeout(total=TIMEOUT)) as session:
+        async with session.get("https://graph.microsoft.com/v1.0/me") as response:
+            if response.status == 200:
+                response_json = await response.json()
+                return response_json["id"]
+
+    return None
+
+
+async def get_microsoft_graph_service_principal(auth_headers: Dict[str, str]) -> str:
+    async with aiohttp.ClientSession(headers=auth_headers, timeout=aiohttp.ClientTimeout(total=TIMEOUT)) as session:
+        async with session.get(
+            "https://graph.microsoft.com/v1.0/servicePrincipals?$filter=appId eq '00000003-0000-0000-c000-000000000000'"
+        ) as response:
+            if response.status == 200:
+                response_json = await response.json()
+                if response_json["value"]:
+                    return response_json["value"][0]["id"]
+            raise Exception(response_json)
 
 
 async def get_application(auth_headers: Dict[str, str], app_id: str) -> Optional[str]:
@@ -34,14 +77,76 @@ async def update_application(auth_headers: Dict[str, str], object_id: str, app_p
 
     return True
 
+
 async def create_application(auth_headers: Dict[str, str], app_payload: object) -> Tuple[str, str]:
     async with aiohttp.ClientSession(headers=auth_headers, timeout=aiohttp.ClientTimeout(total=TIMEOUT)) as session:
         async with session.post("https://graph.microsoft.com/v1.0/applications", json=app_payload) as response:
             response_json = await response.json()
-            object_id = response_json["id"]
-            client_id = response_json["appId"]
+            if response.status == 201:
+                object_id = response_json["id"]
+                client_id = response_json["appId"]
+                return object_id, client_id
+            raise Exception(response_json)
 
-    return object_id, client_id
+
+async def get_application_owners(auth_headers: Dict[str, str], app_obj_id: str) -> List[str]:
+    async with aiohttp.ClientSession(headers=auth_headers, timeout=aiohttp.ClientTimeout(total=TIMEOUT)) as session:
+        async with session.get(f"https://graph.microsoft.com/v1.0/applications/{app_obj_id}/owners") as response:
+            if response.status == 200:
+                response_json = await response.json()
+                if response_json["value"]:
+                    ids = [item["id"] for item in response_json["value"]]
+                    return ids
+
+                return []
+
+
+async def add_application_owner(auth_headers: Dict[str, str], app_obj_id: str, owner_id: str) -> bool:
+    object_ids = await get_application_owners(auth_headers, app_obj_id)
+    if owner_id in object_ids:
+        print("Application owner already exists, not creating new one")
+        return False
+    else:
+        print("Adding application owner")
+        await _add_application_owner(auth_headers, app_obj_id, owner_id)
+
+
+async def _add_application_owner(auth_headers: Dict[str, str], app_obj_id: str, owner_id: str) -> bool:
+    async with aiohttp.ClientSession(headers=auth_headers, timeout=aiohttp.ClientTimeout(total=TIMEOUT)) as session:
+        async with session.post(
+            f"https://graph.microsoft.com/v1.0/applications/{app_obj_id}/owners/$ref",
+            json={"@odata.id": f"https://graph.microsoft.com/v1.0/directoryObjects/{owner_id}"},
+        ) as response:
+            if response.status == 204:
+                return True
+            response_json = await response.json()
+            raise Exception(response_json)
+
+
+async def get_service_principal(auth_headers: Dict[str, str], app_id: str) -> Optional[str]:
+    async with aiohttp.ClientSession(headers=auth_headers, timeout=aiohttp.ClientTimeout(total=TIMEOUT)) as session:
+        async with session.get(
+            f"https://graph.microsoft.com/v1.0/servicePrincipals?$filter=appId eq '{app_id}'"
+        ) as response:
+            if response.status == 200:
+                response_json = await response.json()
+                if response_json["value"]:
+                    return response_json["value"][0]["id"]
+
+    return None
+
+
+async def add_service_principal(auth_headers: Dict[str, str], app_id: str):
+    async with aiohttp.ClientSession(headers=auth_headers, timeout=aiohttp.ClientTimeout(total=TIMEOUT)) as session:
+        async with session.post(
+            f"https://graph.microsoft.com/v1.0/servicePrincipals",
+            json={"appId": app_id, "tags": ["WindowsAzureActiveDirectoryIntegratedApp"]},
+        ) as response:
+            response_json = await response.json()
+            if response.status == 201:
+                return response_json["id"]
+
+            raise Exception(response_json)
 
 
 async def add_client_secret(auth_headers: Dict[str, str], object_id: str):
@@ -57,9 +162,22 @@ async def add_client_secret(auth_headers: Dict[str, str], object_id: str):
             raise Exception(response_json)
 
 
+async def grant_consent(auth_headers: Dict[str, str], obj_id: str, resource_id: str, scope: str):
+    async with aiohttp.ClientSession(headers=auth_headers, timeout=aiohttp.ClientTimeout(total=TIMEOUT)) as session:
+        async with session.post(
+            f"https://graph.microsoft.com/v1.0/oauth2PermissionGrants",
+            json={"clientId": obj_id, "resourceId": resource_id, "scope": scope, "consentType": "AllPrincipals"},
+        ) as response:
+            response_json = await response.json()
+            if response.status == 201:
+                return response_json["id"]
+
+            raise Exception(response_json)
+
+
 async def create_or_update_application_with_secret(
     auth_headers: Dict[str, str], app_id_env_var: str, app_secret_env_var: str, app_payload: Dict[str, Any]
-) -> Tuple[str, str, bool]:
+) -> Tuple[str, str, str]:
     app_id = os.getenv(app_id_env_var, "no-id")
     created_app = False
     object_id = None
@@ -76,17 +194,31 @@ async def create_or_update_application_with_secret(
         update_azd_env(app_id_env_var, app_id)
         created_app = True
 
-    if object_id and os.getenv(app_secret_env_var, "no-secret") == "no-secret":
+        # Wait for application to created and in cache before creating SP
+        wait_for_cache_sync()
+
+    if created_app or (object_id and os.getenv(app_secret_env_var, "no-secret") == "no-secret"):
         print(f"Adding client secret to {app_id}")
         client_secret = await add_client_secret(auth_headers, object_id)
         update_azd_env(app_secret_env_var, client_secret)
 
-    return (object_id, app_id, created_app)
+    sp_id = await get_service_principal(auth_headers, app_id)
+    if not sp_id:
+        print(f"Adding service principal to {app_id}")
+        sp_id = await add_service_principal(auth_headers, app_id)
+
+    return (object_id, app_id, sp_id)
+
+
+def wait_for_cache_sync(wait=30):
+    print(f"Waiting {wait} seconds for cache to sync")
+    time.sleep(wait)
 
 
 def update_azd_env(name, val):
-    subprocess.run(f"azd env set {name} {val}", shell=True)
-
+    # val could start with '-' which would cause azd to think it's a flag
+    # so use '--' to signal end of parameter parsing
+    subprocess.run(f"azd env set {name} -- {val}", shell=True)
 
 
 def test_authentication_enabled():
@@ -102,14 +234,13 @@ def test_authentication_enabled():
     return True
 
 
-
 async def setup_server_know_applications(auth_headers: Dict[str, str], server_object_id: str, client_app_id: str):
-
     await update_application(
         auth_headers,
         object_id=server_object_id,
         app_payload=create_server_app_known_client_application_payload(client_app_id),
     )
+
 
 def create_server_app_known_client_application_payload(client_app_id: str):
     return {
