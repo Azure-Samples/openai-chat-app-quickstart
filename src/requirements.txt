@@ -6,30 +6,28 @@
 #
 aiofiles==23.2.1
     # via quart
-aiohttp==3.8.5
-    # via openai
-aiosignal==1.3.1
-    # via aiohttp
-anyio==4.0.0
-    # via watchfiles
-async-timeout==4.0.3
-    # via aiohttp
-attrs==23.1.0
-    # via aiohttp
+annotated-types==0.6.0
+    # via pydantic
+anyio==3.7.1
+    # via
+    #   httpx
+    #   openai
+    #   watchfiles
 azure-core==1.29.4
     # via azure-identity
-azure-identity==1.14.0
-    # via -r requirements.in
+azure-identity==1.15.0
+    # via -r src/requirements.in
 blinker==1.5
     # via quart
 certifi==2023.7.22
-    # via requests
+    # via
+    #   httpcore
+    #   httpx
+    #   requests
 cffi==1.16.0
     # via cryptography
 charset-normalizer==3.3.0
-    # via
-    #   aiohttp
-    #   requests
+    # via requests
 click==8.1.7
     # via
     #   quart
@@ -39,14 +37,13 @@ cryptography==41.0.4
     #   azure-identity
     #   msal
     #   pyjwt
-frozenlist==1.4.0
-    # via
-    #   aiohttp
-    #   aiosignal
+distro==1.8.0
+    # via openai
 gunicorn==21.2.0
-    # via -r requirements.in
+    # via -r src/requirements.in
 h11==0.14.0
     # via
+    #   httpcore
     #   hypercorn
     #   uvicorn
     #   wsproto
@@ -54,8 +51,12 @@ h2==4.1.0
     # via hypercorn
 hpack==4.0.0
     # via h2
+httpcore==1.0.2
+    # via httpx
 httptools==0.6.0
     # via uvicorn
+httpx==0.25.2
+    # via openai
 hypercorn==0.14.4
     # via quart
 hyperframe==6.0.1
@@ -63,8 +64,8 @@ hyperframe==6.0.1
 idna==3.4
     # via
     #   anyio
+    #   httpx
     #   requests
-    #   yarl
 itsdangerous==2.1.2
     # via quart
 jinja2==3.1.2
@@ -80,12 +81,8 @@ msal==1.24.1
     #   msal-extensions
 msal-extensions==1.0.0
     # via azure-identity
-multidict==6.0.4
-    # via
-    #   aiohttp
-    #   yarl
-openai==0.28.1
-    # via -r requirements.in
+openai==1.3.7
+    # via -r src/requirements.in
 packaging==23.2
     # via gunicorn
 portalocker==2.8.2
@@ -94,46 +91,56 @@ priority==2.0.0
     # via hypercorn
 pycparser==2.21
     # via cffi
+pydantic==2.5.2
+    # via openai
+pydantic-core==2.14.5
+    # via pydantic
 pyjwt[crypto]==2.8.0
-    # via msal
-python-dotenv==0.21.1
     # via
-    #   -r requirements.in
+    #   msal
+    #   pyjwt
+python-dotenv==1.0.0
+    # via
+    #   -r src/requirements.in
     #   uvicorn
-pyyaml==5.3.1
+pyyaml==6.0.1
     # via
-    #   -r requirements.in
+    #   -r src/requirements.in
     #   uvicorn
 quart==0.18.4
-    # via -r requirements.in
+    # via -r src/requirements.in
 requests==2.31.0
     # via
     #   azure-core
     #   msal
-    #   openai
 six==1.16.0
     # via azure-core
 sniffio==1.3.0
-    # via anyio
+    # via
+    #   anyio
+    #   httpx
+    #   openai
 tqdm==4.66.1
     # via openai
 typing-extensions==4.8.0
-    # via azure-core
+    # via
+    #   azure-core
+    #   openai
+    #   pydantic
+    #   pydantic-core
 urllib3==2.0.7
     # via requests
-uvicorn[standard]==0.23.2
-    # via -r requirements.in
+uvicorn[standard]==0.24.0.post1
+    # via -r src/requirements.in
 uvloop==0.17.0
     # via uvicorn
 watchfiles==0.20.0
     # via uvicorn
 websockets==11.0.3
     # via uvicorn
-werkzeug==2.3.7
+werkzeug==3.0.1
     # via
-    #   -r requirements.in
+    #   -r src/requirements.in
     #   quart
 wsproto==1.2.0
     # via hypercorn
-yarl==1.9.2
-    # via aiohttp
