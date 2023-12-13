@@ -96,6 +96,28 @@ If you already have an OpenAI resource and would like to re-use it, first follow
    ```
 3. Then follow the steps for deployment above.
 
+### Deployment with Authentication using Microsoft Entra ID
+
+We have integrated the sample with Entra ID to require authentication.  This shows how to allows users within your organization to log in and how to process their identity within the sample. If a user is logged in, they'll see their name in the chat app.
+
+To configure, follow these steps:
+
+1. Run `azd env set AZURE_USE_AUTHENTICATION true` to enable App Service authentication.
+2. Then follow the steps for deployment above.
+
+### Deployment with Authentication using Microsoft Entra External ID
+
+If you want to allow external users to sign up and sign in to the application using their email address or social identity such as Google, Apple or Facebook, you can use [Microsoft Entra External ID](https://developer.microsoft.com/en-us/identity/customers). If you don't have an External ID tenant already, you can create a [trial tenant](https://aka.ms/ciam-free-trial) using your Microsoft or Work account.
+
+To deploy, you will need the tenant ID of your External ID. In the instructions below, replace `<YOUR_TENANT_ID>` with the tenant ID you obtain from the Entra Portal.
+
+To configure, follow these steps:
+
+1. Run `azd env set AZURE_USE_AUTHENTICATION true` to enable App Service authentication.
+2. Run `azd auth login --tenant-id <YOUR_TENANT_ID>` to log into your External ID tenant.
+3. Run `./scripts/setup_for_external_id.sh <YOUR_TENANT_ID>`  or `./scripts/setup_for_external_id.ps1 <YOUR_TENANT_ID>` as required.
+4. Then follow the steps for deployment above, including logging into Azure via `azd auth login`
+
 ### CI/CD pipeline
 
 This project includes a Github workflow for deploying the resources to Azure
