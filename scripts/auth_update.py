@@ -1,14 +1,13 @@
 import asyncio
 import os
 
-from azure.identity.aio import AzureDeveloperCliCredential
-
 from auth_common import (
     get_application,
     get_auth_headers,
     test_authentication_enabled,
     update_application,
 )
+from azure.identity.aio import AzureDeveloperCliCredential
 
 
 async def main():

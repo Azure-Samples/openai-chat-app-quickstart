@@ -1,27 +1,19 @@
 import argparse
 import asyncio
-import datetime
-import os
-import random
-import time
-from typing import Dict, Tuple
 
 import aiohttp
-from azure.identity.aio import AzureDeveloperCliCredential
-
 from auth_common import (
     TIMEOUT,
     add_application_owner,
+    create_or_update_application_with_secret,
     get_auth_headers,
-    get_azure_auth_headers,
     get_current_user,
     get_microsoft_graph_service_principal,
     get_tenant_details,
-    test_authentication_enabled,
-    create_or_update_application_with_secret,
-    wait_for_cache_sync,
     update_azd_env,
 )
+from azure.identity.aio import AzureDeveloperCliCredential
+
 
 def create_client_app_payload():
     return {
@@ -63,7 +55,7 @@ def app_roles() -> str:
     return app_roles
 
 
-async def grant_approle(auth_headers: Dict[str, str], sp_obj_id: str, resource_id: str, app_role: str):
+async def grant_approle(auth_headers: dict[str, str], sp_obj_id: str, resource_id: str, app_role: str):
     async with aiohttp.ClientSession(headers=auth_headers, timeout=aiohttp.ClientTimeout(total=TIMEOUT)) as session:
         async with session.post(
             f"https://graph.microsoft.com/v1.0/servicePrincipals/{sp_obj_id}/appRoleAssignments",
@@ -75,26 +67,25 @@ async def grant_approle(auth_headers: Dict[str, str], sp_obj_id: str, resource_i
 
             raise Exception(response_json)
 
-# 
+
+#
 # for an external ID tenant, the login domain is a subdomain of ciamlogin.com, not onmicrosoft.com
 #
 def login_domain_for(default_domain: str) -> str:
     prefix = default_domain.split(".")[0]
     return f"{prefix}.ciamlogin.com"
 
+
 async def main():
-    parser = argparse.ArgumentParser(description='Setup External ID Service Principal')
-    parser.add_argument('tenant_id',
-                        metavar='tenant-id',
-                        type=str,
-                        help='the External ID TenantId')
+    parser = argparse.ArgumentParser(description="Setup External ID Service Principal")
+    parser.add_argument("tenant_id", metavar="tenant-id", type=str, help="the External ID TenantId")
     args = parser.parse_args()
 
     if args.tenant_id is None:
         args.print_help()
         exit(1)
     tenant_id = args.tenant_id
-    
+
     print(f"Setting up External ID Service Principal in tenant {tenant_id}")
     credential = AzureDeveloperCliCredential(tenant_id=tenant_id)
     auth_headers = await get_auth_headers(credential)
@@ -106,7 +97,7 @@ async def main():
     # Convert default domain to login domain
     login_domain = login_domain_for(default_domain)
     print(f"Using login domain {login_domain} for tenant {tenant_id}")
-   
+
     # Update azd env
     update_azd_env("AZURE_AUTH_TENANT_ID", tenant_id)
     update_azd_env("AZURE_AUTH_LOGIN_ENDPOINT", login_domain)

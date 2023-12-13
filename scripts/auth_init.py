@@ -2,24 +2,22 @@ import asyncio
 import datetime
 import os
 import random
-from typing import Dict, Optional, List, Tuple
 
 import aiohttp
-from azure.identity.aio import AzureDeveloperCliCredential, ClientSecretCredential
-from azure.core.credentials_async import AsyncTokenCredential
-
 from auth_common import (
     TIMEOUT,
-    get_auth_headers,
     add_application_owner,
+    create_or_update_application_with_secret,
+    get_auth_headers,
+    get_current_user,
     get_microsoft_graph_service_principal,
     get_tenant_details,
-    test_authentication_enabled,
-    create_or_update_application_with_secret,
-    get_current_user,
     grant_consent,
+    test_authentication_enabled,
     update_azd_env,
 )
+from azure.core.credentials_async import AsyncTokenCredential
+from azure.identity.aio import AzureDeveloperCliCredential, ClientSecretCredential
 
 
 def random_app_identifier():
@@ -55,7 +53,7 @@ def create_client_app_payload(identifier: int):
     }
 
 
-def scopes() -> List[str]:
+def scopes() -> list[str]:
     return " ".join(["User.Read", "offline_access", "openid", "profile"])
 
 
@@ -87,7 +85,7 @@ def create_client_userflow_payload(identifier: int):
                         "inputs": [
                             {
                                 "options": [],
-                                "validationRegEx": "^[a-zA-Z0-9.!#$%&amp;&#8217;'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:.[a-zA-Z0-9-]+)*$",
+                                "validationRegEx": "^[a-zA-Z0-9.!#$%&amp;&#8217;'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:.[a-zA-Z0-9-]+)*$",  # noqa: E501
                                 "attribute": "email",
                                 "required": "true",
                                 "label": "Email Address",
@@ -123,10 +121,11 @@ def create_client_userflow_payload(identifier: int):
     }
 
 
-async def get_userflow(auth_headers: Dict[str, str], identifier: str) -> Optional[str]:
+async def get_userflow(auth_headers: dict[str, str], identifier: str) -> (str | None):
+    app_name = f"ChatGPT Sample User Flow {identifier}"
     async with aiohttp.ClientSession(headers=auth_headers, timeout=aiohttp.ClientTimeout(total=TIMEOUT)) as session:
         async with session.get(
-            f"https://graph.microsoft.com/beta/identity/AuthenticationEventsFlows?$filter=displayName eq 'ChatGPT Sample User Flow {identifier}'"
+            f"https://graph.microsoft.com/beta/identity/AuthenticationEventsFlows?$filter=displayName eq '{app_name}'"
         ) as response:
             if response.status == 200:
                 response_json = await response.json()
@@ -136,7 +135,7 @@ async def get_userflow(auth_headers: Dict[str, str], identifier: str) -> Optiona
     return None
 
 
-async def create_userflow(auth_headers: Dict[str, str], app_payload: object) -> str:
+async def create_userflow(auth_headers: dict[str, str], app_payload: object) -> str:
     async with aiohttp.ClientSession(headers=auth_headers, timeout=aiohttp.ClientTimeout(total=TIMEOUT)) as session:
         async with session.post(
             "https://graph.microsoft.com/beta/identity/AuthenticationEventsFlows", json=app_payload
@@ -148,7 +147,7 @@ async def create_userflow(auth_headers: Dict[str, str], app_payload: object) -> 
             raise Exception(response_json)
 
 
-async def get_apps_for_userflow(auth_headers: Dict[str, str], userflow_id: str) -> List[str]:
+async def get_apps_for_userflow(auth_headers: dict[str, str], userflow_id: str) -> list[str]:
     async with aiohttp.ClientSession(headers=auth_headers, timeout=aiohttp.ClientTimeout(total=TIMEOUT)) as session:
         async with session.get(
             f"https://graph.microsoft.com/beta/identity/AuthenticationEventsFlows/{userflow_id}/conditions/applications/includeApplications"
@@ -162,7 +161,7 @@ async def get_apps_for_userflow(auth_headers: Dict[str, str], userflow_id: str) 
             raise Exception(response_json)
 
 
-async def add_app_to_userflow(auth_headers: Dict[str, str], userflow_id: str, app_id: str) -> bool:
+async def add_app_to_userflow(auth_headers: dict[str, str], userflow_id: str, app_id: str) -> bool:
     apps = await get_apps_for_userflow(auth_headers, userflow_id)
     if app_id in apps:
         print("User flow already has application, not adding new one")
@@ -170,7 +169,7 @@ async def add_app_to_userflow(auth_headers: Dict[str, str], userflow_id: str, ap
     return await _add_app_to_userflow(auth_headers, userflow_id, app_id)
 
 
-async def _add_app_to_userflow(auth_headers: Dict[str, str], userflow_id: str, app_id: str) -> bool:
+async def _add_app_to_userflow(auth_headers: dict[str, str], userflow_id: str, app_id: str) -> bool:
     async with aiohttp.ClientSession(headers=auth_headers, timeout=aiohttp.ClientTimeout(total=TIMEOUT)) as session:
         async with session.post(
             f"https://graph.microsoft.com/beta/identity/AuthenticationEventsFlows/{userflow_id}/conditions/applications/includeApplications",
@@ -182,6 +181,7 @@ async def _add_app_to_userflow(auth_headers: Dict[str, str], userflow_id: str, a
 
             raise Exception(response_json)
 
+
 def get_credential(tenantId: str) -> AsyncTokenCredential:
     client_id = os.getenv("AZURE_AUTH_EXTID_APP_ID", None)
     if client_id is None:
@@ -190,6 +190,7 @@ def get_credential(tenantId: str) -> AsyncTokenCredential:
     client_secret = os.getenv("AZURE_AUTH_EXTID_APP_SECRET", None)
     print(f"Using Client Secret Credential... {client_id}")
     return ClientSecretCredential(tenant_id=tenantId, client_id=client_id, client_secret=client_secret)
+
 
 async def main():
     if not test_authentication_enabled():
@@ -207,7 +208,6 @@ async def main():
         else:
             current_user = await get_current_user(auth_headers)
 
-
         app_identifier = os.getenv("AZURE_CLIENT_IDENTIFIER", random_app_identifier())
         update_azd_env("AZURE_CLIENT_IDENTIFIER", app_identifier)
         print("Creating application registration...")
@@ -217,7 +217,7 @@ async def main():
             app_secret_env_var="AZURE_CLIENT_APP_SECRET",
             app_payload=create_client_app_payload(app_identifier),
         )
-        
+
         if tenant_type == "CIAM":
             print("Granting Application consent...")
             graph_sp_id = await get_microsoft_graph_service_principal(auth_headers)
@@ -226,7 +226,7 @@ async def main():
             if current_user is not None:
                 print(f"Setting owner for {app_id}")
                 await add_application_owner(auth_headers, app_obj_id, current_user)
-            
+
             userflow_id = await get_userflow(auth_headers, app_identifier)
             if userflow_id is None:
                 print(f"Creating user flow for {app_id}")
@@ -236,6 +236,7 @@ async def main():
             await add_app_to_userflow(auth_headers, userflow_id, app_id)
     finally:
         await credential.close()
+
 
 if __name__ == "__main__":
     asyncio.run(main())
