@@ -8,11 +8,12 @@ from auth_common import (
     TIMEOUT,
     add_application_owner,
     create_or_update_application_with_secret,
+    create_permission_grant,
     get_auth_headers,
     get_current_user,
     get_microsoft_graph_service_principal,
+    get_permission_grant,
     get_tenant_details,
-    grant_consent,
     test_authentication_enabled,
     update_azd_env,
 )
@@ -221,7 +222,12 @@ async def main():
         if tenant_type == "CIAM":
             print("Granting Application consent...")
             graph_sp_id = await get_microsoft_graph_service_principal(auth_headers)
-            await grant_consent(auth_headers, sp_id, graph_sp_id, scopes())
+            grant_id = await get_permission_grant(auth_headers, sp_id, graph_sp_id, scopes())
+            if grant_id:
+                print("Permission grant already exists, not creating new one")
+            else:
+                print("Creating permission grant")
+                await create_permission_grant(auth_headers, sp_id, graph_sp_id, scopes())
 
             if current_user is not None:
                 print(f"Setting owner for {app_id}")

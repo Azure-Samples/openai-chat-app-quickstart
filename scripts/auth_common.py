@@ -163,7 +163,21 @@ async def add_client_secret(auth_headers: dict[str, str], object_id: str):
             raise Exception(response_json)
 
 
-async def grant_consent(auth_headers: dict[str, str], obj_id: str, resource_id: str, scope: str):
+async def get_permission_grant(auth_headers: dict[str, str], obj_id: str, resource_id: str, scope: str) -> (str | None):
+    async with aiohttp.ClientSession(headers=auth_headers, timeout=aiohttp.ClientTimeout(total=TIMEOUT)) as session:
+        async with session.get(
+            f"https://graph.microsoft.com/v1.0/oauth2PermissionGrants?$filter=clientId eq '{obj_id}' \
+                and resourceId eq '{resource_id}'"
+        ) as response:
+            response_json = await response.json()
+            if response.status == 200:
+                for permission in response_json["value"]:
+                    if permission["scope"] == scope:
+                        return permission["id"]
+    return None
+
+
+async def create_permission_grant(auth_headers: dict[str, str], obj_id: str, resource_id: str, scope: str) -> str:
     async with aiohttp.ClientSession(headers=auth_headers, timeout=aiohttp.ClientTimeout(total=TIMEOUT)) as session:
         async with session.post(
             "https://graph.microsoft.com/v1.0/oauth2PermissionGrants",
@@ -172,7 +186,6 @@ async def grant_consent(auth_headers: dict[str, str], obj_id: str, resource_id: 
             response_json = await response.json()
             if response.status == 201:
                 return response_json["id"]
-
             raise Exception(response_json)
 
 
