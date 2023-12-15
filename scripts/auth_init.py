@@ -75,7 +75,14 @@ def create_client_userflow_payload(identifier: int):
                     "description": "Email address of the user",
                     "id": "email",
                     "userFlowAttributeType": "builtIn",
-                }
+                },
+                {
+                    "description": "Display Name of the User.",
+                    "displayName": "Display Name",
+                    "id": "displayName",
+                    "dataType": "string",
+                    "userFlowAttributeType": "builtIn",
+                },
             ],
             "accessPackages": [],
             "attributeCollectionPage": {
@@ -94,7 +101,18 @@ def create_client_userflow_payload(identifier: int):
                                 "inputType": "text",
                                 "hidden": "true",
                                 "editable": "false",
-                            }
+                            },
+                            {
+                                "options": [],
+                                "validationRegEx": "^.*",
+                                "attribute": "displayName",
+                                "required": "true",
+                                "label": "Display Name",
+                                "writeToDirectory": "true",
+                                "inputType": "text",
+                                "hidden": "false",
+                                "editable": "true",
+                            },
                         ]
                     }
                 ]
