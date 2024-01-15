@@ -1,11 +1,5 @@
-from collections import namedtuple
-
-MockToken = namedtuple("MockToken", ["token", "expires_on"])
+import azure.core.credentials_async
 
 
-class MockAzureCredential:
-    def __init__(self, *args, **kwargs):
-        pass
-
-    async def get_token(self, uri):
-        return MockToken("mock_token", 9999999999)
+class MockAzureCredential(azure.core.credentials_async.AsyncTokenCredential):
+    pass

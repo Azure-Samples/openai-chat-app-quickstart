@@ -2,7 +2,7 @@
 
 name: simple-chatgpt-python
 metadata:
-  template: simple-chatgpt-python@0.0.1-beta
+  template: simple-chatgpt-python@0.1.0-beta
 services:
   aca:
     project: ./src

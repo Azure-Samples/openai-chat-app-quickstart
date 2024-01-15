@@ -97,7 +97,7 @@
 
             let answer = "";
             for await (const event of readNDJSONStream(response.body)) {
-                if (event["choices"][0]["delta"]["content"]) {
+                if (event["choices"].length > 0 && event["choices"][0]["delta"]["content"]) {
                     // Clear out the DIV if its the first answer chunk we've received
                     if (answer == "") {
                         messageDiv.innerHTML = "";
