@@ -1,8 +1,8 @@
 quart==0.18.4
-werkzeug==2.3.7
+werkzeug==3.0.1
 gunicorn
 uvicorn[standard]
 openai
 azure-identity
 python-dotenv==0.21.1 # Pinned due to docker-in-docker issue: https://github.com/devcontainers/features/issues/616
-pyyaml==5.3.1 # Pinned due to docker-in-docker issue: https://github.com/devcontainers/features/issues/616
+pyyaml==6.0.1 # Pinned due to docker-in-docker issue: https://github.com/devcontainers/features/issues/616
