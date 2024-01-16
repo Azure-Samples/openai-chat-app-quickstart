@@ -10,4 +10,4 @@ COPY . .
 
 EXPOSE 50505
 
-ENTRYPOINT ["gunicorn", "app:app"]
+ENTRYPOINT ["gunicorn", "quartapp:create_app()"]

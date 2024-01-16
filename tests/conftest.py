@@ -2,8 +2,9 @@ import openai
 import pytest
 import pytest_asyncio
 
+import quartapp
+
 from . import mock_cred
-from src import quartapp
 
 
 @pytest.fixture

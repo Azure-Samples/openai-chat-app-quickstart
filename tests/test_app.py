@@ -1,7 +1,8 @@
 import pytest
 
+import quartapp
+
 from . import mock_cred
-from src import quartapp
 
 
 @pytest.mark.asyncio

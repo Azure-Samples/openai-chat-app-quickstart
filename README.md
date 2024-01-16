@@ -25,10 +25,10 @@ If you're not using one of those options for opening the project, then you'll ne
     python3 -m pip install -r requirements-dev.txt
     ```
 
-3. Install the pre-commit hooks:
+3. Install the app as an editable package:
 
     ```shell
-    pre-commit install
+    python3 -m pip install -e src
     ```
 
 ## Deployment
@@ -109,7 +109,7 @@ either by deleting the resource group in the Portal or running `azd down`.
 Assuming you've run the steps in [Opening the project](#opening-the-project) and have run `azd up``, you can now run the Quart app locally using the development server:
 
 ```
-python -m quart --app src.app:app run --port 50505 --reload
+python -m quart --app src.quartapp run --port 50505 --reload
 ```
 
 ### Using a local LLM server
@@ -142,13 +142,15 @@ and see them instantly.
 
 2. Make sure that the `.env` file exists. The `azd up` deployment step should have created it.
 
-3. Start the services with this command:
+3. Store a key for the OpenAI resource in the `.env` file. You can get the key from the Azure Portal, or from the output of `./infra/getkey.sh`. The key should be stored in the `.env` file as `AZURE_OPENAI_KEY`. This is necessary because Docker containers don't have access to your user Azure credentials.
+
+4. Start the services with this command:
 
     ```shell
     docker-compose up --build
     ```
 
-4. Click 'http://0.0.0.0:50505' in the terminal, which should open a new tab in the browser. You may need to navigate to 'http://localhost:50505' if that URL doesn't work.
+5. Click 'http://0.0.0.0:50505' in the terminal, which should open a new tab in the browser. You may need to navigate to 'http://localhost:50505' if that URL doesn't work.
 
 
 ## Getting help

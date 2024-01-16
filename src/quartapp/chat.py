@@ -13,6 +13,7 @@ async def configure_openai():
     client_args = {}
     if os.getenv("LOCAL_OPENAI_ENDPOINT"):
         # Use a local endpoint like llamafile server
+        current_app.logger.info("Using local OpenAI-compatible endpoint with no key")
         client_args["api_key"] = "no-key-required"
         client_args["base_url"] = os.getenv("LOCAL_OPENAI_ENDPOINT")
         bp.openai_client = openai.AsyncOpenAI(
@@ -25,16 +26,19 @@ async def configure_openai():
             # Authenticate using an Azure OpenAI API key
             # This is generally discouraged, but is provided for developers
             # that want to develop locally inside the Docker container.
+            current_app.logger.info("Using Azure OpenAI endpoint with key")
             client_args["api_key"] = os.getenv("AZURE_OPENAI_KEY")
         else:
             if client_id := os.getenv("AZURE_OPENAI_CLIENT_ID"):
                 # Authenticate using a user-assigned managed identity on Azure
                 # See aca.bicep for value of AZURE_OPENAI_CLIENT_ID
+                current_app.logger.info("Using Azure OpenAI endpoint with managed identity for client ID %s", client_id)
                 default_credential = azure.identity.aio.ManagedIdentityCredential(client_id=client_id)
             else:
                 # Authenticate using the default Azure credential chain
                 # See https://docs.microsoft.com/azure/developer/python/azure-sdk-authenticate#defaultazurecredential
                 # This will *not* work inside a Docker container.
+                current_app.logger.info("Using Azure OpenAI endpoint with default credential")
                 default_credential = azure.identity.aio.DefaultAzureCredential(
                     exclude_shared_token_cache_credential=True
                 )
@@ -73,8 +77,12 @@ async def chat_handler():
             ],
             stream=True,
         )
-        async for event in await chat_coroutine:
-            current_app.logger.info(event)
-            yield json.dumps(event.model_dump(), ensure_ascii=False) + "\n"
+        try:
+            async for event in await chat_coroutine:
+                current_app.logger.info(event)
+                yield json.dumps(event.model_dump(), ensure_ascii=False) + "\n"
+        except Exception as e:
+            current_app.logger.error(e)
+            yield json.dumps({"error": str(e)}, ensure_ascii=False) + "\n"
 
     return Response(response_stream())

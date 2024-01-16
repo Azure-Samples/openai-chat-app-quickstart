@@ -5,7 +5,7 @@ line-length = 120
 src = ["src"]
 
 [tool.ruff.isort]
-known-local-folder = ["src"]
+known-first-party = ["quartapp"]
 
 [tool.black]
 target-version =  ["py311"]
