@@ -24,7 +24,7 @@ azure-core==1.29.6
     # via azure-identity
 azure-identity==1.15.0
     # via quartapp (pyproject.toml)
-blinker==1.5
+blinker==1.7.0
     # via quart
 certifi==2023.11.17
     # via
@@ -97,7 +97,7 @@ multidict==6.0.4
     # via
     #   aiohttp
     #   yarl
-openai==1.7.2
+openai==1.8.0
     # via quartapp (pyproject.toml)
 packaging==23.2
     # via
@@ -111,19 +111,19 @@ pycparser==2.21
     # via cffi
 pydantic==2.5.3
     # via openai
-pydantic-core==2.14.6
+pydantic-core==2.15.0
     # via pydantic
 pyjwt[crypto]==2.8.0
     # via msal
-python-dotenv==0.21.1
+python-dotenv==1.0.0
     # via
     #   quartapp (pyproject.toml)
     #   uvicorn
-pyyaml==5.3.1
+pyyaml==6.0.1
     # via
     #   quartapp (pyproject.toml)
     #   uvicorn
-quart==0.18.4
+quart==0.19.4
     # via quartapp (pyproject.toml)
 requests==2.31.0
     # via
@@ -146,7 +146,7 @@ typing-extensions==4.9.0
     #   pydantic-core
 urllib3==2.1.0
     # via requests
-uvicorn[standard]==0.25.0
+uvicorn[standard]==0.26.0
     # via quartapp (pyproject.toml)
 uvloop==0.19.0
     # via uvicorn
@@ -154,7 +154,7 @@ watchfiles==0.21.0
     # via uvicorn
 websockets==12.0
     # via uvicorn
-werkzeug==2.3.7
+werkzeug==3.0.1
     # via
     #   quart
     #   quartapp (pyproject.toml)
