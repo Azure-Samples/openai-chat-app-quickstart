@@ -10,10 +10,9 @@ products:
 - azure-container-apps
 - azure-openai-service
 - azure-container-registry
-- azure-pipelines
 urlFragment: chatgpt-quickstart
-name: Build your own ChatGPT app - Simple Chat Application using Azure OpenAI (Python)
-description: A sample chat app that uses Python and the Flask framework to stream ChatGPT completions as server-sent events to a simple frontend.
+name: Simple Chat Application using Azure OpenAI (Python)
+description: A sample chat app that uses Python and the Quart framework to stream chat completions from the OpenAI SDK. Easily deployable to Azure Container Apps.
 ---
 <!-- YAML front-matter schema: https://review.learn.microsoft.com/en-us/help/contribute/samples/process/onboarding?branch=main#supported-metadata-fields-for-readmemd -->
 
