@@ -43,9 +43,7 @@ async def configure_openai():
                     "Using Azure OpenAI with managed identity for client ID %s",
                     client_id,
                 )
-                default_credential = azure.identity.aio.ManagedIdentityCredential(
-                    client_id=client_id
-                )
+                default_credential = azure.identity.aio.ManagedIdentityCredential(client_id=client_id)
             else:
                 # Authenticate using the default Azure credential chain
                 # See https://docs.microsoft.com/azure/developer/python/azure-sdk-authenticate#defaultazurecredential
@@ -54,9 +52,7 @@ async def configure_openai():
                 default_credential = azure.identity.aio.DefaultAzureCredential(
                     exclude_shared_token_cache_credential=True
                 )
-            client_args[
-                "azure_ad_token_provider"
-            ] = azure.identity.aio.get_bearer_token_provider(
+            client_args["azure_ad_token_provider"] = azure.identity.aio.get_bearer_token_provider(
                 default_credential, "https://cognitiveservices.azure.com/.default"
             )
         bp.openai_client = openai.AsyncAzureOpenAI(
