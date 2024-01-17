@@ -3,6 +3,10 @@ if [ -z "$(az account show)" ]; then
     exit 1
 fi
 
+echo "Logged in, using this subscription:"
+az account show --query "{subscriptionId:id, name:name}"
+echo "If that is not the correct subscription, please run 'az account set --subscription \"<SUBSCRIPTION-NAME>\"'"
+
 echo "Getting environment variables from .env file..."
 openAiService=$(grep "AZURE_OPENAI_RESOURCE=" .env | cut -d '=' -f2 | tr -d '"')
 resourceGroupName=$(grep "AZURE_OPENAI_RESOURCE_GROUP=" .env | cut -d '=' -f2  | tr -d '"')
