@@ -3,7 +3,14 @@ import os
 
 import azure.identity.aio
 import openai
-from quart import Blueprint, Response, current_app, render_template, request, stream_with_context
+from quart import (
+    Blueprint,
+    Response,
+    current_app,
+    render_template,
+    request,
+    stream_with_context,
+)
 
 bp = Blueprint("chat", __name__, template_folder="templates", static_folder="static")
 
@@ -13,7 +20,7 @@ async def configure_openai():
     client_args = {}
     if os.getenv("LOCAL_OPENAI_ENDPOINT"):
         # Use a local endpoint like llamafile server
-        current_app.logger.info("Using local OpenAI-compatible endpoint with no key")
+        current_app.logger.info("Using local OpenAI-compatible API with no key")
         client_args["api_key"] = "no-key-required"
         client_args["base_url"] = os.getenv("LOCAL_OPENAI_ENDPOINT")
         bp.openai_client = openai.AsyncOpenAI(
@@ -26,24 +33,31 @@ async def configure_openai():
             # Authenticate using an Azure OpenAI API key
             # This is generally discouraged, but is provided for developers
             # that want to develop locally inside the Docker container.
-            current_app.logger.info("Using Azure OpenAI endpoint with key")
+            current_app.logger.info("Using Azure OpenAI with key")
             client_args["api_key"] = os.getenv("AZURE_OPENAI_KEY")
         else:
             if client_id := os.getenv("AZURE_OPENAI_CLIENT_ID"):
                 # Authenticate using a user-assigned managed identity on Azure
                 # See aca.bicep for value of AZURE_OPENAI_CLIENT_ID
-                current_app.logger.info("Using Azure OpenAI endpoint with managed identity for client ID %s", client_id)
-                default_credential = azure.identity.aio.ManagedIdentityCredential(client_id=client_id)
+                current_app.logger.info(
+                    "Using Azure OpenAI with managed identity for client ID %s",
+                    client_id,
+                )
+                default_credential = azure.identity.aio.ManagedIdentityCredential(
+                    client_id=client_id
+                )
             else:
                 # Authenticate using the default Azure credential chain
                 # See https://docs.microsoft.com/azure/developer/python/azure-sdk-authenticate#defaultazurecredential
                 # This will *not* work inside a Docker container.
-                current_app.logger.info("Using Azure OpenAI endpoint with default credential")
+                current_app.logger.info("Using Azure OpenAI with default credential")
                 default_credential = azure.identity.aio.DefaultAzureCredential(
                     exclude_shared_token_cache_credential=True
                 )
-            client_args["azure_ad_token_provider"] = azure.identity.aio.get_bearer_token_provider(
-                default_credential, "https://api.openai.com/.default"
+            client_args[
+                "azure_ad_token_provider"
+            ] = azure.identity.aio.get_bearer_token_provider(
+                default_credential, "https://cognitiveservices.azure.com/.default"
             )
         bp.openai_client = openai.AsyncAzureOpenAI(
             api_version="2023-07-01-preview",
