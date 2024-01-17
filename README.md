@@ -9,6 +9,7 @@ products:
 - azure
 - azure-container-apps
 - azure-openai-service
+- azure-container-registry
 - azure-pipelines
 urlFragment: chatgpt-quickstart
 name: Build your own ChatGPT app - Simple Chat Application using Azure OpenAI (Python)
