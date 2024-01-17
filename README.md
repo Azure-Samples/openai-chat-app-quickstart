@@ -16,7 +16,7 @@ description: A sample chat app that uses Python and the Quart framework to strea
 ---
 <!-- YAML front-matter schema: https://review.learn.microsoft.com/en-us/help/contribute/samples/process/onboarding?branch=main#supported-metadata-fields-for-readmemd -->
 
-# Build your own ChatGPT app
+# Simple Chat Application using Azure OpenAI (Python)
 
 This repository includes a simple Python [Quart](https://quart.palletsprojects.com/en/latest/)
 app that streams responses from ChatGPT to an HTML/JS frontend using [JSON Lines](http://jsonlines.org/)
