@@ -1,3 +1,21 @@
+---
+page_type: sample
+languages:
+- azdeveloper
+- python
+- bicep
+- html
+products:
+- azure
+- azure-container-apps
+- azure-openai-service
+- azure-pipelines
+urlFragment: chatgpt-quickstart
+name: Build your own ChatGPT app - Simple Chat Application using Azure OpenAI (Python)
+description: A sample chat app that uses Python and the Flask framework to stream ChatGPT completions as server-sent events to a simple frontend.
+---
+<!-- YAML front-matter schema: https://review.learn.microsoft.com/en-us/help/contribute/samples/process/onboarding?branch=main#supported-metadata-fields-for-readmemd -->
+
 # Build your own ChatGPT app
 
 This repository includes a simple Python [Quart](https://quart.palletsprojects.com/en/latest/)
