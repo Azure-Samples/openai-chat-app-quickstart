@@ -106,7 +106,7 @@ either by deleting the resource group in the Portal or running `azd down`.
 
 ## Local development without Docker
 
-Assuming you've run the steps in [Opening the project](#opening-the-project) and have run `azd up``, you can now run the Quart app locally using the development server:
+Assuming you've run the steps in [Opening the project](#opening-the-project) and have run `azd up`, you can now run the Quart app locally using the development server:
 
 ```
 python -m quart --app src.quartapp run --port 50505 --reload
