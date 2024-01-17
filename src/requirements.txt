@@ -124,11 +124,11 @@ pydantic-core==2.14.6
     # via pydantic
 pyjwt[crypto]==2.8.0
     # via msal
-python-dotenv==0.21.1
+python-dotenv==1.0.0
     # via
     #   quartapp (pyproject.toml)
     #   uvicorn
-pyyaml==5.3.1
+pyyaml==6.0.1
     # via
     #   quartapp (pyproject.toml)
     #   uvicorn
