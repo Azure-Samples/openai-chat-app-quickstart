@@ -70,11 +70,10 @@ module app 'core/host/container-app-upsert.bicep' = {
 }
 
 
-module auth 'core/host/container-auth.bicep' = {
-  name: '${serviceName}-container-auth-module'
+module auth 'core/host/container-apps-auth.bicep' = if (useAuthentication) {
+  name: '${serviceName}-container-apps-auth-module'
   params: {
     name: app.outputs.name
-    useAuthentication: useAuthentication
     clientId: clientId
     clientSecretName: clientSecretName
     openIdIssuer: openIdIssuer
