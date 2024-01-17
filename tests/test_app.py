@@ -1,8 +1,8 @@
-import openai
 import pytest
 
+import quartapp
+
 from . import mock_cred
-from src import quartapp
 
 
 @pytest.mark.asyncio
@@ -12,17 +12,14 @@ async def test_index(client):
 
 
 @pytest.mark.asyncio
-async def test_chat_stream_text(client):
+async def test_chat_stream_text(client, snapshot):
     response = await client.post(
         "/chat",
         json={"message": "What is the capital of France?"},
     )
     assert response.status_code == 200
     result = await response.get_data()
-    assert (
-        result
-        == b'{"choices": [{"delta": {"content": "The"}}]}\n{"choices": [{"delta": {"content": "capital"}}]}\n{"choices": [{"delta": {"content": "of"}}]}\n{"choices": [{"delta": {"content": "France"}}]}\n{"choices": [{"delta": {"content": "is"}}]}\n{"choices": [{"delta": {"content": "Paris."}}]}\n'  # noqa
-    )
+    snapshot.assert_match(result, "result.json")
 
 
 @pytest.mark.asyncio
@@ -34,7 +31,8 @@ async def test_openai_key(monkeypatch):
     quart_app = quartapp.create_app()
 
     async with quart_app.test_app():
-        assert openai.api_type == "azure"
+        assert quart_app.blueprints["chat"].openai_client.api_key == "test-key"
+        assert quart_app.blueprints["chat"].openai_client._azure_ad_token_provider is None
 
 
 @pytest.mark.asyncio
@@ -48,4 +46,15 @@ async def test_openai_managedidentity(monkeypatch):
     quart_app = quartapp.create_app()
 
     async with quart_app.test_app():
-        assert openai.api_type == "azure_ad"
+        assert quart_app.blueprints["chat"].openai_client._azure_ad_token_provider is not None
+
+
+@pytest.mark.asyncio
+async def test_openai_local(monkeypatch):
+    monkeypatch.setenv("LOCAL_OPENAI_ENDPOINT", "http://localhost:8080")
+
+    quart_app = quartapp.create_app()
+
+    async with quart_app.test_app():
+        assert quart_app.blueprints["chat"].openai_client.api_key == "no-key-required"
+        assert quart_app.blueprints["chat"].openai_client.base_url == "http://localhost:8080"

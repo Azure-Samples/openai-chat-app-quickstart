@@ -3,8 +3,10 @@
     "image": "mcr.microsoft.com/devcontainers/python:3.11-bullseye",
     "forwardPorts": [50505],
     "features": {
-        "ghcr.io/devcontainers/features/powershell:1.1.0": {},
-        "ghcr.io/devcontainers/features/docker-in-docker:2.2.1": {},
+        "ghcr.io/devcontainers/features/powershell:1.2.0": {},
+        "ghcr.io/devcontainers/features/docker-in-docker:latest": {
+            "dockerDashComposeVersion": "v2"
+        },
         "ghcr.io/devcontainers/features/azure-cli:1": {},
         "ghcr.io/azure/azure-dev/azd:latest": {}
     },
@@ -18,7 +20,7 @@
             ]
         }
     },
-    "postCreateCommand": "python3 -m pip install -r requirements-dev.txt",
+    "postCreateCommand": "python3 -m pip install -r requirements-dev.txt && python3 -m pip install -e  src",
     "remoteUser": "vscode",
     "hostRequirements": {
         "memory": "8gb"
