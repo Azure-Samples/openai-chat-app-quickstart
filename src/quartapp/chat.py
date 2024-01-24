@@ -70,7 +70,7 @@ async def shutdown_openai():
 
 # Extract the username for display from the base64 encoded header
 # X-MS-CLIENT-PRINCIPAL from the 'name' claim.
-#       
+#
 # Fallback to `default_username` if the header is not present.
 def extract_username(headers, default_username="You"):
     if "X-MS-CLIENT-PRINCIPAL" not in headers:
@@ -79,6 +79,7 @@ def extract_username(headers, default_username="You"):
     token = json.loads(base64.b64decode(headers.get("X-MS-CLIENT-PRINCIPAL")))
     claims = {claim["typ"]: claim["val"] for claim in token["claims"]}
     return claims.get("name", default_username)
+
 
 @bp.get("/")
 async def index():
