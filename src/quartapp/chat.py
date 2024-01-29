@@ -56,7 +56,7 @@ async def configure_openai():
                 default_credential, "https://cognitiveservices.azure.com/.default"
             )
         bp.openai_client = openai.AsyncAzureOpenAI(
-            api_version="2023-07-01-preview",
+            api_version=os.getenv("AZURE_OPENAI_VERSION"),
             azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
             **client_args,
         )

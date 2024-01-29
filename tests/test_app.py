@@ -27,6 +27,7 @@ async def test_openai_key(monkeypatch):
     monkeypatch.setenv("AZURE_OPENAI_KEY", "test-key")
     monkeypatch.setenv("AZURE_OPENAI_ENDPOINT", "test-openai-service.openai.azure.com")
     monkeypatch.setenv("AZURE_OPENAI_CHATGPT_DEPLOYMENT", "test-chatgpt")
+    monkeypatch.setenv("AZURE_OPENAI_VERSION", "2023-10-01-preview")
 
     quart_app = quartapp.create_app()
 
@@ -40,6 +41,8 @@ async def test_openai_managedidentity(monkeypatch):
     monkeypatch.setenv("AZURE_OPENAI_CLIENT_ID", "test-client-id")
     monkeypatch.setenv("AZURE_OPENAI_ENDPOINT", "test-openai-service.openai.azure.com")
     monkeypatch.setenv("AZURE_OPENAI_CHATGPT_DEPLOYMENT", "test-chatgpt")
+    monkeypatch.setenv("AZURE_OPENAI_VERSION", "2023-10-01-preview")
+
 
     monkeypatch.setattr("azure.identity.aio.ManagedIdentityCredential", mock_cred.MockAzureCredential)
 
