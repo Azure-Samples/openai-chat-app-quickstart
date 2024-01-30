@@ -1,5 +1,6 @@
 ---
-page_type: sample
+name: Simple Chat Application using Azure OpenAI (Python)
+description: A sample chat app that uses Python and the Quart framework to stream chat completions from the OpenAI SDK. Deployable to Azure Container Apps.
 languages:
 - azdeveloper
 - python
@@ -10,9 +11,8 @@ products:
 - azure-container-apps
 - azure-openai-service
 - azure-container-registry
-urlFragment: chatgpt-quickstart
-name: Simple Chat Application using Azure OpenAI (Python)
-description: A sample chat app that uses Python and the Quart framework to stream chat completions from the OpenAI SDK. Easily deployable to Azure Container Apps.
+page_type: sample
+urlFragment: openai-chat-app-quickstart
 ---
 <!-- YAML front-matter schema: https://review.learn.microsoft.com/en-us/help/contribute/samples/process/onboarding?branch=main#supported-metadata-fields-for-readmemd -->
 
