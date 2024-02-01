@@ -9,7 +9,7 @@ languages:
 products:
 - azure
 - azure-container-apps
-- azure-openai-service
+- azure-openai
 - azure-container-registry
 page_type: sample
 urlFragment: openai-chat-app-quickstart
