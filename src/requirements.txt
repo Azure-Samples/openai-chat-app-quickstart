@@ -42,7 +42,7 @@ click==8.1.7
     #   flask
     #   quart
     #   uvicorn
-cryptography==42.0.2
+cryptography==42.0.3
     # via
     #   azure-identity
     #   msal
@@ -67,7 +67,7 @@ h2==4.1.0
     # via hypercorn
 hpack==4.0.0
     # via h2
-httpcore==1.0.2
+httpcore==1.0.3
     # via httpx
 httptools==0.6.1
     # via uvicorn
@@ -153,7 +153,7 @@ typing-extensions==4.9.0
     #   openai
     #   pydantic
     #   pydantic-core
-urllib3==2.2.0
+urllib3==2.2.1
     # via requests
 uvicorn[standard]==0.27.1
     # via quartapp (pyproject.toml)
