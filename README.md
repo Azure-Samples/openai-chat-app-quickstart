@@ -72,6 +72,7 @@ This repo is set up for deployment on Azure Container Apps using the configurati
     ```shell
     azd up
     ```
+
     It will prompt you to provide an `azd` environment name (like "chat-app"), select a subscription from your Azure account, and select a [location where OpenAI is available](https://azure.microsoft.com/explore/global-infrastructure/products-by-region/?products=cognitive-services&regions=all) (like "francecentral"). Then it will provision the resources in your account and deploy the latest code. If you get an error or timeout with deployment, changing the location can help, as there may be availability constraints for the OpenAI resource.
 
 3. When `azd` has finished deploying, you'll see an endpoint URI in the command output. Visit that URI, and you should see the chat app! 🎉
@@ -88,12 +89,13 @@ If you already have an OpenAI resource and would like to re-use it, first follow
 1. Run `azd env new` to create a new environment. Provide a name that will be used in the name of *new* resources that are created.
 2. Run `azd env set` to specify the values for the existing OpenAI resource.
 
-   ```
+   ```shell
    azd env set AZURE_OPENAI_RESOURCE {name of OpenAI resource}
    azd env set AZURE_OPENAI_RESOURCE_GROUP {name of resource group that it's inside}
    azd env set AZURE_OPENAI_RESOURCE_GROUP_LOCATION {location for that group}
    azd env set AZURE_OPENAI_SKU_NAME {name of the SKU, defaults to "S0"}
    ```
+
 3. Then follow the steps for deployment above.
 
 ### CI/CD pipeline
@@ -126,7 +128,7 @@ either by deleting the resource group in the Portal or running `azd down`.
 
 Assuming you've run the steps in [Opening the project](#opening-the-project) and have run `azd up`, you can now run the Quart app locally using the development server:
 
-```
+```shell
 python -m quart --app src.quartapp run --port 50505 --reload
 ```
 
@@ -162,14 +164,13 @@ and see them instantly.
 
 3. Store a key for the OpenAI resource in the `.env` file. You can get the key from the Azure Portal, or from the output of `./infra/getkey.sh`. The key should be stored in the `.env` file as `AZURE_OPENAI_KEY`. This is necessary because Docker containers don't have access to your user Azure credentials.
 
-4. Start the services with this command:
+5. Start the services with this command:
 
     ```shell
     docker-compose up --build
     ```
 
 5. Click 'http://0.0.0.0:50505' in the terminal, which should open a new tab in the browser. You may need to navigate to 'http://localhost:50505' if that URL doesn't work.
-
 
 ## Getting help
 

@@ -3,3 +3,5 @@
 .pyc
 __pycache__/
 .coverage
+.idea/
+.venv/
