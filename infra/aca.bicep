@@ -9,6 +9,7 @@ param serviceName string = 'aca'
 param exists bool
 param openAiDeploymentName string
 param openAiEndpoint string
+param openAiApiVersion string
 
 resource acaIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
   name: identityName
@@ -34,6 +35,10 @@ module app 'core/host/container-app-upsert.bicep' = {
       {
         name: 'AZURE_OPENAI_ENDPOINT'
         value: openAiEndpoint
+      }
+      {
+        name: 'AZURE_OPENAI_API_VERSION'
+        value: openAiApiVersion
       }
       {
         name: 'RUNNING_IN_PRODUCTION'
