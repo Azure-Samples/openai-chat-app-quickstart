@@ -73,6 +73,7 @@
         const userTemplate = document.querySelector('#message-template-user');
         const assistantTemplate = document.querySelector('#message-template-assistant');
         const converter = new showdown.Converter();
+        const messages = [];
 
         form.addEventListener("submit", async function(e) {
             e.preventDefault();
@@ -86,12 +87,16 @@
             let messageDiv = assistantTemplateClone.querySelector(".message-content");
             targetContainer.appendChild(assistantTemplateClone);
 
+            messages.push({
+                "role": "user",
+                "content": message
+            });
             const response = await fetch("/chat", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify({message: message})
+                body: JSON.stringify({messages: messages})
             });
 
 
@@ -109,6 +114,10 @@
                     messageDiv.innerHTML = "Error: " + event["error"];
                 }
             }
+            messages.push({
+                "role": "assistant",
+                "content": answer
+            });
 
             messageInput.value = "";
         });
