@@ -109,7 +109,13 @@ def mock_openai_chatcompletion(monkeypatch):
 
     async def mock_acreate(*args, **kwargs):
         # Only mock a stream=True completion
-        return AsyncChatCompletionIterator("The capital of France is Paris.")
+        last_message = kwargs.get("messages")[-1]["content"]
+        if last_message == "What is the capital of France?":
+            return AsyncChatCompletionIterator("The capital of France is Paris.")
+        elif last_message == "What is the capital of Germany?":
+            return AsyncChatCompletionIterator("The capital of Germany is Berlin.")
+        else:
+            raise ValueError(f"Unexpected message: {last_message}")
 
     monkeypatch.setattr("openai.resources.chat.AsyncCompletions.create", mock_acreate)
 
