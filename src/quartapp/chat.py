@@ -57,7 +57,7 @@ async def configure_openai():
                 default_credential, "https://cognitiveservices.azure.com/.default"
             )
         bp.openai_client = openai.AsyncAzureOpenAI(
-            api_version="2023-07-01-preview",
+            api_version=os.getenv("AZURE_OPENAI_API_VERSION") or "2024-02-15-preview",
             azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
             **client_args,
         )
@@ -89,17 +89,19 @@ async def index():
 
 @bp.post("/chat")
 async def chat_handler():
-    request_message = (await request.get_json())["message"]
+    request_messages = (await request.get_json())["messages"]
 
     @stream_with_context
     async def response_stream():
+        # This sends all messages, so API request may exceed token limits
+        all_messages = [
+            {"role": "system", "content": "You are a helpful assistant."},
+        ] + request_messages
+
         chat_coroutine = bp.openai_client.chat.completions.create(
             # Azure Open AI takes the deployment name as the model name
             model=os.environ["AZURE_OPENAI_CHATGPT_DEPLOYMENT"],
-            messages=[
-                {"role": "system", "content": "You are a helpful assistant."},
-                {"role": "user", "content": request_message},
-            ],
+            messages=all_messages,
             stream=True,
         )
         try:

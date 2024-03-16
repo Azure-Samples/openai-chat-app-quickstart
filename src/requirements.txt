@@ -6,20 +6,20 @@
 #
 aiofiles==23.2.1
     # via quart
-aiohttp==3.9.1
+aiohttp==3.9.3
     # via quartapp (pyproject.toml)
 aiosignal==1.3.1
     # via aiohttp
 annotated-types==0.6.0
     # via pydantic
-anyio==4.2.0
+anyio==4.3.0
     # via
     #   httpx
     #   openai
     #   watchfiles
 attrs==23.2.0
     # via aiohttp
-azure-core==1.29.7
+azure-core==1.30.1
     # via azure-identity
 azure-identity==1.15.0
     # via quartapp (pyproject.toml)
@@ -27,7 +27,7 @@ blinker==1.7.0
     # via
     #   flask
     #   quart
-certifi==2023.11.17
+certifi==2024.2.2
     # via
     #   httpcore
     #   httpx
@@ -41,14 +41,14 @@ click==8.1.7
     #   flask
     #   quart
     #   uvicorn
-cryptography==42.0.0
+cryptography==42.0.5
     # via
     #   azure-identity
     #   msal
     #   pyjwt
 distro==1.9.0
     # via openai
-flask==3.0.1
+flask==3.0.2
     # via quart
 frozenlist==1.4.1
     # via
@@ -66,11 +66,11 @@ h2==4.1.0
     # via hypercorn
 hpack==4.0.0
     # via h2
-httpcore==1.0.2
+httpcore==1.0.4
     # via httpx
 httptools==0.6.1
     # via uvicorn
-httpx==0.26.0
+httpx==0.27.0
     # via openai
 hypercorn==0.16.0
     # via quart
@@ -90,24 +90,24 @@ jinja2==3.1.3
     # via
     #   flask
     #   quart
-markupsafe==2.1.4
+markupsafe==2.1.5
     # via
     #   jinja2
     #   quart
     #   werkzeug
-msal==1.26.0
+msal==1.27.0
     # via
     #   azure-identity
     #   msal-extensions
 msal-extensions==1.1.0
     # via azure-identity
-multidict==6.0.4
+multidict==6.0.5
     # via
     #   aiohttp
     #   yarl
-openai==1.9.0
+openai==1.13.3
     # via quartapp (pyproject.toml)
-packaging==23.2
+packaging==24.0
     # via
     #   gunicorn
     #   msal-extensions
@@ -117,9 +117,9 @@ priority==2.0.0
     # via hypercorn
 pycparser==2.21
     # via cffi
-pydantic==2.5.3
+pydantic==2.6.3
     # via openai
-pydantic-core==2.14.6
+pydantic-core==2.16.3
     # via pydantic
 pyjwt[crypto]==2.8.0
     # via msal
@@ -139,22 +139,22 @@ requests==2.31.0
     #   msal
 six==1.16.0
     # via azure-core
-sniffio==1.3.0
+sniffio==1.3.1
     # via
     #   anyio
     #   httpx
     #   openai
-tqdm==4.66.1
+tqdm==4.66.2
     # via openai
-typing-extensions==4.9.0
+typing-extensions==4.10.0
     # via
     #   azure-core
     #   openai
     #   pydantic
     #   pydantic-core
-urllib3==2.1.0
+urllib3==2.2.1
     # via requests
-uvicorn[standard]==0.27.0
+uvicorn[standard]==0.28.0
     # via quartapp (pyproject.toml)
 uvloop==0.19.0
     # via uvicorn

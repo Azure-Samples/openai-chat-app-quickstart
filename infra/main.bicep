@@ -22,6 +22,7 @@ param openAiResourceGroupName string = ''
 param openAiResourceGroupLocation string = ''
 param openAiSkuName string = ''
 param openAiDeploymentCapacity int = 30
+param openAiApiVersion string = ''
 
 param useAuthentication bool = false
 param clientId string = ''
@@ -110,6 +111,7 @@ module aca 'aca.bicep' = {
     containerRegistryName: containerApps.outputs.registryName
     openAiDeploymentName: openAiDeploymentName
     openAiEndpoint: openAi.outputs.endpoint
+    openAiApiVersion: openAiApiVersion
     exists: acaExists
     useAuthentication: useAuthentication
     clientId: clientId
@@ -144,6 +146,7 @@ module openAiRoleBackend 'core/security/role.bicep' = {
 output AZURE_LOCATION string = location
 
 output AZURE_OPENAI_CHATGPT_DEPLOYMENT string = openAiDeploymentName
+output AZURE_OPENAI_API_VERSION string = openAiApiVersion
 output AZURE_OPENAI_ENDPOINT string = openAi.outputs.endpoint
 output AZURE_OPENAI_RESOURCE string = openAi.outputs.name
 output AZURE_OPENAI_RESOURCE_GROUP string = openAiResourceGroup.name
