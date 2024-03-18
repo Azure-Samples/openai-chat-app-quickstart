@@ -11,6 +11,26 @@ param openAiDeploymentName string
 param openAiEndpoint string
 param openAiApiVersion string
 
+@description('Enable Auth')
+param useAuthentication bool
+param clientId string
+
+param tenantId string
+param loginEndpoint string
+
+@secure()
+param clientSecret string
+#disable-next-line secure-secrets-in-params
+param clientSecretName string = 'microsoft-provider-authentication-secret'
+
+// the issuer is different depending if we are in a workforce or external tenant
+var openIdIssuer = empty(tenantId) ? '${environment().authentication.loginEndpoint}${tenant().tenantId}/v2.0' : 'https://${loginEndpoint}/${tenantId}/v2.0'
+
+var secrets = !useAuthentication ? [] : [{
+    name: clientSecretName
+    value: clientSecret
+}]
+
 resource acaIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
   name: identityName
   location: location
@@ -50,6 +70,18 @@ module app 'core/host/container-app-upsert.bicep' = {
       }
     ]
     targetPort: 50505
+    secrets: secrets
+  }
+}
+
+
+module auth 'core/host/container-apps-auth.bicep' = if (useAuthentication) {
+  name: '${serviceName}-container-apps-auth-module'
+  params: {
+    name: app.outputs.name
+    clientId: clientId
+    clientSecretName: clientSecretName
+    openIdIssuer: openIdIssuer
   }
 }
 
@@ -57,3 +89,4 @@ output SERVICE_ACA_IDENTITY_PRINCIPAL_ID string = acaIdentity.properties.princip
 output SERVICE_ACA_NAME string = app.outputs.name
 output SERVICE_ACA_URI string = app.outputs.uri
 output SERVICE_ACA_IMAGE_NAME string = app.outputs.imageName
+

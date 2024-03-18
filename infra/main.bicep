@@ -24,6 +24,13 @@ param openAiSkuName string = ''
 param openAiDeploymentCapacity int = 30
 param openAiApiVersion string = ''
 
+param useAuthentication bool = false
+param clientId string = ''
+@secure()
+param clientSecret string = ''
+param tenantId string = ''
+param loginEndpoint string = ''
+
 var resourceToken = toLower(uniqueString(subscription().id, name, location))
 var tags = { 'azd-env-name': name }
 
@@ -106,6 +113,11 @@ module aca 'aca.bicep' = {
     openAiEndpoint: openAi.outputs.endpoint
     openAiApiVersion: openAiApiVersion
     exists: acaExists
+    useAuthentication: useAuthentication
+    clientId: clientId
+    clientSecret: clientSecret
+    tenantId: tenantId
+    loginEndpoint: loginEndpoint
   }
 }
 
@@ -149,3 +161,4 @@ output SERVICE_ACA_IMAGE_NAME string = aca.outputs.SERVICE_ACA_IMAGE_NAME
 output AZURE_CONTAINER_ENVIRONMENT_NAME string = containerApps.outputs.environmentName
 output AZURE_CONTAINER_REGISTRY_ENDPOINT string = containerApps.outputs.registryLoginServer
 output AZURE_CONTAINER_REGISTRY_NAME string = containerApps.outputs.registryName
+
