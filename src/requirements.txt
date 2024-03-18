@@ -106,7 +106,7 @@ multidict==6.0.5
     # via
     #   aiohttp
     #   yarl
-openai==1.13.3
+openai==1.14.1
     # via quartapp (pyproject.toml)
 packaging==24.0
     # via
@@ -118,7 +118,7 @@ priority==2.0.0
     # via hypercorn
 pycparser==2.21
     # via cffi
-pydantic==2.6.3
+pydantic==2.6.4
     # via openai
 pydantic-core==2.16.3
     # via pydantic
