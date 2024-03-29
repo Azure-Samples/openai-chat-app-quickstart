@@ -96,7 +96,7 @@ markupsafe==2.1.5
     #   jinja2
     #   quart
     #   werkzeug
-msal==1.27.0
+msal==1.28.0
     # via
     #   azure-identity
     #   msal-extensions
@@ -106,7 +106,7 @@ multidict==6.0.5
     # via
     #   aiohttp
     #   yarl
-openai==1.14.1
+openai==1.14.2
     # via quartapp (pyproject.toml)
 packaging==24.0
     # via
@@ -155,7 +155,7 @@ typing-extensions==4.10.0
     #   pydantic-core
 urllib3==2.2.1
     # via requests
-uvicorn[standard]==0.28.0
+uvicorn[standard]==0.29.0
     # via quartapp (pyproject.toml)
 uvloop==0.19.0
     # via uvicorn
