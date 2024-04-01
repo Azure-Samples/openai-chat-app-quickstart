@@ -67,7 +67,7 @@ h2==4.1.0
     # via hypercorn
 hpack==4.0.0
     # via h2
-httpcore==1.0.4
+httpcore==1.0.5
     # via httpx
 httptools==0.6.1
     # via uvicorn
@@ -106,7 +106,7 @@ multidict==6.0.5
     # via
     #   aiohttp
     #   yarl
-openai==1.14.2
+openai==1.14.3
     # via quartapp (pyproject.toml)
 packaging==24.0
     # via
@@ -116,11 +116,11 @@ portalocker==2.8.2
     # via msal-extensions
 priority==2.0.0
     # via hypercorn
-pycparser==2.21
+pycparser==2.22
     # via cffi
 pydantic==2.6.4
     # via openai
-pydantic-core==2.16.3
+pydantic-core==2.17.0
     # via pydantic
 pyjwt[crypto]==2.8.0
     # via msal
