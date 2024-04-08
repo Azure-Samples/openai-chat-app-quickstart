@@ -116,7 +116,7 @@ portalocker==2.8.2
     # via msal-extensions
 priority==2.0.0
     # via hypercorn
-pycparser==2.21
+pycparser==2.22
     # via cffi
 pydantic==2.6.4
     # via openai
