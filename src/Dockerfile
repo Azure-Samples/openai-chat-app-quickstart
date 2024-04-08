@@ -3,7 +3,13 @@ FROM python:3.11-alpine AS base
 
 WORKDIR /code
 
+# Install tini, a tiny init for containers
 RUN apk add --update --no-cache tini
+
+# Install required packages for cryptography package
+# https://cryptography.io/en/latest/installation/#building-cryptography-on-linux
+RUN apk add gcc musl-dev python3-dev libffi-dev openssl-dev cargo pkgconfig
+
 # ------------------- Stage 1: Build Stage ------------------------------
 FROM base AS build
 
