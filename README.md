@@ -164,7 +164,7 @@ and see them instantly.
 
 3. Store a key for the OpenAI resource in the `.env` file. You can get the key from the Azure Portal, or from the output of `./infra/getkey.sh`. The key should be stored in the `.env` file as `AZURE_OPENAI_KEY`. This is necessary because Docker containers don't have access to your user Azure credentials.
 
-5. Start the services with this command:
+4. Start the services with this command:
 
     ```shell
     docker-compose up --build
