@@ -67,7 +67,7 @@ h2==4.1.0
     # via hypercorn
 hpack==4.0.0
     # via h2
-httpcore==1.0.4
+httpcore==1.0.5
     # via httpx
 httptools==0.6.1
     # via uvicorn
