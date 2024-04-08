@@ -13,7 +13,7 @@ updates:
       github-actions:
         patterns:
           - "*"
-  - package-ecosystem: "pip" # See documentation for possible values
+  - package-ecosystem: "pip-compile" # See documentation for possible values
     directory: "/" # Location of package manifests
     schedule:
       interval: "weekly"

@@ -14,7 +14,6 @@ annotated-types==0.6.0
     # via pydantic
 anyio==4.3.0
     # via
-    #   azure-core
     #   httpx
     #   openai
     #   watchfiles
@@ -67,7 +66,7 @@ h2==4.1.0
     # via hypercorn
 hpack==4.0.0
     # via h2
-httpcore==1.0.4
+httpcore==1.0.5
     # via httpx
 httptools==0.6.1
     # via uvicorn
@@ -116,7 +115,7 @@ portalocker==2.8.2
     # via msal-extensions
 priority==2.0.0
     # via hypercorn
-pycparser==2.21
+pycparser==2.22
     # via cffi
 pydantic==2.6.4
     # via openai
@@ -147,7 +146,7 @@ sniffio==1.3.1
     #   openai
 tqdm==4.66.2
     # via openai
-typing-extensions==4.10.0
+typing-extensions==4.11.0
     # via
     #   azure-core
     #   openai
@@ -163,7 +162,7 @@ watchfiles==0.21.0
     # via uvicorn
 websockets==12.0
     # via uvicorn
-werkzeug==3.0.1
+werkzeug==3.0.2
     # via
     #   flask
     #   quart
