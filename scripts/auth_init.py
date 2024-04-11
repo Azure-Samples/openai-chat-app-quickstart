@@ -229,7 +229,6 @@ async def main():
 
         app_identifier = os.getenv("AZURE_CLIENT_IDENTIFIER", random_app_identifier())
         update_azd_env("AZURE_CLIENT_IDENTIFIER", app_identifier)
-        print("Creating application registration...")
         (app_obj_id, app_id, sp_id) = await create_or_update_application_with_secret(
             auth_headers,
             app_id_env_var="AZURE_CLIENT_APP_ID",

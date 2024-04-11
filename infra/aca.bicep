@@ -15,7 +15,7 @@ param openAiApiVersion string
 param useAuthentication bool
 param clientId string
 
-param tenantId string
+param tenantIdForAuth string
 param loginEndpoint string
 
 @secure()
@@ -24,7 +24,7 @@ param clientSecret string
 param clientSecretName string = 'microsoft-provider-authentication-secret'
 
 // the issuer is different depending if we are in a workforce or external tenant
-var openIdIssuer = empty(tenantId) ? '${environment().authentication.loginEndpoint}${tenant().tenantId}/v2.0' : 'https://${loginEndpoint}/${tenantId}/v2.0'
+var openIdIssuer = empty(loginEndpoint) ? '${environment().authentication.loginEndpoint}${tenantIdForAuth}/v2.0' : 'https://${loginEndpoint}/${tenantIdForAuth}/v2.0'
 
 var secrets = !useAuthentication ? [] : [{
     name: clientSecretName
@@ -89,4 +89,3 @@ output SERVICE_ACA_IDENTITY_PRINCIPAL_ID string = acaIdentity.properties.princip
 output SERVICE_ACA_NAME string = app.outputs.name
 output SERVICE_ACA_URI string = app.outputs.uri
 output SERVICE_ACA_IMAGE_NAME string = app.outputs.imageName
-

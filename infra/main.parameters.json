@@ -41,7 +41,7 @@
       "clientSecret": {
         "value": "${AZURE_CLIENT_APP_SECRET}"
       },
-      "tenantId": {
+      "authTenantId": {
         "value": "${AZURE_AUTH_TENANT_ID}"
       },
       "loginEndpoint": {

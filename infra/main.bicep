@@ -28,8 +28,10 @@ param useAuthentication bool = false
 param clientId string = ''
 @secure()
 param clientSecret string = ''
-param tenantId string = ''
+param authTenantId string = ''
 param loginEndpoint string = ''
+param tenantId string = tenant().tenantId
+var tenantIdForAuth = !empty(authTenantId) ? authTenantId : tenantId
 
 var resourceToken = toLower(uniqueString(subscription().id, name, location))
 var tags = { 'azd-env-name': name }
@@ -116,7 +118,7 @@ module aca 'aca.bicep' = {
     useAuthentication: useAuthentication
     clientId: clientId
     clientSecret: clientSecret
-    tenantId: tenantId
+    tenantIdForAuth: tenantIdForAuth
     loginEndpoint: loginEndpoint
   }
 }
@@ -161,4 +163,3 @@ output SERVICE_ACA_IMAGE_NAME string = aca.outputs.SERVICE_ACA_IMAGE_NAME
 output AZURE_CONTAINER_ENVIRONMENT_NAME string = containerApps.outputs.environmentName
 output AZURE_CONTAINER_REGISTRY_ENDPOINT string = containerApps.outputs.registryLoginServer
 output AZURE_CONTAINER_REGISTRY_NAME string = containerApps.outputs.registryName
-

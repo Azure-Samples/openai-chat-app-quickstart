@@ -57,7 +57,7 @@ This repo is set up for deployment on Azure Container Apps using the configurati
 
 1. Sign up for a [free Azure account](https://azure.microsoft.com/free/) and create an Azure Subscription.
 2. Request access to Azure OpenAI Service by completing the form at [https://aka.ms/oai/access](https://aka.ms/oai/access) and awaiting approval.
-2. Install the [Azure Developer CLI](https://learn.microsoft.com/azure/developer/azure-developer-cli/install-azd). (If you open this repository in Codespaces or with the VS Code Dev Containers extension, that part will be done for you.)
+3. Install the [Azure Developer CLI](https://learn.microsoft.com/azure/developer/azure-developer-cli/install-azd). (If you open this repository in Codespaces or with the VS Code Dev Containers extension, that part will be done for you.)
 
 ### Deployment from scratch
 
@@ -100,12 +100,13 @@ If you already have an OpenAI resource and would like to re-use it, first follow
 
 ### Deployment with Authentication using Microsoft Entra ID
 
-We have integrated the sample with Entra ID to require authentication.  This shows how to allows users within your organization to log in and how to process their identity within the sample. If a user is logged in, they'll see their name in the chat app.
+We have integrated the sample with Entra ID to require authentication.  This feature allows users within your organization to log in and how to process their identity within the sample. If a user is logged in, they'll see their name in the chat app.
 
 To configure, follow these steps:
 
 1. Run `azd env set AZURE_USE_AUTHENTICATION true` to enable App Service authentication.
-2. Then follow the steps for deployment above.
+2. Run `azd env set AZURE_AUTH_TENANT_ID <YOUR_TENANT_ID>` to set the auth tenant ID if different from your main Azure tenant.
+3. Then follow the steps for deployment above.
 
 ### Deployment with Authentication using Microsoft Entra External ID
 
@@ -116,9 +117,11 @@ To deploy, you will need the tenant ID of your External ID. In the instructions 
 To configure, follow these steps:
 
 1. Run `azd env set AZURE_USE_AUTHENTICATION true` to enable App Service authentication.
-2. Run `azd auth login --tenant-id <YOUR_TENANT_ID>` to log into your External ID tenant.
-3. Run `./scripts/setup_for_external_id.sh <YOUR_TENANT_ID>`  or `./scripts/setup_for_external_id.ps1 <YOUR_TENANT_ID>` as required.
-4. Then follow the steps for deployment above, including logging into Azure via `azd auth login`
+2. Run `azd env set AZURE_AUTH_TENANT_ID <YOUR_TENANT_ID>` to set the auth tenant ID if different from your main Azure tenant.
+3. Run `azd env set AZURE_AUTH_LOGIN_ENDPOINT <YOUR-LOGIN-ENDPOINT>` to set the login endpoint for the External ID tenant.
+3. Run `azd auth login --tenant-id <YOUR_TENANT_ID>` to log into your External ID tenant.
+4. Run `./scripts/setup_for_external_id.sh <YOUR_TENANT_ID>`  or `./scripts/setup_for_external_id.ps1 <YOUR_TENANT_ID>` as required.
+5. Then follow the steps for deployment above, including logging into Azure via `azd auth login`
 
 ### CI/CD pipeline
 
