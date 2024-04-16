@@ -1,2 +1,3 @@
 azure-identity
 aiohttp
+msgraph-sdk==1.1.0

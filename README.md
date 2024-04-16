@@ -110,7 +110,7 @@ To configure, follow these steps:
 
 ### Deployment with Authentication using Microsoft Entra External ID
 
-If you want to allow external users to sign up and sign in to the application using their email address or social identity such as Google, Apple or Facebook, you can use [Microsoft Entra External ID](https://developer.microsoft.com/en-us/identity/customers). If you don't have an External ID tenant already, you can create a [trial tenant](https://aka.ms/ciam-free-trial) using your Microsoft or Work account.
+If you want to allow external users to sign up and sign in to the application using their email address or social identity such as Google, Apple or Facebook, you can use [Microsoft Entra External ID](https://developer.microsoft.com/identity/customers). If you don't have an External ID tenant already, you can create a [trial tenant](https://aka.ms/ciam-free-trial) using your Microsoft or Work account.
 
 To deploy, you will need the tenant ID of your External ID. In the instructions below, replace `<YOUR_TENANT_ID>` with the tenant ID you obtain from the Entra Portal.
 
@@ -119,9 +119,9 @@ To configure, follow these steps:
 1. Run `azd env set AZURE_USE_AUTHENTICATION true` to enable App Service authentication.
 2. Run `azd env set AZURE_AUTH_TENANT_ID <YOUR_TENANT_ID>` to set the auth tenant ID if different from your main Azure tenant.
 3. Run `azd env set AZURE_AUTH_LOGIN_ENDPOINT <YOUR-LOGIN-ENDPOINT>` to set the login endpoint for the External ID tenant.
-3. Run `azd auth login --tenant-id <YOUR_TENANT_ID>` to log into your External ID tenant.
-4. Run `./scripts/setup_for_external_id.sh <YOUR_TENANT_ID>`  or `./scripts/setup_for_external_id.ps1 <YOUR_TENANT_ID>` as required.
-5. Then follow the steps for deployment above, including logging into Azure via `azd auth login`
+4. Run `azd auth login --tenant-id <YOUR_TENANT_ID>` to log into your External ID tenant.
+5. Run `./scripts/setup_for_external_id.sh <YOUR_TENANT_ID>`  or `./scripts/setup_for_external_id.ps1 <YOUR_TENANT_ID>` as required.
+6. Then follow the steps for deployment above, including logging into Azure via `azd auth login`
 
 ### CI/CD pipeline
 

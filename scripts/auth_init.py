@@ -19,6 +19,13 @@ from auth_common import (
 )
 from azure.core.credentials_async import AsyncTokenCredential
 from azure.identity.aio import AzureDeveloperCliCredential, ClientSecretCredential
+from msgraph import GraphServiceClient
+from msgraph.generated.models.application import Application
+from msgraph.generated.models.implicit_grant_settings import ImplicitGrantSettings
+from msgraph.generated.models.required_resource_access import RequiredResourceAccess
+from msgraph.generated.models.resource_access import ResourceAccess
+from msgraph.generated.models.spa_application import SpaApplication
+from msgraph.generated.models.web_application import WebApplication
 
 
 def random_app_identifier():
@@ -27,37 +34,34 @@ def random_app_identifier():
     return rand.randint(1000, 100000)
 
 
-def create_client_app_payload(identifier: int):
-    return {
-        "displayName": f"ChatGPT Sample Client App {identifier}",
-        "signInAudience": "AzureADMyOrg",
-        "web": {
-            "redirectUris": ["http://localhost:50505/.auth/login/aad/callback"],
-            "implicitGrantSettings": {"enableIdTokenIssuance": True},
-        },
-        "spa": {"redirectUris": ["http://localhost:50505/redirect"]},
-        "requiredResourceAccess": [
-            {
-                "resourceAppId": "00000003-0000-0000-c000-000000000000",
-                "resourceAccess": [
-                    # Graph User.Read
-                    {"id": "e1fe6dd8-ba31-4d61-89e7-88639da4683d", "type": "Scope"},
-                    # offline_access
-                    {"id": "7427e0e9-2fba-42fe-b0c0-848c9e6a8182", "type": "Scope"},
-                    # openid
-                    {"id": "37f7f235-527c-4136-accd-4a02d197296e", "type": "Scope"},
-                    # profile
-                    {"id": "14dad69e-099b-42c9-810b-d002981feec1", "type": "Scope"},
+def client_app(identifier: int) -> Application:
+    return Application(
+        display_name=f"ChatGPT Sample Client App {identifier}",
+        sign_in_audience="AzureADMyOrg",
+        web=WebApplication(
+            redirect_uris=["http://localhost:50505/.auth/login/aad/callback"],
+            implicit_grant_settings=ImplicitGrantSettings(enable_id_token_issuance=True),
+        ),
+        spa=SpaApplication(redirect_uris=["http://localhost:50505/redirect"]),
+        required_resource_access=[
+            RequiredResourceAccess(
+                resource_app_id="00000003-0000-0000-c000-000000000000",
+                resource_access=[
+                    ResourceAccess(id="e1fe6dd8-ba31-4d61-89e7-88639da4683d", type="Scope"),  # Graph User.Read
+                    ResourceAccess(id="7427e0e9-2fba-42fe-b0c0-848c9e6a8182", type="Scope"),  # offline_access
+                    ResourceAccess(id="37f7f235-527c-4136-accd-4a02d197296e", type="Scope"),  # openid
+                    ResourceAccess(id="14dad69e-099b-42c9-810b-d002981feec1", type="Scope"),  # profile
                 ],
-            },
+            )
         ],
-    }
+    )
 
 
 def scopes() -> list[str]:
     return " ".join(["User.Read", "offline_access", "openid", "profile"])
 
 
+# Not supported? https://learn.microsoft.com/en-us/graph/api/resources/externalusersselfservicesignupeventsflow?view=graph-rest-beta
 def create_client_userflow_payload(identifier: int):
     return {
         "@odata.type": "#microsoft.graph.externalUsersSelfServiceSignUpEventsFlow",
@@ -140,6 +144,7 @@ def create_client_userflow_payload(identifier: int):
     }
 
 
+# Not supported? https://learn.microsoft.com/en-us/graph/api/resources/externalusersselfservicesignupeventsflow?view=graph-rest-beta
 async def get_userflow(auth_headers: dict[str, str], identifier: str) -> (str | None):
     app_name = f"ChatGPT Sample User Flow {identifier}"
     async with aiohttp.ClientSession(headers=auth_headers, timeout=aiohttp.ClientTimeout(total=TIMEOUT)) as session:
@@ -154,6 +159,7 @@ async def get_userflow(auth_headers: dict[str, str], identifier: str) -> (str | 
     return None
 
 
+# Not supported? https://learn.microsoft.com/en-us/graph/api/resources/externalusersselfservicesignupeventsflow?view=graph-rest-beta
 async def create_userflow(auth_headers: dict[str, str], app_payload: object) -> str:
     async with aiohttp.ClientSession(headers=auth_headers, timeout=aiohttp.ClientTimeout(total=TIMEOUT)) as session:
         async with session.post(
@@ -166,6 +172,7 @@ async def create_userflow(auth_headers: dict[str, str], app_payload: object) -> 
             raise Exception(response_json)
 
 
+# Not supported? https://learn.microsoft.com/en-us/graph/api/resources/externalusersselfservicesignupeventsflow?view=graph-rest-beta
 async def get_apps_for_userflow(auth_headers: dict[str, str], userflow_id: str) -> list[str]:
     async with aiohttp.ClientSession(headers=auth_headers, timeout=aiohttp.ClientTimeout(total=TIMEOUT)) as session:
         async with session.get(
@@ -188,6 +195,7 @@ async def add_app_to_userflow(auth_headers: dict[str, str], userflow_id: str, ap
     return await _add_app_to_userflow(auth_headers, userflow_id, app_id)
 
 
+# Not supported? https://learn.microsoft.com/en-us/graph/api/resources/externalusersselfservicesignupeventsflow?view=graph-rest-beta
 async def _add_app_to_userflow(auth_headers: dict[str, str], userflow_id: str, app_id: str) -> bool:
     async with aiohttp.ClientSession(headers=auth_headers, timeout=aiohttp.ClientTimeout(total=TIMEOUT)) as session:
         async with session.post(
@@ -219,36 +227,38 @@ async def main():
     print("Setting up authentication...")
     tenant_id = os.getenv("AZURE_AUTH_TENANT_ID", None)
     credential = get_credential(tenant_id)
+    scopes = ["https://graph.microsoft.com/.default"]
+    graph_client = GraphServiceClient(credentials=credential, scopes=scopes)
     try:
         auth_headers = await get_auth_headers(credential)
         (tenant_type, _) = await get_tenant_details(AzureDeveloperCliCredential(), tenant_id)
         if tenant_type == "CIAM":
             current_user = os.getenv("AZURE_AUTH_EXTID_APP_OWNER", None)
         else:
-            current_user = await get_current_user(auth_headers)
+            current_user = await get_current_user(graph_client)
 
         app_identifier = os.getenv("AZURE_CLIENT_IDENTIFIER", random_app_identifier())
         update_azd_env("AZURE_CLIENT_IDENTIFIER", app_identifier)
         (app_obj_id, app_id, sp_id) = await create_or_update_application_with_secret(
-            auth_headers,
+            graph_client,
             app_id_env_var="AZURE_CLIENT_APP_ID",
             app_secret_env_var="AZURE_CLIENT_APP_SECRET",
-            app_payload=create_client_app_payload(app_identifier),
+            request_app=client_app(app_identifier),
         )
 
         if tenant_type == "CIAM":
             print("Granting Application consent...")
             graph_sp_id = await get_microsoft_graph_service_principal(auth_headers)
-            grant_id = await get_permission_grant(auth_headers, sp_id, graph_sp_id, scopes())
+            grant_id = await get_permission_grant(graph_client, sp_id, graph_sp_id, scopes())
             if grant_id:
                 print("Permission grant already exists, not creating new one")
             else:
                 print("Creating permission grant")
-                await create_permission_grant(auth_headers, sp_id, graph_sp_id, scopes())
+                await create_permission_grant(graph_client, sp_id, graph_sp_id, scopes())
 
             if current_user is not None:
                 print(f"Setting owner for {app_id}")
-                await add_application_owner(auth_headers, app_obj_id, current_user)
+                await add_application_owner(graph_client, app_obj_id, current_user)
 
             userflow_id = await get_userflow(auth_headers, app_identifier)
             if userflow_id is None:

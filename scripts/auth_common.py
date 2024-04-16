@@ -1,10 +1,29 @@
 import os
 import subprocess
 import time
-from typing import Any
 
 import aiohttp
 from azure.core.credentials_async import AsyncTokenCredential
+from kiota_abstractions.api_error import APIError
+from msgraph import GraphServiceClient
+from msgraph.generated.applications.item.add_password.add_password_post_request_body import (
+    AddPasswordPostRequestBody,
+)
+from msgraph.generated.models.application import Application
+from msgraph.generated.models.password_credential import PasswordCredential
+from msgraph.generated.models.service_principal import ServicePrincipal
+from msgraph.generated.models.o_auth2_permission_grant import OAuth2PermissionGrant
+from msgraph.generated.service_principals.service_principals_request_builder import ServicePrincipalsRequestBuilder
+from msgraph.generated.models.reference_create import ReferenceCreate
+
+
+async def get_application(graph_client: GraphServiceClient, client_id: str) -> str | None:
+    try:
+        app = await graph_client.applications_with_app_id(client_id).get()
+        return app.id
+    except APIError:
+        return None
+
 
 TIMEOUT = 60
 
@@ -35,176 +54,135 @@ async def get_tenant_details(credential: AsyncTokenCredential, tenant_id: str) -
             raise Exception(response_json)
 
 
-async def get_current_user(auth_headers: dict[str, str]) -> (str | None):
-    async with aiohttp.ClientSession(headers=auth_headers, timeout=aiohttp.ClientTimeout(total=TIMEOUT)) as session:
-        async with session.get("https://graph.microsoft.com/v1.0/me") as response:
-            if response.status == 200:
-                response_json = await response.json()
-                return response_json["id"]
-
-    return None
+# https://learn.microsoft.com/en-us/graph/api/user-get?view=graph-rest-1.0&tabs=python
+async def get_current_user(graph_client: GraphServiceClient) -> (str | None):
+    result = await graph_client.me.get()
+    return result.id
 
 
-async def get_microsoft_graph_service_principal(auth_headers: dict[str, str]) -> str:
-    async with aiohttp.ClientSession(headers=auth_headers, timeout=aiohttp.ClientTimeout(total=TIMEOUT)) as session:
-        async with session.get(
-            "https://graph.microsoft.com/v1.0/servicePrincipals?$filter=appId eq '00000003-0000-0000-c000-000000000000'"
-        ) as response:
-            if response.status == 200:
-                response_json = await response.json()
-                if response_json["value"]:
-                    return response_json["value"][0]["id"]
-            raise Exception(response_json)
+async def get_microsoft_graph_service_principal(graph_client: GraphServiceClient) -> str:
+    query_params = ServicePrincipalsRequestBuilder.ServicePrincipalsRequestBuilderGetQueryParameters(
+        filter="appId eq '00000003-0000-0000-c000-000000000000'"
+    )
+    request_configuration = ServicePrincipalsRequestBuilder.ServicePrincipalsRequestBuilderGetRequestConfiguration(
+        query_parameters=query_params,
+    )
+    result = await graph_client.service_principals.get(request_configuration=request_configuration)
+    return result.value[0].id
 
 
-async def get_application(auth_headers: dict[str, str], app_id: str) -> (str | None):
-    async with aiohttp.ClientSession(headers=auth_headers, timeout=aiohttp.ClientTimeout(total=TIMEOUT)) as session:
-        async with session.get(f"https://graph.microsoft.com/v1.0/applications(appId='{app_id}')") as response:
-            if response.status == 200:
-                response_json = await response.json()
-                return response_json["id"]
-
-    return None
+async def create_application(graph_client: GraphServiceClient, request_app: Application) -> tuple[str, str]:
+    app = await graph_client.applications.post(request_app)
+    object_id = app.id
+    client_id = app.app_id
+    return object_id, client_id
 
 
-async def update_application(auth_headers: dict[str, str], object_id: str, app_payload: object):
-    async with aiohttp.ClientSession(headers=auth_headers, timeout=aiohttp.ClientTimeout(total=TIMEOUT)) as session:
-        async with session.patch(
-            f"https://graph.microsoft.com/v1.0/applications/{object_id}", json=app_payload
-        ) as response:
-            if not response.ok:
-                response_json = await response.json()
-                raise Exception(response_json)
-
-    return True
+# https://learn.microsoft.com/en-us/graph/api/application-list-owners?view=graph-rest-1.0&tabs=python
+async def get_application_owners(graph_client: GraphServiceClient, app_obj_id: str) -> list[str]:
+    result = await graph_client.applications.by_application_id("application-id").owners.get()
+    return [item.id for item in result]
 
 
-async def create_application(auth_headers: dict[str, str], app_payload: object) -> tuple[str, str]:
-    async with aiohttp.ClientSession(headers=auth_headers, timeout=aiohttp.ClientTimeout(total=TIMEOUT)) as session:
-        async with session.post("https://graph.microsoft.com/v1.0/applications", json=app_payload) as response:
-            response_json = await response.json()
-            if response.status == 201:
-                object_id = response_json["id"]
-                client_id = response_json["appId"]
-                return object_id, client_id
-            raise Exception(response_json)
-
-
-async def get_application_owners(auth_headers: dict[str, str], app_obj_id: str) -> list[str]:
-    async with aiohttp.ClientSession(headers=auth_headers, timeout=aiohttp.ClientTimeout(total=TIMEOUT)) as session:
-        async with session.get(f"https://graph.microsoft.com/v1.0/applications/{app_obj_id}/owners") as response:
-            if response.status == 200:
-                response_json = await response.json()
-                if response_json["value"]:
-                    ids = [item["id"] for item in response_json["value"]]
-                    return ids
-
-                return []
-
-
-async def add_application_owner(auth_headers: dict[str, str], app_obj_id: str, owner_id: str) -> bool:
-    object_ids = await get_application_owners(auth_headers, app_obj_id)
+async def add_application_owner(graph_client: GraphServiceClient, app_obj_id: str, owner_id: str) -> bool:
+    object_ids = await get_application_owners(graph_client, app_obj_id)
     if owner_id in object_ids:
         print("Application owner already exists, not creating new one")
         return False
     else:
         print("Adding application owner")
-        await _add_application_owner(auth_headers, app_obj_id, owner_id)
+        await _add_application_owner(graph_client, app_obj_id, owner_id)
 
 
-async def _add_application_owner(auth_headers: dict[str, str], app_obj_id: str, owner_id: str) -> bool:
-    async with aiohttp.ClientSession(headers=auth_headers, timeout=aiohttp.ClientTimeout(total=TIMEOUT)) as session:
-        async with session.post(
-            f"https://graph.microsoft.com/v1.0/applications/{app_obj_id}/owners/$ref",
-            json={"@odata.id": f"https://graph.microsoft.com/v1.0/directoryObjects/{owner_id}"},
-        ) as response:
-            if response.status == 204:
-                return True
-            response_json = await response.json()
-            raise Exception(response_json)
+# https://learn.microsoft.com/en-us/graph/api/application-post-owners?view=graph-rest-1.0&tabs=python
+async def _add_application_owner(graph_client: GraphServiceClient, app_obj_id: str, owner_id: str) -> bool:
+    request_body = ReferenceCreate(
+        odata_id=f"https://graph.microsoft.com/v1.0/directoryObjects/{owner_id}",
+    )
+    return await graph_client.applications.by_application_id(app_obj_id).owners.ref.post(request_body)
 
 
-async def get_service_principal(auth_headers: dict[str, str], app_id: str) -> (str | None):
-    async with aiohttp.ClientSession(headers=auth_headers, timeout=aiohttp.ClientTimeout(total=TIMEOUT)) as session:
-        async with session.get(
-            f"https://graph.microsoft.com/v1.0/servicePrincipals?$filter=appId eq '{app_id}'"
-        ) as response:
-            if response.status == 200:
-                response_json = await response.json()
-                if response_json["value"]:
-                    return response_json["value"][0]["id"]
+# https://learn.microsoft.com/en-us/graph/api/serviceprincipal-list?view=graph-rest-1.0&tabs=http
+async def get_service_principal(graph_client: GraphServiceClient, app_id: str) -> (str | None):
+    query_params = ServicePrincipalsRequestBuilder.ServicePrincipalsRequestBuilderGetQueryParameters(
+        filter=f"appId eq '{app_id}'"
+    )
+    request_configuration = ServicePrincipalsRequestBuilder.ServicePrincipalsRequestBuilderGetRequestConfiguration(
+        query_parameters=query_params,
+    )
+    result = await graph_client.service_principals.get(request_configuration=request_configuration)
+    if not result.value or len(result.value) == 0:
+        return None
+    return result.value[0].id
 
+
+# https://learn.microsoft.com/en-us/graph/api/serviceprincipal-post-serviceprincipals?view=graph-rest-1.0&tabs=python
+async def add_service_principal(graph_client: GraphServiceClient, app_id: str):
+    request_principal = ServicePrincipal(app_id=app_id, tags=["WindowsAzureActiveDirectoryIntegratedApp"])
+    sp = await graph_client.service_principals.post(request_principal)
+    return sp.id
+
+
+async def add_client_secret(graph_client: GraphServiceClient, object_id: str) -> str:
+    request_password = AddPasswordPostRequestBody(
+        password_credential=PasswordCredential(display_name="WebAppSecret"),
+    )
+    result = await graph_client.applications.by_application_id(object_id).add_password.post(request_password)
+    return result.secret_text
+
+
+# no docs found!!
+async def get_permission_grant(
+    graph_client: GraphServiceClient, obj_id: str, resource_id: str, scope: str
+) -> (str | None):
+    from msgraph.generated.oauth2_permission_grants.oauth2_permission_grants_request_builder import (
+        OAuth2PermissionGrantsRequestBuilder,
+    )
+
+    query_params = OAuth2PermissionGrantsRequestBuilder.OAuth2PermissionGrantsRequestBuilderGetQueryParameters(
+        filter=f"clientId eq '{obj_id}' and resourceId eq '{resource_id}'"
+    )
+    request_configuration = (
+        OAuth2PermissionGrantsRequestBuilder.OAuth2PermissionGrantsRequestBuilderGetRequestConfiguration(
+            query_parameters=query_params,
+        )
+    )
+    result = await graph_client.oauth2_permission_grants.get(request_configuration=request_configuration)
+    for permission in result:
+        if permission.scope == scope:
+            return permission.id
     return None
 
 
-async def add_service_principal(auth_headers: dict[str, str], app_id: str):
-    async with aiohttp.ClientSession(headers=auth_headers, timeout=aiohttp.ClientTimeout(total=TIMEOUT)) as session:
-        async with session.post(
-            "https://graph.microsoft.com/v1.0/servicePrincipals",
-            json={"appId": app_id, "tags": ["WindowsAzureActiveDirectoryIntegratedApp"]},
-        ) as response:
-            response_json = await response.json()
-            if response.status == 201:
-                return response_json["id"]
+# https://learn.microsoft.com/en-us/graph/api/oauth2permissiongrant-post?view=graph-rest-1.0&tabs=python
+async def create_permission_grant(graph_client: GraphServiceClient, obj_id: str, resource_id: str, scope: str) -> str:
+    request_body = OAuth2PermissionGrant(
+        client_id=obj_id,
+        consent_type="AllPrincipals",
+        resource_id=resource_id,
+        scope=scope,
+    )
 
-            raise Exception(response_json)
-
-
-async def add_client_secret(auth_headers: dict[str, str], object_id: str):
-    async with aiohttp.ClientSession(headers=auth_headers, timeout=aiohttp.ClientTimeout(total=TIMEOUT)) as session:
-        async with session.post(
-            f"https://graph.microsoft.com/v1.0/applications/{object_id}/addPassword",
-            json={"passwordCredential": {"displayName": "secret"}},
-        ) as response:
-            response_json = await response.json()
-            if response.status == 200:
-                return response_json["secretText"]
-
-            raise Exception(response_json)
-
-
-async def get_permission_grant(auth_headers: dict[str, str], obj_id: str, resource_id: str, scope: str) -> (str | None):
-    async with aiohttp.ClientSession(headers=auth_headers, timeout=aiohttp.ClientTimeout(total=TIMEOUT)) as session:
-        async with session.get(
-            f"https://graph.microsoft.com/v1.0/oauth2PermissionGrants?$filter=clientId eq '{obj_id}' \
-                and resourceId eq '{resource_id}'"
-        ) as response:
-            response_json = await response.json()
-            if response.status == 200:
-                for permission in response_json["value"]:
-                    if permission["scope"] == scope:
-                        return permission["id"]
-    return None
-
-
-async def create_permission_grant(auth_headers: dict[str, str], obj_id: str, resource_id: str, scope: str) -> str:
-    async with aiohttp.ClientSession(headers=auth_headers, timeout=aiohttp.ClientTimeout(total=TIMEOUT)) as session:
-        async with session.post(
-            "https://graph.microsoft.com/v1.0/oauth2PermissionGrants",
-            json={"clientId": obj_id, "resourceId": resource_id, "scope": scope, "consentType": "AllPrincipals"},
-        ) as response:
-            response_json = await response.json()
-            if response.status == 201:
-                return response_json["id"]
-            raise Exception(response_json)
+    result = await graph_client.oauth2_permission_grants.post(request_body)
+    return result.id
 
 
 async def create_or_update_application_with_secret(
-    auth_headers: dict[str, str], app_id_env_var: str, app_secret_env_var: str, app_payload: dict[str, Any]
+    graph_client: GraphServiceClient, app_id_env_var: str, app_secret_env_var: str, request_app: Application
 ) -> tuple[str, str, str]:
     app_id = os.getenv(app_id_env_var, "no-id")
     created_app = False
     object_id = None
     if app_id != "no-id":
         print(f"Checking if application {app_id} exists")
-        object_id = await get_application(auth_headers, app_id)
+        object_id = await get_application(graph_client, app_id)
 
     if object_id:
         print("Application already exists, not creating new one")
-        await update_application(auth_headers, object_id, app_payload)
+        await graph_client.applications.by_application_id(object_id).patch(request_app)
     else:
         print("Creating application registration")
-        object_id, app_id = await create_application(auth_headers, app_payload)
+        object_id, app_id = await create_application(graph_client, request_app)
         update_azd_env(app_id_env_var, app_id)
         created_app = True
 
@@ -213,13 +191,13 @@ async def create_or_update_application_with_secret(
 
     if created_app or (object_id and os.getenv(app_secret_env_var, "no-secret") == "no-secret"):
         print(f"Adding client secret to {app_id}")
-        client_secret = await add_client_secret(auth_headers, object_id)
+        client_secret = await add_client_secret(graph_client, object_id)
         update_azd_env(app_secret_env_var, client_secret)
 
-    sp_id = await get_service_principal(auth_headers, app_id)
+    sp_id = await get_service_principal(graph_client, app_id)
     if not sp_id:
         print(f"Adding service principal to {app_id}")
-        sp_id = await add_service_principal(auth_headers, app_id)
+        sp_id = await add_service_principal(graph_client, app_id)
 
     return (object_id, app_id, sp_id)
 
@@ -246,19 +224,3 @@ def test_authentication_enabled():
         return False
 
     return True
-
-
-async def setup_server_know_applications(auth_headers: dict[str, str], server_object_id: str, client_app_id: str):
-    await update_application(
-        auth_headers,
-        object_id=server_object_id,
-        app_payload=create_server_app_known_client_application_payload(client_app_id),
-    )
-
-
-def create_server_app_known_client_application_payload(client_app_id: str):
-    return {
-        "api": {
-            "knownClientApplications": [client_app_id],
-        }
-    }
