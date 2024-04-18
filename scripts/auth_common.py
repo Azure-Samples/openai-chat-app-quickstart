@@ -80,8 +80,8 @@ async def create_application(graph_client: GraphServiceClient, request_app: Appl
 
 # https://learn.microsoft.com/en-us/graph/api/application-list-owners?view=graph-rest-1.0&tabs=python
 async def get_application_owners(graph_client: GraphServiceClient, app_obj_id: str) -> list[str]:
-    result = await graph_client.applications.by_application_id("application-id").owners.get()
-    return [item.id for item in result]
+    result = await graph_client.applications.by_application_id(app_obj_id).owners.get()
+    return [item.id for item in result.value]
 
 
 async def add_application_owner(graph_client: GraphServiceClient, app_obj_id: str, owner_id: str) -> bool:

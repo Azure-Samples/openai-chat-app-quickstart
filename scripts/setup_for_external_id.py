@@ -1,43 +1,45 @@
 import argparse
 import asyncio
 
-import aiohttp
 from auth_common import (
-    TIMEOUT,
     add_application_owner,
     create_or_update_application_with_secret,
-    get_auth_headers,
     get_current_user,
     get_microsoft_graph_service_principal,
     get_tenant_details,
     update_azd_env,
 )
 from azure.identity.aio import AzureDeveloperCliCredential
+from msgraph import GraphServiceClient
+from msgraph.generated.models.application import Application
+from msgraph.generated.models.required_resource_access import RequiredResourceAccess
+from msgraph.generated.models.resource_access import ResourceAccess
+from msgraph.generated.models.o_data_errors.o_data_error import ODataError
+from msgraph.generated.models.app_role_assignment import AppRoleAssignment
 
 
-def create_client_app_payload():
-    return {
-        "displayName": "azd Application Creation helper",
-        "signInAudience": "AzureADMyOrg",
-        "requiredResourceAccess": [
-            {
-                "resourceAppId": "00000003-0000-0000-c000-000000000000",
-                "resourceAccess": [
+def client_app():
+    return Application(
+        display_name="azd Application Creation helper",
+        sign_in_audience="AzureADMyOrg",
+        required_resource_access=[
+            RequiredResourceAccess(
+                resource_app_id="00000003-0000-0000-c000-000000000000",
+                resource_access=[
                     # Graph Application.ReadWrite.All
-                    {"id": "1bfefb4e-e0b5-418b-a88f-73c46d2cc8e9", "type": "Role"},
+                    ResourceAccess(id="1bfefb4e-e0b5-418b-a88f-73c46d2cc8e9", type="Role"),
                     # Graph EventListener.ReadWrite.All
-                    {"id": "0edf5e9e-4ce8-468a-8432-d08631d18c43", "type": "Role"},
+                    ResourceAccess(id="0edf5e9e-4ce8-468a-8432-d08631d18c43", type="Role"),
                     # Graph DelegatedPermissionGrant.ReadWrite.All
-                    {"id": "8e8e4742-1d95-4f68-9d56-6ee75648c72a", "type": "Role"},
+                    ResourceAccess(id="8e8e4742-1d95-4f68-9d56-6ee75648c72a", type="Role"),
                     # Graph Organization.ReadWrite.All
-                    {"id": "292d869f-3427-49a8-9dab-8c70152b74e9", "type": "Role"},
+                    ResourceAccess(id="292d869f-3427-49a8-9dab-8c70152b74e9", type="Role"),
                     # Graph User.Read.All
-                    {"id": "df021288-bdef-4463-88db-98f22de89214", "type": "Role"},
+                    ResourceAccess(id="df021288-bdef-4463-88db-98f22de89214", type="Role"),
                 ],
-            },
-        ],
-    }
-
+            )
+        ]
+    )
 
 def app_roles() -> str:
     app_roles = [
@@ -55,17 +57,17 @@ def app_roles() -> str:
     return app_roles
 
 
-async def grant_approle(auth_headers: dict[str, str], sp_obj_id: str, resource_id: str, app_role: str):
-    async with aiohttp.ClientSession(headers=auth_headers, timeout=aiohttp.ClientTimeout(total=TIMEOUT)) as session:
-        async with session.post(
-            f"https://graph.microsoft.com/v1.0/servicePrincipals/{sp_obj_id}/appRoleAssignments",
-            json={"principalId": sp_obj_id, "resourceId": resource_id, "appRoleId": app_role},
-        ) as response:
-            response_json = await response.json()
-            if response.status == 201:
-                return response_json["id"]
-
-            raise Exception(response_json)
+async def grant_approle(graph_client:GraphServiceClient, sp_obj_id: str, resource_id: str, app_role: str):
+    request_body = AppRoleAssignment(
+        principal_id = sp_obj_id,
+        resource_id = resource_id,
+        app_role_id = app_role
+    )
+    try:
+        await graph_client.service_principals.by_service_principal_id(sp_obj_id).app_role_assignments.post(request_body)
+    except ODataError as e:
+        if e.error.message != "Permission being assigned already exists on the object":
+            raise e
 
 
 #
@@ -88,8 +90,9 @@ async def main():
 
     print(f"Setting up External ID Service Principal in tenant {tenant_id}")
     credential = AzureDeveloperCliCredential(tenant_id=tenant_id)
-    auth_headers = await get_auth_headers(credential)
-
+    scopes = ["https://graph.microsoft.com/.default"]
+    graph_client = GraphServiceClient(credentials=credential, scopes=scopes)
+    
     (tenant_type, default_domain) = await get_tenant_details(credential, tenant_id)
     if tenant_type != "CIAM":
         print("You don't need to run this script for non-ExternalId tenant...")
@@ -104,21 +107,21 @@ async def main():
 
     print("Creating application registration...")
     (obj_id, app_id, sp_id) = await create_or_update_application_with_secret(
-        auth_headers,
+        graph_client,
         app_id_env_var="AZURE_AUTH_EXTID_APP_ID",
         app_secret_env_var="AZURE_AUTH_EXTID_APP_SECRET",
-        app_payload=create_client_app_payload(),
+        request_app=client_app(),
     )
 
     print("Granting Application consent...")
-    graph_sp_id = await get_microsoft_graph_service_principal(auth_headers)
+    graph_sp_id = await get_microsoft_graph_service_principal(graph_client)
     for app_role in app_roles():
         print(f"Granting app role {app_role}...")
-        await grant_approle(auth_headers, sp_id, graph_sp_id, app_role)
+        await grant_approle(graph_client, sp_id, graph_sp_id, app_role)
 
     print(f"Adding application owner for {app_id}")
-    owner_id = await get_current_user(auth_headers)
-    await add_application_owner(auth_headers, obj_id, owner_id)
+    owner_id = await get_current_user(graph_client)
+    await add_application_owner(graph_client, obj_id, owner_id)
     update_azd_env("AZURE_AUTH_EXTID_APP_OWNER", owner_id)
 
 
