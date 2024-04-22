@@ -5,6 +5,7 @@ import time
 import aiohttp
 from azure.core.credentials_async import AsyncTokenCredential
 from kiota_abstractions.api_error import APIError
+from kiota_abstractions.base_request_configuration import RequestConfiguration
 from msgraph import GraphServiceClient
 from msgraph.generated.applications.item.add_password.add_password_post_request_body import (
     AddPasswordPostRequestBody,
@@ -15,7 +16,7 @@ from msgraph.generated.models.service_principal import ServicePrincipal
 from msgraph.generated.models.o_auth2_permission_grant import OAuth2PermissionGrant
 from msgraph.generated.service_principals.service_principals_request_builder import ServicePrincipalsRequestBuilder
 from msgraph.generated.models.reference_create import ReferenceCreate
-
+from msgraph_beta.generated.oauth2_permission_grants.oauth2_permission_grants_request_builder import Oauth2PermissionGrantsRequestBuilder
 
 async def get_application(graph_client: GraphServiceClient, client_id: str) -> str | None:
     try:
@@ -51,7 +52,9 @@ async def get_tenant_details(credential: AsyncTokenCredential, tenant_id: str) -
                         if "tenantType" not in tenant:
                             raise Exception(f"tenantType not found in tenant details: {tenant}")
                         return tenant["tenantType"], tenant["defaultDomain"]
-            raise Exception(response_json)
+                raise Exception(f"Tenant {tenant_id} not found")
+            else:
+                raise Exception(response_json)
 
 
 # https://learn.microsoft.com/en-us/graph/api/user-get?view=graph-rest-1.0&tabs=python
@@ -64,7 +67,7 @@ async def get_microsoft_graph_service_principal(graph_client: GraphServiceClient
     query_params = ServicePrincipalsRequestBuilder.ServicePrincipalsRequestBuilderGetQueryParameters(
         filter="appId eq '00000003-0000-0000-c000-000000000000'"
     )
-    request_configuration = ServicePrincipalsRequestBuilder.ServicePrincipalsRequestBuilderGetRequestConfiguration(
+    request_configuration = RequestConfiguration(
         query_parameters=query_params,
     )
     result = await graph_client.service_principals.get(request_configuration=request_configuration)
@@ -107,7 +110,7 @@ async def get_service_principal(graph_client: GraphServiceClient, app_id: str) -
     query_params = ServicePrincipalsRequestBuilder.ServicePrincipalsRequestBuilderGetQueryParameters(
         filter=f"appId eq '{app_id}'"
     )
-    request_configuration = ServicePrincipalsRequestBuilder.ServicePrincipalsRequestBuilderGetRequestConfiguration(
+    request_configuration = RequestConfiguration(
         query_parameters=query_params,
     )
     result = await graph_client.service_principals.get(request_configuration=request_configuration)
@@ -131,24 +134,17 @@ async def add_client_secret(graph_client: GraphServiceClient, object_id: str) ->
     return result.secret_text
 
 
-# no docs found!!
 async def get_permission_grant(
-    graph_client: GraphServiceClient, obj_id: str, resource_id: str, scope: str
+    graph_client_beta: GraphServiceClient, obj_id: str, resource_id: str, scope: str
 ) -> (str | None):
-    from msgraph.generated.oauth2_permission_grants.oauth2_permission_grants_request_builder import (
-        OAuth2PermissionGrantsRequestBuilder,
-    )
-
-    query_params = OAuth2PermissionGrantsRequestBuilder.OAuth2PermissionGrantsRequestBuilderGetQueryParameters(
+    query_params = Oauth2PermissionGrantsRequestBuilder.Oauth2PermissionGrantsRequestBuilderGetQueryParameters(
         filter=f"clientId eq '{obj_id}' and resourceId eq '{resource_id}'"
     )
-    request_configuration = (
-        OAuth2PermissionGrantsRequestBuilder.OAuth2PermissionGrantsRequestBuilderGetRequestConfiguration(
-            query_parameters=query_params,
-        )
+    request_configuration = RequestConfiguration(
+        query_parameters=query_params
     )
-    result = await graph_client.oauth2_permission_grants.get(request_configuration=request_configuration)
-    for permission in result:
+    result = await graph_client_beta.oauth2_permission_grants.get(request_configuration=request_configuration)
+    for permission in result.value:
         if permission.scope == scope:
             return permission.id
     return None

@@ -20,16 +20,13 @@ param loginEndpoint string
 
 @secure()
 param clientSecret string
-#disable-next-line secure-secrets-in-params
-param clientSecretName string = 'microsoft-provider-authentication-secret'
 
 // the issuer is different depending if we are in a workforce or external tenant
 var openIdIssuer = empty(loginEndpoint) ? '${environment().authentication.loginEndpoint}${tenantIdForAuth}/v2.0' : 'https://${loginEndpoint}/${tenantIdForAuth}/v2.0'
 
-var secrets = !useAuthentication ? [] : [{
-    name: clientSecretName
-    value: clientSecret
-}]
+var secrets = !useAuthentication ? {} : {
+  'microsoft-provider-authentication-secret': clientSecret
+}
 
 resource acaIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
   name: identityName
@@ -80,7 +77,7 @@ module auth 'core/host/container-apps-auth.bicep' = if (useAuthentication) {
   params: {
     name: app.outputs.name
     clientId: clientId
-    clientSecretName: clientSecretName
+    clientSecretName: 'microsoft-provider-authentication-secret'
     openIdIssuer: openIdIssuer
   }
 }

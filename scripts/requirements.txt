@@ -21,6 +21,7 @@ azure-core==1.30.1
 azure-identity==1.16.0
     # via
     #   -r requirements.in
+    #   msgraph-beta-sdk
     #   msgraph-sdk
 certifi==2024.2.2
     # via
@@ -68,31 +69,52 @@ microsoft-kiota-abstractions==1.3.2
     # via
     #   microsoft-kiota-authentication-azure
     #   microsoft-kiota-http
+    #   microsoft-kiota-serialization-form
     #   microsoft-kiota-serialization-json
+    #   microsoft-kiota-serialization-multipart
     #   microsoft-kiota-serialization-text
+    #   msgraph-beta-sdk
     #   msgraph-core
     #   msgraph-sdk
 microsoft-kiota-authentication-azure==1.0.0
     # via
+    #   msgraph-beta-sdk
     #   msgraph-core
     #   msgraph-sdk
 microsoft-kiota-http==1.3.1
     # via
+    #   msgraph-beta-sdk
     #   msgraph-core
     #   msgraph-sdk
+microsoft-kiota-serialization-form==0.1.0
+    # via
+    #   msgraph-beta-sdk
+    #   msgraph-sdk
 microsoft-kiota-serialization-json==1.2.0
-    # via msgraph-sdk
+    # via
+    #   msgraph-beta-sdk
+    #   msgraph-sdk
+microsoft-kiota-serialization-multipart==0.1.0
+    # via
+    #   msgraph-beta-sdk
+    #   msgraph-sdk
 microsoft-kiota-serialization-text==1.0.0
-    # via msgraph-sdk
+    # via
+    #   msgraph-beta-sdk
+    #   msgraph-sdk
 msal==1.28.0
     # via
     #   azure-identity
     #   msal-extensions
 msal-extensions==1.1.0
     # via azure-identity
+msgraph-beta-sdk==1.3.0
+    # via -r requirements.in
 msgraph-core==1.0.0
-    # via msgraph-sdk
-msgraph-sdk==1.1.0
+    # via
+    #   msgraph-beta-sdk
+    #   msgraph-sdk
+msgraph-sdk==1.3.0
     # via -r requirements.in
 multidict==6.0.5
     # via
@@ -114,15 +136,15 @@ opentelemetry-semantic-conventions==0.45b0
 packaging==24.0
     # via msal-extensions
 pendulum==3.0.0
-    # via microsoft-kiota-serialization-json
+    # via
+    #   microsoft-kiota-serialization-form
+    #   microsoft-kiota-serialization-json
 portalocker==2.8.2
     # via msal-extensions
 pycparser==2.22
     # via cffi
 pyjwt[crypto]==2.8.0
-    # via
-    #   msal
-    #   pyjwt
+    # via msal
 python-dateutil==2.9.0.post0
     # via
     #   microsoft-kiota-serialization-text
