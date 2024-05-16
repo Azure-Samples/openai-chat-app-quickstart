@@ -1,3 +1,21 @@
+---
+name: Simple Chat Application using Azure OpenAI (Python)
+description: A sample chat app that uses Python and the Quart framework to stream chat completions from the OpenAI SDK. Deployable to Azure Container Apps.
+languages:
+- azdeveloper
+- python
+- bicep
+- html
+products:
+- azure
+- azure-container-apps
+- azure-openai
+- azure-container-registry
+page_type: sample
+urlFragment: openai-chat-app-quickstart
+---
+<!-- YAML front-matter schema: https://review.learn.microsoft.com/en-us/help/contribute/samples/process/onboarding?branch=main#supported-metadata-fields-for-readmemd -->
+
 # Simple Chat Application using Azure OpenAI (Python)
 
 This repository includes a simple Python [Quart](https://quart.palletsprojects.com/en/latest/)
@@ -6,7 +24,7 @@ over a [ReadableStream](https://developer.mozilla.org/en-US/docs/Web/API/Readabl
 
 The repository is designed for use with [Docker containers](https://www.docker.com/), both for local development and deployment, and includes infrastructure files for deployment to [Azure Container Apps](https://learn.microsoft.com/azure/container-apps/overview). 🐳
 
-![Architecture diagram: Azure Container Apps inside Container Apps Environment, connected to Container Registry with Container, connected to Managed Identity for Azure OpenAI](readme_diagram.png)
+![Architecture diagram: Azure Container Apps inside Container Apps Environment, connected to Container Registry with Container, connected to Managed Identity for Azure OpenAI](../readme_diagram.png)
 
 We recommend first going through the [deployment steps](#deployment) before running this app locally,
 since the local app needs credentials for Azure OpenAI to work properly.
