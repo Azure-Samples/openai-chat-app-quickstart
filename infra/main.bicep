@@ -35,7 +35,7 @@ var openAiConfig = {
 
 @secure()
 param openAiComAPIKey string = ''
-
+param openAiComAPIKeySecretName string = 'openai-com-api-key'
 
 param clientId string = ''
 @secure()
@@ -125,11 +125,13 @@ module aca 'aca.bicep' = {
     openAiDeploymentName: deployAzureOpenAi ? openAiDeploymentName : ''
     openAiEndpoint: deployAzureOpenAi ? openAi.outputs.endpoint : ''
     openAiApiVersion: deployAzureOpenAi ? openAiApiVersion : ''
+    openAiComAPIKeySecretName: openAiComAPIKeySecretName
     exists: acaExists
     clientId: clientId
     clientSecret: clientSecret
     tenantIdForAuth: tenantIdForAuth
     loginEndpoint: loginEndpoint
+    azureKeyVaultName: keyVault.outputs.name
   }
 }
 
@@ -155,6 +157,39 @@ module openAiRoleBackend 'core/security/role.bicep' = if (deployAzureOpenAi) {
   }
 }
 
+
+// Currently, we only need Key Vault for storing Search service key,
+// which is only used for free tier
+module keyVault 'core/security/keyvault.bicep' = {
+  name: 'keyvault'
+  scope: resourceGroup
+  params: {
+    name: '${replace(take(prefix, 17), '-', '')}-vault'
+    location: location
+    principalId: principalId
+  }
+}
+
+module webKVAccess 'core/security/keyvault-access.bicep' = {
+  name: 'web-keyvault-access'
+  scope: resourceGroup
+  params: {
+    keyVaultName: keyVault.outputs.name
+    principalId: aca.outputs.SERVICE_ACA_IDENTITY_PRINCIPAL_ID
+  }
+}
+
+
+module searchServiceKVSecret 'core/security/keyvault-secret.bicep' = if (!empty(openAiComAPIKey)) {
+  name: 'openai-key-secret'
+  scope: resourceGroup
+  params: {
+    keyVaultName: keyVault.outputs.name
+    name: openAiComAPIKeySecretName
+    secretValue: openAiComAPIKey
+  }
+}
+
 output AZURE_LOCATION string = location
 
 output AZURE_OPENAI_CHATGPT_DEPLOYMENT string = deployAzureOpenAi ? openAiDeploymentName : ''
@@ -164,6 +199,8 @@ output AZURE_OPENAI_RESOURCE string = deployAzureOpenAi ? openAi.outputs.name : 
 output AZURE_OPENAI_RESOURCE_GROUP string = deployAzureOpenAi ? openAiResourceGroup.name : ''
 output AZURE_OPENAI_SKU_NAME string = deployAzureOpenAi ? openAi.outputs.skuName : ''
 output AZURE_OPENAI_RESOURCE_GROUP_LOCATION string = deployAzureOpenAi ? openAiResourceGroup.location : ''
+output OPENAICOM_API_KEY_SECRET_NAME string = openAiComAPIKeySecretName
+output OPENAI_MODEL_NAME string = openAiConfig.modelName
 
 output SERVICE_ACA_IDENTITY_PRINCIPAL_ID string = aca.outputs.SERVICE_ACA_IDENTITY_PRINCIPAL_ID
 output SERVICE_ACA_NAME string = aca.outputs.SERVICE_ACA_NAME
@@ -173,3 +210,5 @@ output SERVICE_ACA_IMAGE_NAME string = aca.outputs.SERVICE_ACA_IMAGE_NAME
 output AZURE_CONTAINER_ENVIRONMENT_NAME string = containerApps.outputs.environmentName
 output AZURE_CONTAINER_REGISTRY_ENDPOINT string = containerApps.outputs.registryLoginServer
 output AZURE_CONTAINER_REGISTRY_NAME string = containerApps.outputs.registryName
+
+output AZURE_KEY_VAULT_NAME string = keyVault.outputs.name

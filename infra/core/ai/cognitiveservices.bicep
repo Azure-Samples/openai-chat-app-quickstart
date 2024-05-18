@@ -40,4 +40,3 @@ output endpoint string = account.properties.endpoint
 output id string = account.id
 output name string = account.name
 output skuName string = account.sku.name
-output key string = account.listKeys().key1

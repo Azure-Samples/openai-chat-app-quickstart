@@ -10,6 +10,8 @@ param exists bool
 param openAiDeploymentName string
 param openAiEndpoint string
 param openAiApiVersion string
+param openAiComAPIKeySecretName string
+param azureKeyVaultName string
 
 param clientId string
 
@@ -59,9 +61,18 @@ module app 'core/host/container-app-upsert.bicep' = {
         name: 'RUNNING_IN_PRODUCTION'
         value: 'true'
       }
+      // Must be named AZURE_CLIENT_ID for DefaultAzureCredential to find it automatically
       {
-        name: 'AZURE_OPENAI_CLIENT_ID'
+        name: 'AZURE_CLIENT_ID'
         value: acaIdentity.properties.clientId
+      }
+      {
+        name: 'OPENAICOM_API_KEY_SECRET_NAME'
+        value: openAiComAPIKeySecretName
+      }
+      {
+        name: 'AZURE_KEY_VAULT_NAME'
+        value: azureKeyVaultName
       }
     ]
     targetPort: 50505

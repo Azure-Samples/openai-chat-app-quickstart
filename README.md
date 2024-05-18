@@ -102,7 +102,7 @@ To configure, follow these steps:
     azd env set AZURE_AUTH_TENANT_ID your-tenant-id
     ```
 
-1. Set `AZURE_AUTH_LOGIN_ENDPOINT` to the login endpoint for the External ID tenant. That will typically look like "TenantNameHere.ciamlogin.com". 
+1. Set `AZURE_AUTH_LOGIN_ENDPOINT` to the login endpoint for the External ID tenant. That will typically look like "TenantNameHere.ciamlogin.com".
 
     ```shell
     azd env set AZURE_AUTH_LOGIN_ENDPOINT your-login-endpoint
@@ -177,7 +177,19 @@ to be stored as Github action secrets. To set that up, run:
 azd pipeline config
 ```
 
-### Costs
+## Development server
+
+Assuming you've run the steps in [Opening the project](#opening-the-project) and have run `azd up`, you can now run the Quart app in your development environment:
+
+```shell
+python -m quart --app src.quartapp run --port 50505 --reload
+```
+
+This will start the app on port 50505, and you can access it at `http://localhost:50505`.
+
+To save costs during development, you may point the app at a [local LLM server](docs/local_ollama.md).
+
+## Costs
 
 Pricing varies per region and usage, so it isn't possible to predict exact costs for your usage.
 The majority of the Azure resources used in this infrastructure are on usage-based pricing tiers.
@@ -193,54 +205,21 @@ You can try the [Azure pricing calculator](https://azure.com/e/2176802ea14941e49
 ⚠️ To avoid unnecessary costs, remember to take down your app if it's no longer in use,
 either by deleting the resource group in the Portal or running `azd down`.
 
-## Local development without Docker
+## Security Guidelines
 
-Assuming you've run the steps in [Opening the project](#opening-the-project) and have run `azd up`, you can now run the Quart app locally using the development server:
+By default, this template uses [Managed Identity](https://learn.microsoft.com/entra/identity/managed-identities-azure-resources/overview) for authenticating to the Azure OpenAI service. It uses an [Azure Key Vault](https://learn.microsoft.com/azure/key-vault/general/basic-concepts) to store the client secret for the Microsoft Entra application.
 
-```shell
-python -m quart --app src.quartapp run --port 50505 --reload
-```
+Additionally, we have added a [GitHub Action](https://github.com/microsoft/security-devops-action) that scans the infrastructure-as-code files and generates a report containing any detected issues. To ensure continued best practices in your own repository, we recommend that anyone creating solutions based on our templates ensure that the [Github secret scanning](https://docs.github.com/code-security/secret-scanning/about-secret-scanning) setting is enabled.
 
-### Using a local LLM server
+You may want to consider additional security measures, such as:
 
-You may want to save costs by developing against a local LLM server, such as
-[llamafile](https://github.com/Mozilla-Ocho/llamafile/). Note that a local LLM
-will generally be slower and not as sophisticated.
+* Protecting the Azure Container Apps instance with a [firewall](https://learn.microsoft.com/azure/container-apps/waf-app-gateway) and/or [Virtual Network](https://learn.microsoft.com/azure/container-apps/networking?tabs=workload-profiles-env%2Cazure-cli).
+* Using [certificates](https://learn.microsoft.com/entra/identity/authentication/how-to-certificate-based-authentication) instead of client secrets for the Microsoft Entra application.
 
-Once you've got your local LLM running and serving an OpenAI-compatible endpoint, define `LOCAL_OPENAI_ENDPOINT` in your `.env` file.
 
-For example, to point at a local llamafile server running on its default port:
+## Resources
 
-```shell
-LOCAL_OPENAI_ENDPOINT="http://localhost:8080/v1"
-```
-
-If you're running inside a dev container, use this local URL instead:
-
-```shell
-LOCAL_OPENAI_ENDPOINT="http://host.docker.internal:8080/v1"
-```
-
-## Local development with Docker
-
-In addition to the `Dockerfile` that's used in production, this repo includes a `docker-compose.yaml` for
-local development which creates a volume for the app code. That allows you to make changes to the code
-and see them instantly.
-
-1. Install [Docker Desktop](https://www.docker.com/products/docker-desktop/). If you opened this inside Github Codespaces or a Dev Container in VS Code, installation is not needed. ⚠️ If you're on an Apple M1/M2, you won't be able to run `docker` commands inside a Dev Container; either use Codespaces or do not open the Dev Container.
-
-2. Make sure that the `.env` file exists. The `azd up` deployment step should have created it.
-
-3. Store a key for the OpenAI resource in the `.env` file. You can get the key from the Azure Portal, or from the output of `./infra/getkey.sh`. The key should be stored in the `.env` file as `AZURE_OPENAI_KEY`. This is necessary because Docker containers don't have access to your user Azure credentials.
-
-5. Start the services with this command:
-
-    ```shell
-    docker-compose up --build
-    ```
-
-5. Click 'http://0.0.0.0:50505' in the terminal, which should open a new tab in the browser. You may need to navigate to 'http://localhost:50505' if that URL doesn't work.
-
-## Getting help
-
-If you're working with this project and running into issues, please post in **Discussions**.
+* [OpenAI Chat Application with Microsoft Entra Authentication (Python)](https://github.com/Azure-Samples/openai-chat-app-entra-auth-local): Similar to this project, but sets up authentication using the MSAL SDK instead of the built-in authentication feature of Azure Container Apps. This is necessary if you want to deploy an app to a different environment or use authentication during development.
+* [OpenAI Chat App with Managed Identity](https://github.com/Azure-Samples/openai-chat-app-quickstart): Similar to this project, but doesn't include Microsoft Entra authentication.
+* [RAG chat with Azure AI Search + Python](https://github.com/Azure-Samples/azure-search-openai-demo/): A more advanced chat app that uses Azure AI Search to ground responses in domain knowledge.
+* [Develop Python apps that use Azure AI services](https://learn.microsoft.com/azure/developer/python/azure-ai-for-python-developers)

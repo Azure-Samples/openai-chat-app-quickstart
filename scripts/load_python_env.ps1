@@ -13,5 +13,5 @@ if (Test-Path -Path "/usr") {
   $venvPythonPath = "./scripts/.venv/bin/python"
 }
 
-Write-Host 'Installing dependencies from "requirements.txt" into virtual environment'
-Start-Process -FilePath $venvPythonPath -ArgumentList "-m pip install -r scripts/requirements.txt" -Wait -NoNewWindow
+Write-Host 'Installing dependencies from "requirements.txt" into virtual environment (in quiet mode)...'
+Start-Process -FilePath $venvPythonPath -ArgumentList "-m pip --quiet --disable-pip-version-check install -r scripts/requirements.txt" -Wait -NoNewWindow

@@ -23,11 +23,11 @@ hooks:
     postprovision:
       windows:
         shell: pwsh
-        run: ./scripts/auth_update.ps1
+        run: ./scripts/auth_update.ps1; $output = azd env get-values; Add-Content -Path .env -Value $output;
         interactive: true
         continueOnError: false
       posix:
         shell: sh
-        run: ./scripts/auth_update.sh
+        run: ./scripts/auth_update.sh; azd env get-values > .env;
         interactive: true
         continueOnError: false

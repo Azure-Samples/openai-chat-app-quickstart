@@ -9,6 +9,7 @@ dependencies = [
     "uvicorn[standard]",
     "openai",
     "azure-identity",
+    "azure-keyvault-secrets",
     "aiohttp",
     "python-dotenv",
     "pyyaml"

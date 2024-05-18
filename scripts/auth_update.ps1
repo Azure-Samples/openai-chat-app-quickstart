@@ -9,3 +9,5 @@ if (Test-Path -Path "/usr") {
 }
 
 Start-Process -FilePath $venvPythonPath -ArgumentList "./scripts/auth_update.py" -Wait -NoNewWindow
+
+azd env set OPENAICOM_API_KEY ""
