@@ -1,7 +1,7 @@
 import asyncio
 import os
 
-from auth_common import get_application
+from auth_common import get_application, update_azd_env
 from azure.identity.aio import AzureDeveloperCliCredential
 from msgraph import GraphServiceClient
 from msgraph.generated.models.application import Application
@@ -45,6 +45,10 @@ async def main():
             await graph_client.applications.by_application_id(client_object_id).patch(app)
             print(f"Application update for client app id {client_app_id} complete.")
 
+    print("Clearing secrets as they should now be stored in Key Vault...")
+    update_azd_env("OPENAICOM_API_KEY", "\"\"")
+    update_azd_env("AZURE_CLIENT_APP_SECRET", "\"\"")
+    print("Post-provisioning script complete.")
 
 if __name__ == "__main__":
     asyncio.run(main())

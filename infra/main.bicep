@@ -37,11 +37,12 @@ var openAiConfig = {
 param openAiComAPIKey string = ''
 param openAiComAPIKeySecretName string = 'openai-com-api-key'
 
-param clientId string = ''
+param authClientId string
 @secure()
-param clientSecret string = ''
-param authTenantId string = ''
-param loginEndpoint string = ''
+param authClientSecret string
+param authClientSecretName string = 'AZURE-AUTH-CLIENT-SECRET'
+param authTenantId string
+param loginEndpoint string
 param tenantId string = tenant().tenantId
 var tenantIdForAuth = !empty(authTenantId) ? authTenantId : tenantId
 
@@ -111,6 +112,41 @@ module containerApps 'core/host/container-apps.bicep' = {
   }
 }
 
+
+
+// Currently, we only need Key Vault for storing Search service key,
+// which is only used for free tier
+module keyVault 'core/security/keyvault.bicep' = {
+  name: 'keyvault'
+  scope: resourceGroup
+  params: {
+    name: '${replace(take(prefix, 17), '-', '')}-vault'
+    location: location
+    principalId: principalId
+  }
+}
+
+module openAiComAPIKeyStorage 'core/security/keyvault-secret.bicep' = if (!empty(openAiComAPIKey)) {
+  name: 'openai-key-secret'
+  scope: resourceGroup
+  params: {
+    keyVaultName: keyVault.outputs.name
+    name: openAiComAPIKeySecretName
+    secretValue: openAiComAPIKey
+  }
+}
+
+
+module authClientSecretStorage 'core/security/keyvault-secret.bicep' = if (!empty(authClientSecret)) {
+    name: 'secrets'
+    scope: resourceGroup
+    params: {
+      keyVaultName: keyVault.outputs.name
+      name: authClientSecretName
+      secretValue: authClientSecret
+    }
+  }
+  
 // Container app frontend
 module aca 'aca.bicep' = {
   name: 'aca'
@@ -127,12 +163,13 @@ module aca 'aca.bicep' = {
     openAiApiVersion: deployAzureOpenAi ? openAiApiVersion : ''
     openAiComAPIKeySecretName: openAiComAPIKeySecretName
     exists: acaExists
-    clientId: clientId
-    clientSecret: clientSecret
-    tenantIdForAuth: tenantIdForAuth
-    loginEndpoint: loginEndpoint
+    authClientId: authClientId
+    authClientSecretName: authClientSecretName
+    authTenantId: tenantIdForAuth
+    authLoginEndpoint: loginEndpoint
     azureKeyVaultName: keyVault.outputs.name
   }
+  dependsOn: [authClientSecretStorage]
 }
 
 
@@ -157,38 +194,6 @@ module openAiRoleBackend 'core/security/role.bicep' = if (deployAzureOpenAi) {
   }
 }
 
-
-// Currently, we only need Key Vault for storing Search service key,
-// which is only used for free tier
-module keyVault 'core/security/keyvault.bicep' = {
-  name: 'keyvault'
-  scope: resourceGroup
-  params: {
-    name: '${replace(take(prefix, 17), '-', '')}-vault'
-    location: location
-    principalId: principalId
-  }
-}
-
-module webKVAccess 'core/security/keyvault-access.bicep' = {
-  name: 'web-keyvault-access'
-  scope: resourceGroup
-  params: {
-    keyVaultName: keyVault.outputs.name
-    principalId: aca.outputs.SERVICE_ACA_IDENTITY_PRINCIPAL_ID
-  }
-}
-
-
-module searchServiceKVSecret 'core/security/keyvault-secret.bicep' = if (!empty(openAiComAPIKey)) {
-  name: 'openai-key-secret'
-  scope: resourceGroup
-  params: {
-    keyVaultName: keyVault.outputs.name
-    name: openAiComAPIKeySecretName
-    secretValue: openAiComAPIKey
-  }
-}
 
 output AZURE_LOCATION string = location
 

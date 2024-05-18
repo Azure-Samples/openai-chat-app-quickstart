@@ -224,7 +224,6 @@ async def main():
     credential = get_credential(tenant_id)
     scopes = ["https://graph.microsoft.com/.default"]
     graph_client = GraphServiceClient(credentials=credential, scopes=scopes)
-    graph_client_beta = GraphServiceClient(credentials=credential, scopes=scopes)
     try:
         (tenant_type, _) = await get_tenant_details(AzureDeveloperCliCredential(tenant_id=tenant_id), tenant_id)
         print(f"Detected a tenant of type: {tenant_type}")
@@ -266,6 +265,7 @@ async def main():
             await add_app_to_userflow(auth_headers, userflow_id, app_id)
     finally:
         await credential.close()
+    print("Pre-provisioning script complete.")
 
 
 if __name__ == "__main__":

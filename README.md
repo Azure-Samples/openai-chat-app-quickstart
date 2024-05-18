@@ -216,7 +216,6 @@ You may want to consider additional security measures, such as:
 * Protecting the Azure Container Apps instance with a [firewall](https://learn.microsoft.com/azure/container-apps/waf-app-gateway) and/or [Virtual Network](https://learn.microsoft.com/azure/container-apps/networking?tabs=workload-profiles-env%2Cazure-cli).
 * Using [certificates](https://learn.microsoft.com/entra/identity/authentication/how-to-certificate-based-authentication) instead of client secrets for the Microsoft Entra application.
 
-
 ## Resources
 
 * [OpenAI Chat Application with Microsoft Entra Authentication (Python)](https://github.com/Azure-Samples/openai-chat-app-entra-auth-local): Similar to this project, but sets up authentication using the MSAL SDK instead of the built-in authentication feature of Azure Container Apps. This is necessary if you want to deploy an app to a different environment or use authentication during development.

@@ -38,10 +38,10 @@
       "acaExists": {
         "value": "${SERVICE_ACA_RESOURCE_EXISTS=false}"
       },
-      "clientId": {
+      "authClientId": {
         "value": "${AZURE_CLIENT_APP_ID}"
       },
-      "clientSecret": {
+      "authClientSecret": {
         "value": "${AZURE_CLIENT_APP_SECRET}"
       },
       "authTenantId": {

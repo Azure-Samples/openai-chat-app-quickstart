@@ -13,24 +13,30 @@ param openAiApiVersion string
 param openAiComAPIKeySecretName string
 param azureKeyVaultName string
 
-param clientId string
+param authClientId string
+param authClientSecretName string
+param authTenantId string
+param authLoginEndpoint string
 
-param tenantIdForAuth string
-param loginEndpoint string
-
-@secure()
-param clientSecret string
-
-// the issuer is different depending if we are in a workforce or external tenant
-var openIdIssuer = empty(loginEndpoint) ? '${environment().authentication.loginEndpoint}${tenantIdForAuth}/v2.0' : 'https://${loginEndpoint}/${tenantIdForAuth}/v2.0'
-
-var secrets = {
-  'microsoft-provider-authentication-secret': clientSecret
-}
+// The issuer is different depending if we are in a workforce or external tenant
+var openIdIssuer = empty(authLoginEndpoint) ? '${environment().authentication.loginEndpoint}${authTenantId}/v2.0' : 'https://${authLoginEndpoint}/${authTenantId}/v2.0'
 
 resource acaIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
   name: identityName
   location: location
+}
+
+resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' existing = {
+  name: azureKeyVaultName
+}
+
+
+module webKVAccess 'core/security/keyvault-access.bicep' = {
+  name: 'web-keyvault-access'
+  params: {
+    keyVaultName: keyVault.name
+    principalId: acaIdentity.properties.principalId
+  }
 }
 
 
@@ -76,8 +82,16 @@ module app 'core/host/container-app-upsert.bicep' = {
       }
     ]
     targetPort: 50505
-    secrets: secrets
+    keyvaultIdentities: {
+      'microsoft-provider-authentication-secret': {
+        keyVaultUrl: '${keyVault.properties.vaultUri}secrets/${authClientSecretName}'
+        identity: acaIdentity.id
+      }
+    }
   }
+  dependsOn: [
+    webKVAccess
+  ]
 }
 
 
@@ -85,7 +99,7 @@ module auth 'core/host/container-apps-auth.bicep' = {
   name: '${serviceName}-container-apps-auth-module'
   params: {
     name: app.outputs.name
-    clientId: clientId
+    clientId: authClientId
     clientSecretName: 'microsoft-provider-authentication-secret'
     openIdIssuer: openIdIssuer
   }
