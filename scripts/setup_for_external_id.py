@@ -1,5 +1,5 @@
-import argparse
 import asyncio
+import os
 
 from auth_common import (
     add_application_owner,
@@ -79,14 +79,10 @@ def login_domain_for(default_domain: str) -> str:
 
 
 async def main():
-    parser = argparse.ArgumentParser(description="Setup External ID Service Principal")
-    parser.add_argument("tenant_id", metavar="tenant-id", type=str, help="the External ID TenantId")
-    args = parser.parse_args()
-
-    if args.tenant_id is None:
-        args.print_help()
+    tenant_id = os.getenv("AZURE_AUTH_TENANT_ID", None)
+    if not tenant_id:
+        print("Please set AZURE_AUTH_TENANT_ID environment variable")
         exit(1)
-    tenant_id = args.tenant_id
 
     print(f"Setting up External ID Service Principal in tenant {tenant_id}")
     credential = AzureDeveloperCliCredential(tenant_id=tenant_id)
@@ -105,7 +101,7 @@ async def main():
     update_azd_env("AZURE_AUTH_TENANT_ID", tenant_id)
     update_azd_env("AZURE_AUTH_LOGIN_ENDPOINT", login_domain)
 
-    print("Creating application registration...")
+    print("Checking if we need to create application registration...")
     (obj_id, app_id, sp_id) = await create_or_update_application_with_secret(
         graph_client,
         app_id_env_var="AZURE_AUTH_EXTID_APP_ID",
@@ -123,6 +119,7 @@ async def main():
     owner_id = await get_current_user(graph_client)
     await add_application_owner(graph_client, obj_id, owner_id)
     update_azd_env("AZURE_AUTH_EXTID_APP_OWNER", owner_id)
+    print("External ID setup is complete! Now follow the steps for deployment.")
 
 
 if __name__ == "__main__":

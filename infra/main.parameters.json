@@ -11,6 +11,9 @@
       "principalId": {
         "value": "${AZURE_PRINCIPAL_ID}"
       },
+      "deployAzureOpenAi": {
+        "value": "${DEPLOY_AZURE_OPENAI=true}"
+      },
       "openAiResourceName": {
         "value": "${AZURE_OPENAI_RESOURCE}"
       },
@@ -26,14 +29,14 @@
       "openAiApiVersion": {
         "value": "${AZURE_OPENAI_API_VERSION}"
       },
+      "openAiComAPIKey": {
+        "value": "${OPENAICOM_API_KEY}"
+      },
       "createRoleForUser": {
         "value": "${CREATE_ROLE_FOR_USER=true}"
       },
       "acaExists": {
         "value": "${SERVICE_ACA_RESOURCE_EXISTS=false}"
-      },
-      "useAuthentication": {
-        "value": "${AZURE_USE_AUTHENTICATION=false}"
       },
       "clientId": {
         "value": "${AZURE_CLIENT_APP_ID}"

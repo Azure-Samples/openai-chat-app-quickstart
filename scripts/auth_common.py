@@ -199,7 +199,7 @@ async def create_or_update_application_with_secret(
 
 
 def wait_for_cache_sync(wait=30):
-    print(f"Waiting {wait} seconds for cache to sync")
+    print(f"Waiting {wait} seconds for cache to sync...")
     time.sleep(wait)
 
 
@@ -207,16 +207,3 @@ def update_azd_env(name, val):
     # val could start with '-' which would cause azd to think it's a flag
     # so use '--' to signal end of parameter parsing
     subprocess.run(f"azd env set {name} -- {val}", shell=True)
-
-
-def test_authentication_enabled():
-    use_authentication = os.getenv("AZURE_USE_AUTHENTICATION", "").lower() == "true"
-    require_access_control = os.getenv("AZURE_ENFORCE_ACCESS_CONTROL", "").lower() == "true"
-    if require_access_control and not use_authentication:
-        print("AZURE_ENFORCE_ACCESS_CONTROL is true, but AZURE_USE_AUTHENTICATION is false. Stopping...")
-        return False
-
-    if not use_authentication:
-        return False
-
-    return True

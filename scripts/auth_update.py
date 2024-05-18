@@ -1,7 +1,7 @@
 import asyncio
 import os
 
-from auth_common import get_application, test_authentication_enabled
+from auth_common import get_application
 from azure.identity.aio import AzureDeveloperCliCredential
 from msgraph import GraphServiceClient
 from msgraph.generated.models.application import Application
@@ -11,10 +11,6 @@ from msgraph.generated.models.web_application import WebApplication
 
 
 async def main():
-    if not test_authentication_enabled():
-        print("Not updating authentication...")
-        exit(0)
-
     tenantId = os.getenv("AZURE_AUTH_TENANT_ID", None)
     credential = AzureDeveloperCliCredential(tenant_id=tenantId)
 

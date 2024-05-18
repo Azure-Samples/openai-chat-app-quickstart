@@ -17,14 +17,26 @@ param createRoleForUser bool = true
 
 param acaExists bool = false
 
+param deployAzureOpenAi bool = true
+
 param openAiResourceName string = ''
 param openAiResourceGroupName string = ''
 param openAiResourceGroupLocation string = ''
+param openAiDeploymentName string = 'chatgpt'
 param openAiSkuName string = ''
 param openAiDeploymentCapacity int = 30
 param openAiApiVersion string = ''
 
-param useAuthentication bool = false
+var openAiConfig = {
+  modelName: deployAzureOpenAi ? 'gpt-35-turbo' : 'gpt-3.5-turbo'
+  deploymentName: !empty(openAiDeploymentName) ? openAiDeploymentName : 'chatgpt'
+  deploymentCapacity: openAiDeploymentCapacity != 0 ? openAiDeploymentCapacity : 30
+}
+
+@secure()
+param openAiComAPIKey string = ''
+
+
 param clientId string = ''
 @secure()
 param clientSecret string = ''
@@ -48,8 +60,7 @@ resource openAiResourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' exi
 
 var prefix = '${name}-${resourceToken}'
 
-var openAiDeploymentName = 'chatgpt'
-module openAi 'core/ai/cognitiveservices.bicep' = {
+module openAi 'core/ai/cognitiveservices.bicep' = if (deployAzureOpenAi) {
   name: 'openai'
   scope: openAiResourceGroup
   params: {
@@ -61,15 +72,15 @@ module openAi 'core/ai/cognitiveservices.bicep' = {
     }
     deployments: [
       {
-        name: openAiDeploymentName
+        name: openAiConfig.deploymentName
         model: {
           format: 'OpenAI'
-          name: 'gpt-35-turbo'
-          version: '0613'
+          name: openAiConfig.modelName
+          version: '0125'
         }
         sku: {
           name: 'Standard'
-          capacity: 30
+          capacity: openAiConfig.deploymentCapacity
         }
       }
     ]
@@ -111,11 +122,10 @@ module aca 'aca.bicep' = {
     identityName: '${prefix}-id-aca'
     containerAppsEnvironmentName: containerApps.outputs.environmentName
     containerRegistryName: containerApps.outputs.registryName
-    openAiDeploymentName: openAiDeploymentName
-    openAiEndpoint: openAi.outputs.endpoint
-    openAiApiVersion: openAiApiVersion
+    openAiDeploymentName: deployAzureOpenAi ? openAiDeploymentName : ''
+    openAiEndpoint: deployAzureOpenAi ? openAi.outputs.endpoint : ''
+    openAiApiVersion: deployAzureOpenAi ? openAiApiVersion : ''
     exists: acaExists
-    useAuthentication: useAuthentication
     clientId: clientId
     clientSecret: clientSecret
     tenantIdForAuth: tenantIdForAuth
@@ -124,7 +134,7 @@ module aca 'aca.bicep' = {
 }
 
 
-module openAiRoleUser 'core/security/role.bicep' = if (createRoleForUser) {
+module openAiRoleUser 'core/security/role.bicep' = if (createRoleForUser && deployAzureOpenAi) {
   scope: openAiResourceGroup
   name: 'openai-role-user'
   params: {
@@ -135,7 +145,7 @@ module openAiRoleUser 'core/security/role.bicep' = if (createRoleForUser) {
 }
 
 
-module openAiRoleBackend 'core/security/role.bicep' = {
+module openAiRoleBackend 'core/security/role.bicep' = if (deployAzureOpenAi) {
   scope: openAiResourceGroup
   name: 'openai-role-backend'
   params: {
@@ -147,13 +157,13 @@ module openAiRoleBackend 'core/security/role.bicep' = {
 
 output AZURE_LOCATION string = location
 
-output AZURE_OPENAI_CHATGPT_DEPLOYMENT string = openAiDeploymentName
-output AZURE_OPENAI_API_VERSION string = openAiApiVersion
-output AZURE_OPENAI_ENDPOINT string = openAi.outputs.endpoint
-output AZURE_OPENAI_RESOURCE string = openAi.outputs.name
-output AZURE_OPENAI_RESOURCE_GROUP string = openAiResourceGroup.name
-output AZURE_OPENAI_SKU_NAME string = openAi.outputs.skuName
-output AZURE_OPENAI_RESOURCE_GROUP_LOCATION string = openAiResourceGroup.location
+output AZURE_OPENAI_CHATGPT_DEPLOYMENT string = deployAzureOpenAi ? openAiDeploymentName : ''
+output AZURE_OPENAI_API_VERSION string = deployAzureOpenAi ? openAiApiVersion : ''
+output AZURE_OPENAI_ENDPOINT string = deployAzureOpenAi ? openAi.outputs.endpoint : ''
+output AZURE_OPENAI_RESOURCE string = deployAzureOpenAi ? openAi.outputs.name : ''
+output AZURE_OPENAI_RESOURCE_GROUP string = deployAzureOpenAi ? openAiResourceGroup.name : ''
+output AZURE_OPENAI_SKU_NAME string = deployAzureOpenAi ? openAi.outputs.skuName : ''
+output AZURE_OPENAI_RESOURCE_GROUP_LOCATION string = deployAzureOpenAi ? openAiResourceGroup.location : ''
 
 output SERVICE_ACA_IDENTITY_PRINCIPAL_ID string = aca.outputs.SERVICE_ACA_IDENTITY_PRINCIPAL_ID
 output SERVICE_ACA_NAME string = aca.outputs.SERVICE_ACA_NAME

@@ -9,15 +9,13 @@ from auth_common import (
     add_application_owner,
     create_or_update_application_with_secret,
     create_permission_grant,
-    get_auth_headers,
     get_current_user,
     get_microsoft_graph_service_principal,
     get_permission_grant,
     get_tenant_details,
-    test_authentication_enabled,
     update_azd_env,
+    get_auth_headers,
 )
-from kiota_abstractions.base_request_configuration import RequestConfiguration
 
 from azure.core.credentials_async import AsyncTokenCredential
 from azure.identity.aio import AzureDeveloperCliCredential, ClientSecretCredential
@@ -28,12 +26,6 @@ from msgraph.generated.models.required_resource_access import RequiredResourceAc
 from msgraph.generated.models.resource_access import ResourceAccess
 from msgraph.generated.models.spa_application import SpaApplication
 from msgraph.generated.models.web_application import WebApplication
-from msgraph_beta.generated.models.external_users_self_service_sign_up_events_flow import ExternalUsersSelfServiceSignUpEventsFlow
-from msgraph_beta.generated.models.on_user_create_start_handler import OnUserCreateStartHandler
-from msgraph_beta.generated.models.on_interactive_auth_flow_start_handler import OnInteractiveAuthFlowStartHandler
-from msgraph_beta.generated.models.on_authentication_method_load_start_handler import OnAuthenticationMethodLoadStartHandler
-from msgraph_beta.generated.models.on_attribute_collection_handler import OnAttributeCollectionHandler
-from msgraph_beta.generated.identity.authentication_events_flows.authentication_events_flows_request_builder import AuthenticationEventsFlowsRequestBuilder
 
 def random_app_identifier():
     rand = random.Random()
@@ -70,30 +62,16 @@ def permission_scopes() -> str:
 
 # Not supported? https://learn.microsoft.com/en-us/graph/api/resources/externalusersselfservicesignupeventsflow?view=graph-rest-beta
 def create_client_userflow_payload(identifier: int):
-    return ExternalUsersSelfServiceSignUpEventsFlow(
-        priority=500,
-        description=f"ChatGPT Sample User Flow {identifier}",
-        display_name=f"ChatGPT Sample User Flow {identifier}",
-        on_user_create_start=OnUserCreateStartHandler(
-            user_type_to_create="member",
-            access_packages=[],
-        ),
-        on_interactive_auth_flow_start=OnInteractiveAuthFlowStartHandler(
-            is_sign_up_allowed=True,
-        ),
-        on_authentication_method_load_start=OnAuthenticationMethodLoadStartHandler(
-            identity_providers=[
-                {
-                    "displayName": "Email One Time Passcode",
-                    "state": "null",
-                    "identityProviderType": "EmailOTP",
-                    "id": "EmailOtpSignup-OAUTH",
-                    "@odata.type": "#microsoft.graph.builtInIdentityProvider",
-                }
-            ]
-        ),
-        on_attribute_collection=OnAttributeCollectionHandler(
-            attributes=[
+    return {
+        "@odata.type": "#microsoft.graph.externalUsersSelfServiceSignUpEventsFlow",
+        "priority": 500,
+        "onUserCreateStart": {
+            "userTypeToCreate": "member",
+            "accessPackages": [],
+            "@odata.type": "#microsoft.graph.onUserCreateStartExternalUsersSelfServiceSignUp",
+        },
+        "onAttributeCollection": {
+            "attributes": [
                 {
                     "displayName": "Email Address",
                     "dataType": "string",
@@ -109,10 +87,12 @@ def create_client_userflow_payload(identifier: int):
                     "userFlowAttributeType": "builtIn",
                 },
             ],
-            access_packages=[],
-            attribute_collection_page={
+            "accessPackages": [],
+            "attributeCollectionPage": {
                 "views": [
                     {
+                        #   "title": null,
+                        #   "description": null,
                         "inputs": [
                             {
                                 "options": [],
@@ -139,24 +119,42 @@ def create_client_userflow_payload(identifier: int):
                         ]
                     }
                 ]
-            }
-        )
-    )
+            },
+            "@odata.type": "#microsoft.graph.onAttributeCollectionExternalUsersSelfServiceSignUp",
+        },
+        "description": f"ChatGPT Sample User Flow {identifier}",
+        "onInteractiveAuthFlowStart": {
+            "@odata.type": "#microsoft.graph.onInteractiveAuthFlowStartExternalUsersSelfServiceSignUp",
+            "isSignUpAllowed": "true",
+        },
+        "displayName": f"ChatGPT Sample User Flow {identifier}",
+        "onAuthenticationMethodLoadStart": {
+            "identityProviders": [
+                {
+                    "displayName": "Email One Time Passcode",
+                    "state": "null",
+                    "identityProviderType": "EmailOTP",
+                    "id": "EmailOtpSignup-OAUTH",
+                    "@odata.type": "#microsoft.graph.builtInIdentityProvider",
+                }
+            ],
+            "@odata.type": "#microsoft.graph.onAuthenticationMethodLoadStartExternalUsersSelfServiceSignUp",
+        },
+    }
 
 
 # Beta: https://learn.microsoft.com/graph/api/resources/externalusersselfservicesignupeventsflow?view=graph-rest-beta
-async def get_userflow(graph_client_beta: GraphServiceClient, identifier: str) -> (str | None):
+async def get_userflow(auth_headers: dict[str, str], identifier: str) -> (str | None):
     app_name = f"ChatGPT Sample User Flow {identifier}"
+    async with aiohttp.ClientSession(headers=auth_headers, timeout=aiohttp.ClientTimeout(total=TIMEOUT)) as session:
+        async with session.get(
+            f"https://graph.microsoft.com/beta/identity/AuthenticationEventsFlows?$filter=displayName eq '{app_name}'"
+        ) as response:
+            if response.status == 200:
+                response_json = await response.json()
+                if response_json["value"]:
+                    return response_json["value"][0]["id"]
 
-    query_params = AuthenticationEventsFlowsRequestBuilder.AuthenticationEventsFlowsRequestBuilderGetQueryParameters(
-        filter=f"displayName eq '{app_name}'",
-    )
-    request_configuration = RequestConfiguration(
-        query_parameters=query_params,
-    )
-    result = await graph_client_beta.identity.authentication_events_flows.get(request_configuration=request_configuration)
-    if result.value:
-        return result.value[0].id
     return None
 
 
@@ -221,18 +219,15 @@ def get_credential(tenantId: str) -> AsyncTokenCredential:
 
 
 async def main():
-    if not test_authentication_enabled():
-        print("Not setting up authentication...")
-        exit(0)
-
-    print("Setting up authentication...")
     tenant_id = os.getenv("AZURE_AUTH_TENANT_ID", None)
+    print("Setting up authentication for tenant %s" % tenant_id)
     credential = get_credential(tenant_id)
     scopes = ["https://graph.microsoft.com/.default"]
     graph_client = GraphServiceClient(credentials=credential, scopes=scopes)
     graph_client_beta = GraphServiceClient(credentials=credential, scopes=scopes)
     try:
         (tenant_type, _) = await get_tenant_details(AzureDeveloperCliCredential(tenant_id=tenant_id), tenant_id)
+        print(f"Detected a tenant of type: {tenant_type}")
         if tenant_type == "CIAM":
             current_user = os.getenv("AZURE_AUTH_EXTID_APP_OWNER", None)
         else:
@@ -249,7 +244,7 @@ async def main():
 
         if tenant_type == "CIAM":
             print("Granting Application consent...")
-            graph_sp_id = await get_microsoft_graph_service_principal(graph_client_beta)
+            graph_sp_id = await get_microsoft_graph_service_principal(graph_client)
             grant_id = await get_permission_grant(graph_client, sp_id, graph_sp_id, permission_scopes())
             if grant_id:
                 print("Permission grant already exists, not creating new one")
@@ -261,13 +256,14 @@ async def main():
                 print(f"Setting owner for {app_id}")
                 await add_application_owner(graph_client, app_obj_id, current_user)
 
-            userflow_id = await get_userflow(graph_client_beta, app_identifier)
+            auth_headers = await get_auth_headers(credential)
+            userflow_id = await get_userflow(auth_headers, app_identifier)
             if userflow_id is None:
                 print(f"Creating user flow for {app_id}")
-                userflow_id = await create_userflow(graph_client_beta, create_client_userflow_payload(app_identifier))
+                userflow_id = await create_userflow(auth_headers, create_client_userflow_payload(app_identifier))
 
             print(f"Adding user flow to application {app_id}")
-            await add_app_to_userflow(graph_client_beta, userflow_id, app_id)
+            await add_app_to_userflow(auth_headers, userflow_id, app_id)
     finally:
         await credential.close()
 

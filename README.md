@@ -1,33 +1,23 @@
----
-name: Simple Chat Application using Azure OpenAI (Python)
-description: A sample chat app that uses Python and the Quart framework to stream chat completions from the OpenAI SDK. Deployable to Azure Container Apps.
-languages:
-- azdeveloper
-- python
-- bicep
-- html
-products:
-- azure
-- azure-container-apps
-- azure-openai
-- azure-container-registry
-page_type: sample
-urlFragment: openai-chat-app-quickstart
----
-<!-- YAML front-matter schema: https://review.learn.microsoft.com/en-us/help/contribute/samples/process/onboarding?branch=main#supported-metadata-fields-for-readmemd -->
-
 # Simple Chat Application using Azure OpenAI (Python)
 
-This repository includes a simple Python [Quart](https://quart.palletsprojects.com/en/latest/)
-app that streams responses from ChatGPT to an HTML/JS frontend using [JSON Lines](http://jsonlines.org/)
-over a [ReadableStream](https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream).
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/Azure-Samples/openai-chat-app-entra-auth-builtin)
+[![Open in Dev Containers](https://img.shields.io/static/v1?style=for-the-badge&label=Dev%20Containers&message=Open&color=blue&logo=visualstudiocode)](https://vscode.dev/redirect?url=vscode://ms-vscode-remote.remote-containers/cloneInVolume?url=https://github.com/azure-samples/openai-chat-app-entra-auth-builtin)
 
-The repository is designed for use with [Docker containers](https://www.docker.com/), both for local development and deployment, and includes infrastructure files for deployment to [Azure Container Apps](https://learn.microsoft.com/azure/container-apps/overview). 🐳
+This repository includes a Python app that uses Azure OpenAI to generate responses to user messages and uses Microsoft Entra for user authentication. The user sign-in functionality uses the [built-in authentication feature of Azure Container Apps](https://learn.microsoft.com/azure/container-apps/authentication), which supports both Microsoft Entra ID and Microsoft Entra External ID.
 
-![Architecture diagram: Azure Container Apps inside Container Apps Environment, connected to Container Registry with Container, connected to Managed Identity for Azure OpenAI](readme_diagram.png)
+The project includes all the infrastructure and configuration needed to setup Microsoft Entra authentication, provision Azure OpenAI resources (with keyless access), and deploy the app to [Azure Container Apps](https://learn.microsoft.com/azure/container-apps/overview) using the [Azure Developer CLI](https://learn.microsoft.com/azure/developer/azure-developer-cli/overview).
 
 We recommend first going through the [deployment steps](#deployment) before running this app locally,
 since the local app needs credentials for Azure OpenAI to work properly.
+
+## Features
+
+* A Python [Quart](https://quart.palletsprojects.com/en/latest/) backend that uses the [openai](https://pypi.org/project/openai/) package to generate responses to user messages.
+* A basic HTML/JS frontend that streams responses from the backend using [JSON Lines](http://jsonlines.org/) over a [ReadableStream](https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream).
+* [Bicep files](https://docs.microsoft.com/azure/azure-resource-manager/bicep/) for provisioning Azure resources, including an Azure OpenAI resource, Azure Container Apps (with authentication configuration), and Azure Container Registry.
+* Python scripts that use the [msgraph-sdk](https://pypi.org/project/msgraph-sdk/) package to create a Microsoft Entra application and service principal, and to grant the service principal permissions to the application.
+
+![Screenshot of the chat app](docs/screenshot_chatapp.png)
 
 ## Opening the project
 
@@ -40,43 +30,122 @@ If you're not using one of those options for opening the project, then you'll ne
 2. Install the requirements:
 
     ```shell
-    python3 -m pip install -r requirements-dev.txt
+    python -m pip install -r requirements-dev.txt
     ```
 
 3. Install the app as an editable package:
 
     ```shell
-    python3 -m pip install -e src
+    python -m pip install -e src
     ```
 
 ## Deployment
 
-This repo is set up for deployment on Azure Container Apps using the configuration files in the `infra` folder.
+Once you've opened the project in [Codespaces](#github-codespaces), in [Dev Containers](#vs-code-dev-containers), or [locally](#local-environment), you can deploy it to Azure.
 
-### Prerequisites for deployment
+### Azure account setup
 
 1. Sign up for a [free Azure account](https://azure.microsoft.com/free/) and create an Azure Subscription.
 2. Request access to Azure OpenAI Service by completing the form at [https://aka.ms/oai/access](https://aka.ms/oai/access) and awaiting approval.
-3. Install the [Azure Developer CLI](https://learn.microsoft.com/azure/developer/azure-developer-cli/install-azd). (If you open this repository in Codespaces or with the VS Code Dev Containers extension, that part will be done for you.)
+3. Check that you have the necessary permissions:
 
-### Deployment from scratch
+    * Your Azure account must have `Microsoft.Authorization/roleAssignments/write` permissions, such as [Role Based Access Control Administrator](https://learn.microsoft.com/azure/role-based-access-control/built-in-roles#role-based-access-control-administrator-preview), [User Access Administrator](https://learn.microsoft.com/azure/role-based-access-control/built-in-roles#user-access-administrator), or [Owner](https://learn.microsoft.com/azure/role-based-access-control/built-in-roles#owner). If you don't have subscription-level permissions, you must be granted [RBAC](https://learn.microsoft.com/azure/role-based-access-control/built-in-roles#role-based-access-control-administrator-preview) for an existing resource group and [deploy to that existing group](docs/deploy_existing.md#resource-group).
+    * Your Azure account also needs `Microsoft.Resources/deployments/write` permissions on the subscription level.
 
-1. Login to Azure:
+### Microsoft Entra ID setup
+
+We have integrated the sample with Entra ID to require authentication.  This feature allows users within your organization to log in and how to process their identity within the sample. If a user is logged in, they'll see their name in the chat app.
+
+To configure, follow these steps:
+
+1. Create a new azd environment:
 
     ```shell
-    azd auth login
+    azd env new
     ```
 
-2. Provision and deploy all the resources:
+    This will create a folder under `.azure/` in your project to store the configuration for this deployment. You may have multiple azd environments if desired.
+
+1. Set the `AZURE_AUTH_TENANT_ID` azd environment variable to the tenant ID you want to use for Entra authentication:
+
+    ```shell
+    azd env set AZURE_AUTH_TENANT_ID your-tenant-id
+    ```
+
+1. Login to the azd CLI with the Entra tenant ID:
+
+    ```shell
+    azd auth login --tenant-id AUTH-TENANT-ID
+    ```
+
+1. Then proceed with the [deployment steps](#deployment) below.
+
+### Microsoft Entra External ID setup
+
+If you want to allow external users to sign up and sign in to the application using their email address or social identity such as Google, Apple or Facebook, you can use [Microsoft Entra External ID](https://developer.microsoft.com/identity/customers). If you don't have an External ID tenant already, you can create a [trial tenant](https://aka.ms/ciam-free-trial) using your Microsoft or Work account.
+
+To deploy, you will need the tenant ID of your External ID. In the instructions below, replace `<YOUR_TENANT_ID>` with the tenant ID you obtain from the Entra Portal.
+
+To configure, follow these steps:
+
+1. Create a new azd environment:
+
+    ```shell
+    azd env new
+    ```
+
+    This will create a folder under `.azure/` in your project to store the configuration for this deployment. You may have multiple azd environments if desired.
+
+1. Set the `AZURE_AUTH_TENANT_ID` azd environment variable to whichever tenant ID you want to use for Entra authentication:
+
+    ```shell
+    azd env set AZURE_AUTH_TENANT_ID your-tenant-id
+    ```
+
+1. Set `AZURE_AUTH_LOGIN_ENDPOINT` to the login endpoint for the External ID tenant. That will typically look like "TenantNameHere.ciamlogin.com". 
+
+    ```shell
+    azd env set AZURE_AUTH_LOGIN_ENDPOINT your-login-endpoint
+    ```
+
+1. Login to the azd CLI with the External ID tenant ID:
+
+    ```shell
+    azd auth login --tenant-id AUTH-TENANT-ID
+    ```
+
+1. Run the script that will setup permissions needed for the rest of the deployment process. Both PowerShell and Bash scripts are provided:
+
+    ```shell
+    ./scripts/setup_for_external_id.ps1
+    ```
+
+    ```shell
+    ./scripts/setup_for_external_id.sh
+    ```
+
+1. Now proceed with the [deployment steps](#deployment) below.
+
+### Deployment
+
+Once you have either setup [Microsoft Entra ID](#microsoft-entra-id-setup) or [Microsoft Entra External ID](#microsoft-entra-external-id-setup), you can proceed to deploy the app.
+
+1. If the Azure resources will be created in a different tenant than the Entra tenant, you must now login to Azure with that account:
+
+    ```shell
+    azd auth login --tenant-id AZURE-TENANT-ID
+    ```
+
+1. Provision and deploy all the resources:
 
     ```shell
     azd up
     ```
 
-    It will prompt you to provide an `azd` environment name (like "chat-app"), select a subscription from your Azure account, and select a [location where OpenAI is available](https://azure.microsoft.com/explore/global-infrastructure/products-by-region/?products=cognitive-services&regions=all) (like "francecentral"). Then it will provision the resources in your account and deploy the latest code. If you get an error or timeout with deployment, changing the location can help, as there may be availability constraints for the OpenAI resource.
+    It will prompt you to provide an `azd` environment name (like "chat-app") and select a subscription from your Azure account. Then it will provision the resources in your account and deploy the latest code. If you get an error or timeout with deployment, changing the location can help, as there may be availability constraints for the OpenAI resource.
 
-3. When `azd` has finished deploying, you'll see an endpoint URI in the command output. Visit that URI, and you should see the chat app! 🎉
-4. When you've made any changes to the app code, you can just run:
+1. When `azd` has finished deploying, you'll see an endpoint URI in the command output. Visit that URI, and you should see the chat app! 🎉
+1. When you've made any changes to the app code, you can just run:
 
     ```shell
     azd deploy
@@ -98,31 +167,6 @@ If you already have an OpenAI resource and would like to re-use it, first follow
 
 3. Then follow the steps for deployment above.
 
-### Deployment with Authentication using Microsoft Entra ID
-
-We have integrated the sample with Entra ID to require authentication.  This feature allows users within your organization to log in and how to process their identity within the sample. If a user is logged in, they'll see their name in the chat app.
-
-To configure, follow these steps:
-
-1. Run `azd env set AZURE_USE_AUTHENTICATION true` to enable App Service authentication.
-2. Run `azd env set AZURE_AUTH_TENANT_ID <YOUR_TENANT_ID>` to set the auth tenant ID if different from your main Azure tenant.
-3. Then follow the steps for deployment above.
-
-### Deployment with Authentication using Microsoft Entra External ID
-
-If you want to allow external users to sign up and sign in to the application using their email address or social identity such as Google, Apple or Facebook, you can use [Microsoft Entra External ID](https://developer.microsoft.com/identity/customers). If you don't have an External ID tenant already, you can create a [trial tenant](https://aka.ms/ciam-free-trial) using your Microsoft or Work account.
-
-To deploy, you will need the tenant ID of your External ID. In the instructions below, replace `<YOUR_TENANT_ID>` with the tenant ID you obtain from the Entra Portal.
-
-To configure, follow these steps:
-
-1. Run `azd env set AZURE_USE_AUTHENTICATION true` to enable App Service authentication.
-2. Run `azd env set AZURE_AUTH_TENANT_ID <YOUR_TENANT_ID>` to set the auth tenant ID if different from your main Azure tenant.
-3. Run `azd env set AZURE_AUTH_LOGIN_ENDPOINT <YOUR-LOGIN-ENDPOINT>` to set the login endpoint for the External ID tenant.
-4. Run `azd auth login --tenant-id <YOUR_TENANT_ID>` to log into your External ID tenant.
-5. Run `./scripts/setup_for_external_id.sh <YOUR_TENANT_ID>`  or `./scripts/setup_for_external_id.ps1 <YOUR_TENANT_ID>` as required.
-6. Then follow the steps for deployment above, including logging into Azure via `azd auth login`
-
 ### CI/CD pipeline
 
 This project includes a Github workflow for deploying the resources to Azure
@@ -141,10 +185,10 @@ However, Azure Container Registry has a fixed cost per registry per day.
 
 You can try the [Azure pricing calculator](https://azure.com/e/2176802ea14941e4959eae8ad335aeb5) for the resources:
 
-- Azure OpenAI Service: S0 tier, ChatGPT model. Pricing is based on token count. [Pricing](https://azure.microsoft.com/pricing/details/cognitive-services/openai-service/)
-- Azure Container App: Consumption tier with 0.5 CPU, 1GiB memory/storage. Pricing is based on resource allocation, and each month allows for a certain amount of free usage. [Pricing](https://azure.microsoft.com/pricing/details/container-apps/)
-- Azure Container Registry: Basic tier. [Pricing](https://azure.microsoft.com/pricing/details/container-registry/)
-- Log analytics: Pay-as-you-go tier. Costs based on data ingested. [Pricing](https://azure.microsoft.com/pricing/details/monitor/)
+* Azure OpenAI Service: S0 tier, ChatGPT model. Pricing is based on token count. [Pricing](https://azure.microsoft.com/pricing/details/cognitive-services/openai-service/)
+* Azure Container App: Consumption tier with 0.5 CPU, 1GiB memory/storage. Pricing is based on resource allocation, and each month allows for a certain amount of free usage. [Pricing](https://azure.microsoft.com/pricing/details/container-apps/)
+* Azure Container Registry: Basic tier. [Pricing](https://azure.microsoft.com/pricing/details/container-registry/)
+* Log analytics: Pay-as-you-go tier. Costs based on data ingested. [Pricing](https://azure.microsoft.com/pricing/details/monitor/)
 
 ⚠️ To avoid unnecessary costs, remember to take down your app if it's no longer in use,
 either by deleting the resource group in the Portal or running `azd down`.

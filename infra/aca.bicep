@@ -11,8 +11,6 @@ param openAiDeploymentName string
 param openAiEndpoint string
 param openAiApiVersion string
 
-@description('Enable Auth')
-param useAuthentication bool
 param clientId string
 
 param tenantIdForAuth string
@@ -24,7 +22,7 @@ param clientSecret string
 // the issuer is different depending if we are in a workforce or external tenant
 var openIdIssuer = empty(loginEndpoint) ? '${environment().authentication.loginEndpoint}${tenantIdForAuth}/v2.0' : 'https://${loginEndpoint}/${tenantIdForAuth}/v2.0'
 
-var secrets = !useAuthentication ? {} : {
+var secrets = {
   'microsoft-provider-authentication-secret': clientSecret
 }
 
@@ -72,7 +70,7 @@ module app 'core/host/container-app-upsert.bicep' = {
 }
 
 
-module auth 'core/host/container-apps-auth.bicep' = if (useAuthentication) {
+module auth 'core/host/container-apps-auth.bicep' = {
   name: '${serviceName}-container-apps-auth-module'
   params: {
     name: app.outputs.name

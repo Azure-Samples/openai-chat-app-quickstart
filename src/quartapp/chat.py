@@ -27,6 +27,13 @@ async def configure_openai():
         bp.openai_client = openai.AsyncOpenAI(
             **client_args,
         )
+    elif os.getenv("OPENAICOM_KEY"):
+        # Use an OpenAI API key
+        current_app.logger.info("Using OpenAI.com OpenAI with key")
+        client_args["api_key"] = os.getenv("OPENAICOM_KEY")
+        bp.openai_client = openai.AsyncOpenAI(
+            **client_args,
+        )
     else:
         # Use an Azure OpenAI endpoint instead,
         # either with a key or with keyless authentication
