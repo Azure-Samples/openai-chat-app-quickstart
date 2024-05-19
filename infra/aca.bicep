@@ -45,7 +45,8 @@ module app 'core/host/container-app-upsert.bicep' = {
         value: 'true'
       }
       {
-        name: 'AZURE_OPENAI_CLIENT_ID'
+        // DefaultAzureCredential will look for an environment variable with this name:
+        name: 'AZURE_CLIENT_ID'
         value: acaIdentity.properties.clientId
       }
     ]

@@ -31,6 +31,9 @@
       },
       "acaExists": {
         "value": "${SERVICE_ACA_RESOURCE_EXISTS=false}"
+      },
+      "disableKeyBasedAuth": {
+        "value": "${DISABLE_KEY_BASED_AUTH=true}"
       }
     }
   }
