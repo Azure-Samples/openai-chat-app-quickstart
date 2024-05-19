@@ -24,6 +24,7 @@ since the local app needs credentials for Azure OpenAI to work properly.
 * A Python [Quart](https://quart.palletsprojects.com/en/latest/) that uses the [openai](https://pypi.org/project/openai/) package to generate responses to user messages.
 * A basic HTML/JS frontend that streams responses from the backend using [JSON Lines](http://jsonlines.org/) over a [ReadableStream](https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream).
 * [Bicep files](https://docs.microsoft.com/azure/azure-resource-manager/bicep/) for provisioning Azure resources, including Azure OpenAI, Azure Container Apps, Azure Container Registry, Azure Log Analytics, and RBAC roles.
+* Support for using [local LLMs](/docs/local_ollama.md) during development.
 
 ![Screenshot of the chat app](docs/screenshot_chatapp.png)
 
