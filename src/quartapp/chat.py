@@ -36,22 +36,15 @@ async def configure_openai():
             current_app.logger.info("Using Azure OpenAI with key")
             client_args["api_key"] = os.getenv("AZURE_OPENAI_KEY")
         else:
-            if client_id := os.getenv("AZURE_OPENAI_CLIENT_ID"):
-                # Authenticate using a user-assigned managed identity on Azure
-                # See aca.bicep for value of AZURE_OPENAI_CLIENT_ID
-                current_app.logger.info(
-                    "Using Azure OpenAI with managed identity for client ID %s",
-                    client_id,
-                )
-                default_credential = azure.identity.aio.ManagedIdentityCredential(client_id=client_id)
-            else:
-                # Authenticate using the default Azure credential chain
-                # See https://docs.microsoft.com/azure/developer/python/azure-sdk-authenticate#defaultazurecredential
-                # This will *not* work inside a Docker container.
-                current_app.logger.info("Using Azure OpenAI with default credential")
-                default_credential = azure.identity.aio.DefaultAzureCredential(
-                    exclude_shared_token_cache_credential=True
-                )
+            # Authenticate using the default Azure credential chain
+            # See https://docs.microsoft.com/azure/developer/python/azure-sdk-authenticate#defaultazurecredential
+            # This will *not* work inside a local Docker container.
+            # If using managed user-assigned identity, make sure that AZURE_CLIENT_ID is set
+            # to the client ID of the user-assigned identity.
+            current_app.logger.info("Using Azure OpenAI with default credential")
+            default_credential = azure.identity.aio.DefaultAzureCredential(
+                exclude_shared_token_cache_credential=True
+            )
             client_args["azure_ad_token_provider"] = azure.identity.aio.get_bearer_token_provider(
                 default_credential, "https://cognitiveservices.azure.com/.default"
             )
@@ -91,7 +84,6 @@ async def chat_handler():
         )
         try:
             async for event in await chat_coroutine:
-                current_app.logger.info(event)
                 yield json.dumps(event.model_dump(), ensure_ascii=False) + "\n"
         except Exception as e:
             current_app.logger.error(e)

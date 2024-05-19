@@ -23,6 +23,7 @@ param openAiResourceGroupLocation string = ''
 param openAiSkuName string = ''
 param openAiDeploymentCapacity int = 30
 param openAiApiVersion string = ''
+param disableKeyBasedAuth bool = true
 
 var resourceToken = toLower(uniqueString(subscription().id, name, location))
 var tags = { 'azd-env-name': name }
@@ -47,6 +48,7 @@ module openAi 'core/ai/cognitiveservices.bicep' = {
     name: !empty(openAiResourceName) ? openAiResourceName : '${resourceToken}-cog'
     location: !empty(openAiResourceGroupLocation) ? openAiResourceGroupLocation : location
     tags: tags
+    disableLocalAuth: disableKeyBasedAuth
     sku: {
       name: !empty(openAiSkuName) ? openAiSkuName : 'S0'
     }
@@ -60,7 +62,7 @@ module openAi 'core/ai/cognitiveservices.bicep' = {
         }
         sku: {
           name: 'Standard'
-          capacity: 30
+          capacity: openAiDeploymentCapacity
         }
       }
     ]
