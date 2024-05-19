@@ -42,9 +42,7 @@ async def configure_openai():
             # If using managed user-assigned identity, make sure that AZURE_CLIENT_ID is set
             # to the client ID of the user-assigned identity.
             current_app.logger.info("Using Azure OpenAI with default credential")
-            default_credential = azure.identity.aio.DefaultAzureCredential(
-                exclude_shared_token_cache_credential=True
-            )
+            default_credential = azure.identity.aio.DefaultAzureCredential(exclude_shared_token_cache_credential=True)
             client_args["azure_ad_token_provider"] = azure.identity.aio.get_bearer_token_provider(
                 default_credential, "https://cognitiveservices.azure.com/.default"
             )

@@ -194,7 +194,8 @@ Additionally, we have added a [GitHub Action](https://github.com/microsoft/secur
 
 You may want to consider additional security measures, such as:
 
-* Protecting the Azure Container Apps instance with a [firewall](https://learn.microsoft.com/azure/container-apps/waf-app-gateway) and/or [Virtual Network](https://learn.microsoft.com/azure/container-apps/networking?tabs=workload-profiles-env%2Cazure-cli).
+* Protecting the Azure Container Apps instance with a [firewall](https://learn.microsoft.com/azure/container-apps/waf-app-gateway).
+* Using a [Virtual Network](https://learn.microsoft.com/azure/container-apps/networking?tabs=workload-profiles-env%2Cazure-cli) to restrict access to the Azure OpenAI service and Azure Container Apps.
 
 ## Resources
 
