@@ -14,7 +14,7 @@ async def test_index(client):
 @pytest.mark.asyncio
 async def test_chat_stream_text(client, snapshot):
     response = await client.post(
-        "/chat",
+        "/chat/stream",
         json={
             "messages": [
                 {"role": "user", "content": "What is the capital of France?"},
@@ -29,7 +29,7 @@ async def test_chat_stream_text(client, snapshot):
 @pytest.mark.asyncio
 async def test_chat_stream_text_history(client, snapshot):
     response = await client.post(
-        "/chat",
+        "/chat/stream",
         json={
             "messages": [
                 {"role": "user", "content": "What is the capital of France?"},
