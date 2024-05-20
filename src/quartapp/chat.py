@@ -88,7 +88,7 @@ async def chat_handler():
             async for event in await chat_coroutine:
                 event_dict = event.model_dump()
                 if event_dict["choices"]:
-                    yield json.dumps(event_dict["choices"][1], ensure_ascii=False) + "\n"
+                    yield json.dumps(event_dict["choices"][0], ensure_ascii=False) + "\n"
         except Exception as e:
             current_app.logger.error(e)
             yield json.dumps({"error": str(e)}, ensure_ascii=False) + "\n"
