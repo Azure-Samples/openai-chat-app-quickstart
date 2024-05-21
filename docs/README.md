@@ -48,7 +48,7 @@ since the local app needs credentials for Azure OpenAI to work properly.
 
 ## Architecture diagram
 
-![Architecture diagram: Azure Container Apps inside Container Apps Environment, connected to Container Registry with Container, connected to Managed Identity for Azure OpenAI](readme_diagram.png)
+![Architecture diagram: Azure Container Apps inside Container Apps Environment, connected to Container Registry with Container, connected to Managed Identity for Azure OpenAI](/readme_diagram.png)
 
 ## Opening the project
 
