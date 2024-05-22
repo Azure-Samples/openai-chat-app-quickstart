@@ -76,9 +76,7 @@
         const converter = new showdown.Converter();
         const messages = [];
 
-        const client = new ChatProtocol.AIChatProtocolClient("/chat", {
-            allowInsecureConnection: true
-        });
+        const client = new ChatProtocol.AIChatProtocolClient("/chat");
 
         form.addEventListener("submit", async function(e) {
             e.preventDefault();
