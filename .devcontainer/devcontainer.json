@@ -1,13 +1,11 @@
 {
-    "name": "Azure Developer CLI",
+    "name": "openai-chat-app-quickstart",
     "image": "mcr.microsoft.com/devcontainers/python:3.11-bullseye",
     "forwardPorts": [50505],
     "features": {
-        "ghcr.io/devcontainers/features/powershell:1.2.0": {},
         "ghcr.io/devcontainers/features/docker-in-docker:latest": {
             "dockerDashComposeVersion": "v2"
         },
-        "ghcr.io/devcontainers/features/azure-cli:1": {},
         "ghcr.io/azure/azure-dev/azd:latest": {}
     },
     "customizations": {
