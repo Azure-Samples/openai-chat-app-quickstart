@@ -1,3 +1,22 @@
+---
+page_type: sample
+languages:
+- azdeveloper
+- python
+- html
+- dockerfile
+- bicep
+products:
+- azure
+- azure-openai
+- azure-container-apps
+- azure-container-registry
+urlFragment: openai-chat-app-quickstart
+name: Chat Application using Azure OpenAI (Python)
+description: Using a simple chat application with Python, the sample uses managed identity for Azure OpenAI access and is designed for deployment on Azure Container Apps with the Azure Developer CLI.
+---
+<!-- YAML front-matter schema: https://review.learn.microsoft.com/en-us/help/contribute/samples/process/onboarding?branch=main#supported-metadata-fields-for-readmemd -->
+
 # Chat Application using Azure OpenAI (Python)
 
 [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/Azure-Samples/openai-chat-app-quickstart)
