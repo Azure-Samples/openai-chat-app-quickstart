@@ -10,6 +10,8 @@ param exists bool
 param openAiDeploymentName string
 param openAiEndpoint string
 param openAiApiVersion string
+@secure()
+param openAiKey string
 
 resource acaIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
   name: identityName
@@ -50,6 +52,9 @@ module app 'core/host/container-app-upsert.bicep' = {
         value: acaIdentity.properties.clientId
       }
     ]
+    secrets: {
+      AZURE_OPENAI_KEY: openAiKey
+    }
     targetPort: 50505
   }
 }
