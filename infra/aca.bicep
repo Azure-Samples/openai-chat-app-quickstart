@@ -11,7 +11,7 @@ param openAiDeploymentName string
 param openAiEndpoint string
 param openAiApiVersion string
 @secure()
-param openAiKey string
+param openAiKey string = ''
 
 resource acaIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
   name: identityName
