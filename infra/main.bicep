@@ -21,9 +21,21 @@ param openAiResourceName string = ''
 param openAiResourceGroupName string = ''
 param openAiResourceGroupLocation string = ''
 param openAiSkuName string = ''
+param openAiDeploymentName string // Set in main.parameters.json
 param openAiDeploymentCapacity int = 30
 param openAiApiVersion string = ''
 param disableKeyBasedAuth bool = true
+
+@description('Flag to decide whether to create Azure OpenAI instance or not')
+param createAzureOpenAi bool // Set in main.parameters.json
+
+@description('Azure OpenAI key to use for authentication. If not provided, managed identity will be used (and is preferred)')
+@secure()
+param openAiKey string = ''
+
+@description('Azure OpenAI endpoint to use. If provided, no Azure OpenAI instance will be created.')
+param openAiEndpoint string = ''
+
 
 var resourceToken = toLower(uniqueString(subscription().id, name, location))
 var tags = { 'azd-env-name': name }
@@ -40,8 +52,7 @@ resource openAiResourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' exi
 
 var prefix = '${name}-${resourceToken}'
 
-var openAiDeploymentName = 'chatgpt'
-module openAi 'core/ai/cognitiveservices.bicep' = {
+module openAi 'core/ai/cognitiveservices.bicep' = if (createAzureOpenAi) {
   name: 'openai'
   scope: openAiResourceGroup
   params: {
@@ -105,14 +116,15 @@ module aca 'aca.bicep' = {
     containerAppsEnvironmentName: containerApps.outputs.environmentName
     containerRegistryName: containerApps.outputs.registryName
     openAiDeploymentName: openAiDeploymentName
-    openAiEndpoint: openAi.outputs.endpoint
+    openAiEndpoint: createAzureOpenAi ? openAi.outputs.endpoint : openAiEndpoint
     openAiApiVersion: openAiApiVersion
+    openAiKey: openAiKey
     exists: acaExists
   }
 }
 
 
-module openAiRoleUser 'core/security/role.bicep' = if (createRoleForUser) {
+module openAiRoleUser 'core/security/role.bicep' = if (createRoleForUser && createAzureOpenAi) {
   scope: openAiResourceGroup
   name: 'openai-role-user'
   params: {
@@ -123,7 +135,7 @@ module openAiRoleUser 'core/security/role.bicep' = if (createRoleForUser) {
 }
 
 
-module openAiRoleBackend 'core/security/role.bicep' = {
+module openAiRoleBackend 'core/security/role.bicep' = if (createAzureOpenAi) {
   scope: openAiResourceGroup
   name: 'openai-role-backend'
   params: {
@@ -137,7 +149,7 @@ output AZURE_LOCATION string = location
 
 output AZURE_OPENAI_CHATGPT_DEPLOYMENT string = openAiDeploymentName
 output AZURE_OPENAI_API_VERSION string = openAiApiVersion
-output AZURE_OPENAI_ENDPOINT string = openAi.outputs.endpoint
+output AZURE_OPENAI_ENDPOINT string = createAzureOpenAi ? openAi.outputs.endpoint : openAiEndpoint
 
 output SERVICE_ACA_IDENTITY_PRINCIPAL_ID string = aca.outputs.SERVICE_ACA_IDENTITY_PRINCIPAL_ID
 output SERVICE_ACA_NAME string = aca.outputs.SERVICE_ACA_NAME

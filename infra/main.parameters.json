@@ -11,6 +11,9 @@
       "principalId": {
         "value": "${AZURE_PRINCIPAL_ID}"
       },
+      "openAiDeploymentName": {
+        "value": "${AZURE_OPENAI_CHATGPT_DEPLOYMENT=gpt-35-turbo}"
+      },
       "openAiResourceName": {
         "value": "${AZURE_OPENAI_RESOURCE}"
       },
@@ -25,6 +28,15 @@
       },
       "openAiApiVersion": {
         "value": "${AZURE_OPENAI_API_VERSION}"
+      },
+      "createAzureOpenAi": {
+        "value": "${CREATE_AZURE_OPENAI=true}"
+      },
+      "openAiKey": {
+        "value": "${AZURE_OPENAI_KEY}"
+      },
+      "openAiEndpoint": {
+        "value": "${AZURE_OPENAI_ENDPOINT}"
       },
       "createRoleForUser": {
         "value": "${CREATE_ROLE_FOR_USER=true}"
