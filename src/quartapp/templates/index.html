@@ -65,7 +65,7 @@
         </div>
 	</main>
     <script src="https://cdn.jsdelivr.net/npm/showdown@2.1.0/dist/showdown.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@microsoft/ai-chat-protocol@1.0.0-alpha.20240520.1/dist/iife/index.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@microsoft/ai-chat-protocol@1.0.0-beta.20240610.1/dist/iife/index.js"></script>
 
     <script>
         const form = document.getElementById("chat-form");
@@ -95,32 +95,36 @@
                 "content": message
             });
 
-            const result = await client.getStreamedCompletion(messages);
+            try {
+                const result = await client.getStreamedCompletion(messages);
 
-            let answer = "";
-            for await (const response of result) {
-                if (!response.delta) {
-                    continue;
-                }
-                if (response.delta.content) {
-                    // Clear out the DIV if its the first answer chunk we've received
-                    if (answer == "") {
-                        messageDiv.innerHTML = "";
+                let answer = "";
+                for await (const response of result) {
+                    if (!response.delta) {
+                        continue;
                     }
-                    answer += response.delta.content;
-                    messageDiv.innerHTML = converter.makeHtml(answer);
-                    messageDiv.scrollIntoView();
+                    if (response.delta.content) {
+                        // Clear out the DIV if its the first answer chunk we've received
+                        if (answer == "") {
+                            messageDiv.innerHTML = "";
+                        }
+                        answer += response.delta.content;
+                        messageDiv.innerHTML = converter.makeHtml(answer);
+                        messageDiv.scrollIntoView();
+                    }
+                    if (response.error) {
+                        messageDiv.innerHTML = "Error: " + response.error;
+                    }
                 }
-                if (response.error) {
-                    messageDiv.innerHTML = "Error: " + response.error;
-                }
-            }
-            messages.push({
-                "role": "assistant",
-                "content": answer
-            });
+                messages.push({
+                    "role": "assistant",
+                    "content": answer
+                });
 
-            messageInput.value = "";
+                messageInput.value = "";
+            } catch (error) {
+                messageDiv.innerHTML = "Error: " + error;
+            }
         });
     </script>
 </body>

@@ -149,15 +149,7 @@ output AZURE_LOCATION string = location
 
 output AZURE_OPENAI_CHATGPT_DEPLOYMENT string = openAiDeploymentName
 output AZURE_OPENAI_API_VERSION string = openAiApiVersion
-<<<<<<< Updated upstream
-output AZURE_OPENAI_ENDPOINT string = openAi.outputs.endpoint
-=======
 output AZURE_OPENAI_ENDPOINT string = createAzureOpenAi ? openAi.outputs.endpoint : openAiEndpoint
-output AZURE_OPENAI_RESOURCE string = createAzureOpenAi ? openAi.outputs.name : ''
-output AZURE_OPENAI_RESOURCE_GROUP string = createAzureOpenAi ? openAiResourceGroup.name : ''
-output AZURE_OPENAI_SKU_NAME string = createAzureOpenAi ? openAi.outputs.skuName : ''
-output AZURE_OPENAI_RESOURCE_GROUP_LOCATION string = createAzureOpenAi ? openAiResourceGroup.location : ''
->>>>>>> Stashed changes
 
 output SERVICE_ACA_IDENTITY_PRINCIPAL_ID string = aca.outputs.SERVICE_ACA_IDENTITY_PRINCIPAL_ID
 output SERVICE_ACA_NAME string = aca.outputs.SERVICE_ACA_NAME
