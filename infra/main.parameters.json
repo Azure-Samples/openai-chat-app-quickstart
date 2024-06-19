@@ -12,7 +12,7 @@
         "value": "${AZURE_PRINCIPAL_ID}"
       },
       "openAiDeploymentName": {
-        "value": "${AZURE_OPENAI_CHATGPT_DEPLOYMENT=gpt-35-turbo}"
+        "value": "${AZURE_OPENAI_CHATGPT_DEPLOYMENT=gpt-4o}"
       },
       "openAiResourceName": {
         "value": "${AZURE_OPENAI_RESOURCE}"

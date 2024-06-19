@@ -19,7 +19,6 @@ param acaExists bool = false
 
 param openAiResourceName string = ''
 param openAiResourceGroupName string = ''
-param openAiResourceGroupLocation string = ''
 param openAiSkuName string = ''
 param openAiDeploymentName string // Set in main.parameters.json
 param openAiDeploymentCapacity int = 30
@@ -57,7 +56,6 @@ module openAi 'core/ai/cognitiveservices.bicep' = if (createAzureOpenAi) {
   scope: openAiResourceGroup
   params: {
     name: !empty(openAiResourceName) ? openAiResourceName : '${resourceToken}-cog'
-    location: !empty(openAiResourceGroupLocation) ? openAiResourceGroupLocation : location
     tags: tags
     disableLocalAuth: disableKeyBasedAuth
     sku: {
@@ -68,11 +66,11 @@ module openAi 'core/ai/cognitiveservices.bicep' = if (createAzureOpenAi) {
         name: openAiDeploymentName
         model: {
           format: 'OpenAI'
-          name: 'gpt-35-turbo'
-          version: '0613'
+          name: 'gpt-4o'
+          version: '2024-05-13'
         }
         sku: {
-          name: 'Standard'
+          name: 'GlobalStandard'
           capacity: openAiDeploymentCapacity
         }
       }
