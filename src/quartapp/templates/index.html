@@ -27,6 +27,8 @@
                                     You
                                 </strong>
                             </div>
+                            <div class="toast-body message-file">
+                            </div>
                             <div class="toast-body message-content">
                             </div>
                         </div>
@@ -98,18 +100,25 @@
 
         form.addEventListener("submit", async function(e) {
             e.preventDefault();
+
+            const file = document.getElementById("file").files[0];
+            const fileData = file ? await toBase64(file) : null;
+
             const message = messageInput.value;
 
             const userTemplateClone = userTemplate.content.cloneNode(true);
             userTemplateClone.querySelector(".message-content").innerText = message;
+            if (file) {
+                const img = document.createElement("img");
+                img.src = fileData;
+                userTemplateClone.querySelector(".message-file").appendChild(img);
+            }
             targetContainer.appendChild(userTemplateClone);
 
             const assistantTemplateClone = assistantTemplate.content.cloneNode(true);
             let messageDiv = assistantTemplateClone.querySelector(".message-content");
             targetContainer.appendChild(assistantTemplateClone);
 
-            const file = document.getElementById("file").files[0];
-            const fileData = file ? await toBase64(file) : null;
 
             messages.push({
                 "role": "user",

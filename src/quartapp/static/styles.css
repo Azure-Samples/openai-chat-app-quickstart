@@ -10,6 +10,11 @@ html, body {
     margin-bottom: 12px;
 }
 
+#messages .message-file img {
+    max-width: 100%;
+    max-height: 400px;
+}
+
 .background-user {
     background-color: #2372cc;
 }

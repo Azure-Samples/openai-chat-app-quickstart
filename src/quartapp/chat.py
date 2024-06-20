@@ -80,7 +80,7 @@ async def chat_handler():
         all_messages = [
             {"role": "system", "content": "You are a helpful assistant."},
         ] + request_messages[0:-1]
-
+        all_messages = request_messages[0:-1]
         if image:
             user_content = []
             user_content.append({"text": request_messages[-1]["content"], "type": "text"})
@@ -88,6 +88,7 @@ async def chat_handler():
             all_messages.append({"role": "user", "content": user_content})
         else:
             all_messages.append(request_messages[-1])
+
         chat_coroutine = bp.openai_client.chat.completions.create(
             # Azure Open AI takes the deployment name as the model name
             model=os.environ["AZURE_OPENAI_CHATGPT_DEPLOYMENT"],
