@@ -111,7 +111,7 @@ packaging==24.1
     # via
     #   gunicorn
     #   msal-extensions
-portalocker==2.8.2
+portalocker==2.10.0
     # via msal-extensions
 priority==2.0.0
     # via hypercorn
