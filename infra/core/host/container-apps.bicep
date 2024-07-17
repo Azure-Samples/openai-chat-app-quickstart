@@ -39,7 +39,7 @@ module containerRegistry 'container-registry.bicep' = {
 
 // Wait for the registry to be ready before continuing
 // DNS propagation can take up to 60 sec
-// see: https://learn.microsoft.com/en-us/azure/dns/dns-faq#how-long-does-it-take-for-dns-changes-to-take-effect-
+// see: https://learn.microsoft.com/azure/dns/dns-faq#how-long-does-it-take-for-dns-changes-to-take-effect-
 resource waitForRegistry 'Microsoft.Resources/deploymentScripts@2023-08-01' = {
   name: 'wait-for-registry-app-container-registry'
   location: location
