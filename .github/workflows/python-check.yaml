@@ -27,7 +27,7 @@ jobs:
             python -m pip install --upgrade pip
             pip install -r requirements-dev.txt
         - name: Lint with ruff
-          run: python3 -m ruff .
+          run: python3 -m ruff check .
         - name: Check formatting with black
           run: python3 -m black . --check --verbose
         - name: Run tests with pytest
