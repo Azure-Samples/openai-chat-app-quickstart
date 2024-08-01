@@ -14,6 +14,12 @@
       "openAiDeploymentName": {
         "value": "${AZURE_OPENAI_CHATGPT_DEPLOYMENT=gpt-35-turbo}"
       },
+      "openAiModelName": {
+        "value": "${AZURE_OPENAI_CHATGPT_MODEL=gpt-35-turbo}"
+      },
+      "openAiModelVersion": {
+        "value": "${AZURE_OPENAI_CHATGPT_MODEL_VERSION=0613}"
+      },
       "openAiResourceName": {
         "value": "${AZURE_OPENAI_RESOURCE}"
       },
