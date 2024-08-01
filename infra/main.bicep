@@ -22,6 +22,8 @@ param openAiResourceGroupName string = ''
 param openAiResourceGroupLocation string = ''
 param openAiSkuName string = ''
 param openAiDeploymentName string // Set in main.parameters.json
+param openAiModelName string // Set in main.parameters.json
+param openAiModelVersion string // Set in main.parameters.json  
 param openAiDeploymentCapacity int = 30
 param openAiApiVersion string = ''
 param disableKeyBasedAuth bool = true
@@ -68,8 +70,8 @@ module openAi 'core/ai/cognitiveservices.bicep' = if (createAzureOpenAi) {
         name: openAiDeploymentName
         model: {
           format: 'OpenAI'
-          name: 'gpt-35-turbo'
-          version: '0613'
+          name: openAiModelName
+          version: openAiModelVersion
         }
         sku: {
           name: 'Standard'
