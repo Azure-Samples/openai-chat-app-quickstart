@@ -12,11 +12,15 @@ since the local app needs credentials for Azure OpenAI to work properly.
 
 * [Features](#features)
 * [Architecture diagram](#architecture-diagram)
-* [Opening the project](#opening-the-project)
+* [Getting started](#getting-started)
+  * [GitHub Codespaces](#github-codespaces)
+  * [VS Code Dev Containers](#vs-code-dev-containers)
+  * [Local Environment](#local-environment)
 * [Deploying](#deploying)
 * [Development server](#development-server)
-* [Costs](#costs)
-* [Security Guidelines](#security-guidelines)
+* [Guidance](#guidance)
+  * [Costs](#costs)
+  * [Security Guidelines](#security-guidelines)
 * [Resources](#resources)
 
 ## Features
@@ -32,7 +36,7 @@ since the local app needs credentials for Azure OpenAI to work properly.
 
 ![Architecture diagram: Azure Container Apps inside Container Apps Environment, connected to Container Registry with Container, connected to Managed Identity for Azure OpenAI](readme_diagram.png)
 
-## Opening the project
+## Getting started
 
 You have a few options for getting started with this template.
 The quickest way to get started is GitHub Codespaces, since it will setup all the tools for you, but you can also [set it up locally](#local-environment).
@@ -142,17 +146,43 @@ azd pipeline config
 
 ## Development server
 
-Assuming you've run the steps in [Opening the project](#opening-the-project) and the steps in [Deploying](#deploying), you can now run the Quart app in your development environment:
+In order to run this app, you need to either have an Azure OpenAI account deployed (from the [deploying steps](#deploying)), use a model from [GitHub models](https://github.com/marketplace/models), or use a [local LLM server](/docs/local_ollama.md).
 
-```shell
-python -m quart --app src.quartapp run --port 50505 --reload
-```
+1. Copy `.env.sample.azure` into `.env`:
 
-This will start the app on port 50505, and you can access it at `http://localhost:50505`.
+    ```shell
+    cp .env.sample .env
+    ```
 
-To save costs during development, you may point the app at a [local LLM server](/docs/local_ollama.md).
+2. For use with Azure OpenAI, run this command to get the value of `AZURE_OPENAI_ENDPOINT` from your deployed resource group and paste it in the `.env` file:
 
-## Costs
+    ```shell
+    azd env get-value AZURE_OPENAI_ENDPOINT
+    ```
+
+3. For use with GitHub models, change `OPENAI_HOST` to "github" in the `.env` file.
+
+    You'll need a `GITHUB_TOKEN` environment variable that stores a GitHub personal access token.
+    If you're running this inside a GitHub Codespace, the token will be automatically available.
+    If not, generate a new [personal access token](https://github.com/settings/tokens) and run this command to set the `GITHUB_TOKEN` environment variable:
+
+    ```shell
+    export GITHUB_TOKEN="<your-github-token-goes-here>"
+    ```
+
+4. For use with local models, change `OPENAI_HOST` to "local" in the `.env` file and change `LOCAL_MODELS_ENDPOINT` and `LOCAL_MODELS_NAME` to match the local server. See [local LLM server](/docs/local_ollama.md) for more information.
+
+5. Start the development server:
+
+    ```shell
+    python -m quart --app src.quartapp run --port 50505 --reload
+    ```
+
+    This will start the app on port 50505, and you can access it at `http://localhost:50505`.
+
+## Guidance
+
+### Costs
 
 Pricing varies per region and usage, so it isn't possible to predict exact costs for your usage.
 The majority of the Azure resources used in this infrastructure are on usage-based pricing tiers.
@@ -168,7 +198,7 @@ You can try the [Azure pricing calculator](https://azure.com/e/2176802ea14941e49
 ⚠️ To avoid unnecessary costs, remember to take down your app if it's no longer in use,
 either by deleting the resource group in the Portal or running `azd down`.
 
-## Security Guidelines
+### Security Guidelines
 
 This template uses [Managed Identity](https://learn.microsoft.com/entra/identity/managed-identities-azure-resources/overview) for authenticating to the Azure OpenAI service.
 

@@ -5,9 +5,11 @@ from dotenv import load_dotenv
 from quart import Quart
 
 
-def create_app():
+def create_app(testing=False):
     # We do this here in addition to gunicorn.conf.py, since we don't always use gunicorn
-    load_dotenv(override=True)
+    if not testing:
+        load_dotenv(override=True)
+
     if os.getenv("RUNNING_IN_PRODUCTION"):
         logging.basicConfig(level=logging.WARNING)
     else:

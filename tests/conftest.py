@@ -131,7 +131,7 @@ async def client(monkeypatch, mock_openai_chatcompletion, mock_defaultazurecrede
     monkeypatch.setenv("AZURE_OPENAI_ENDPOINT", "test-openai-service.openai.azure.com")
     monkeypatch.setenv("AZURE_OPENAI_CHATGPT_DEPLOYMENT", "test-chatgpt")
 
-    quart_app = quartapp.create_app()
+    quart_app = quartapp.create_app(testing=True)
 
     async with quart_app.test_app() as test_app:
         quart_app.config.update({"TESTING": True})
