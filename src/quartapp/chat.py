@@ -17,16 +17,23 @@ bp = Blueprint("chat", __name__, template_folder="templates", static_folder="sta
 
 @bp.before_app_serving
 async def configure_openai():
-    client_args = {}
-    if os.getenv("LOCAL_OPENAI_ENDPOINT"):
-        # Use a local endpoint like llamafile server
+    openai_host = os.getenv("OPENAI_HOST")
+    if openai_host == "local":
         current_app.logger.info("Using local OpenAI-compatible API with no key")
-        client_args["api_key"] = "no-key-required"
-        client_args["base_url"] = os.getenv("LOCAL_OPENAI_ENDPOINT")
         bp.openai_client = openai.AsyncOpenAI(
-            **client_args,
+            api_key="no-key-required",
+            base_url=os.environ["LOCAL_MODELS_ENDPOINT"],
         )
+        bp.openai_model = os.environ["LOCAL_MODELS_NAME"]
+    elif openai_host == "github":
+        current_app.logger.info("Using GitHub-hosted model")
+        bp.openai_client = openai.AsyncOpenAI(
+            api_key=os.environ["GITHUB_TOKEN"],
+            base_url=os.environ["GITHUB_MODELS_ENDPOINT"],
+        )
+        bp.openai_model = os.environ["GITHUB_MODELS_NAME"]
     else:
+        client_args = {}
         # Use an Azure OpenAI endpoint instead,
         # either with a key or with keyless authentication
         if os.getenv("AZURE_OPENAI_KEY"):
@@ -55,6 +62,7 @@ async def configure_openai():
             azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
             **client_args,
         )
+        bp.openai_model = os.getenv("AZURE_OPENAI_CHATGPT_DEPLOYMENT")
 
 
 @bp.after_app_serving
@@ -80,7 +88,7 @@ async def chat_handler():
 
         chat_coroutine = bp.openai_client.chat.completions.create(
             # Azure Open AI takes the deployment name as the model name
-            model=os.environ["AZURE_OPENAI_CHATGPT_DEPLOYMENT"],
+            model=bp.openai_model,
             messages=all_messages,
             stream=True,
         )
