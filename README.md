@@ -79,7 +79,7 @@ If you're not using one of the above options for opening the project, then you'l
 2. Download the project code:
 
     ```shell
-    azd init -t openai-chat-app-entra-auth-local
+    azd init -t openai-chat-app-quickstart
     ```
 
 3. Open the project folder
