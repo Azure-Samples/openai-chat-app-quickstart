@@ -10,14 +10,14 @@ param allowedOrigins array = []
 param containerAppsEnvironmentName string
 
 @description('CPU cores allocated to a single container instance, e.g., 0.5')
-param containerCpuCoreCount string = '2.0'
+param containerCpuCoreCount string = '0.5'
 
 @description('The maximum number of replicas to run. Must be at least 1.')
 @minValue(1)
 param containerMaxReplicas int = 10
 
 @description('Memory allocated to a single container instance, e.g., 1Gi')
-param containerMemory string = '4.0Gi'
+param containerMemory string = '1.0Gi'
 
 @description('The minimum number of replicas to run. Must be at least 1.')
 param containerMinReplicas int = 1
