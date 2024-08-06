@@ -14,8 +14,7 @@
                 "ms-azuretools.azure-dev",
                 "ms-azuretools.vscode-bicep",
                 "ms-python.python",
-                "GitHub.vscode-github-actions",
-                "ms-python.black-formatter"
+                "GitHub.vscode-github-actions"
             ]
         }
     },
