@@ -19,7 +19,7 @@ anyio==4.4.0
     #   httpx
     #   openai
     #   watchfiles
-attrs==23.2.0
+attrs==24.2.0
     # via aiohttp
 azure-core==1.30.2
     # via azure-identity
