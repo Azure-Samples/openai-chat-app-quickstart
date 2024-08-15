@@ -5,8 +5,27 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Python: Quart",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "quart",
+            "env": {
+                "QUART_APP": "src.quartapp",
+                "QUART_ENV": "development",
+                "QUART_DEBUG": "0"
+            },
+            "args": [
+                "run",
+                "--no-reload",
+                "-p 50505"
+            ],
+            "console": "integratedTerminal",
+            "jinja": true,
+            "justMyCode": false
+        },
+        {
             "name": "Python: Debug Tests",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "program": "${file}",
             "purpose": ["debug-test"],
