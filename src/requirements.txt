@@ -10,23 +10,25 @@ aiohttp==3.9.5
     # via quartapp (pyproject.toml)
 aiosignal==1.3.1
     # via aiohttp
-annotated-types==0.6.0
+annotated-types==0.7.0
     # via pydantic
-anyio==4.3.0
+anyio==4.4.0
     # via
     #   httpx
     #   openai
     #   watchfiles
 attrs==23.2.0
     # via aiohttp
-azure-core==1.30.1
+azure-core==1.30.2
     # via azure-identity
+main
 azure-identity==1.16.1
     # via quartapp (pyproject.toml)
 blinker==1.8.2
     # via
     #   flask
     #   quart
+main
 certifi==2024.7.4
     # via
     #   httpcore
@@ -41,7 +43,7 @@ click==8.1.7
     #   flask
     #   quart
     #   uvicorn
-cryptography==42.0.7
+cryptography==42.0.8
     # via
     #   azure-identity
     #   msal
@@ -72,7 +74,7 @@ httptools==0.6.1
     # via uvicorn
 httpx==0.27.0
     # via openai
-hypercorn==0.16.0
+hypercorn==0.17.3
     # via quart
 hyperframe==6.0.1
     # via h2
@@ -95,7 +97,7 @@ markupsafe==2.1.5
     #   jinja2
     #   quart
     #   werkzeug
-msal==1.28.0
+msal==1.28.1
     # via
     #   azure-identity
     #   msal-extensions
@@ -105,9 +107,9 @@ multidict==6.0.5
     # via
     #   aiohttp
     #   yarl
-openai==1.30.1
+openai==1.35.1
     # via quartapp (pyproject.toml)
-packaging==24.0
+packaging==24.1
     # via
     #   gunicorn
     #   msal-extensions
@@ -117,14 +119,12 @@ priority==2.0.0
     # via hypercorn
 pycparser==2.22
     # via cffi
-pydantic==2.7.1
+pydantic==2.7.4
     # via openai
-pydantic-core==2.18.2
+pydantic-core==2.18.4
     # via pydantic
 pyjwt[crypto]==2.8.0
-    # via
-    #   msal
-    #   pyjwt
+    # via msal
 python-dotenv==1.0.1
     # via
     #   quartapp (pyproject.toml)
@@ -135,7 +135,7 @@ pyyaml==6.0.1
     #   uvicorn
 quart==0.19.6
     # via quartapp (pyproject.toml)
-requests==2.32.0
+requests==2.32.3
     # via
     #   azure-core
     #   msal
@@ -148,19 +148,20 @@ sniffio==1.3.1
     #   openai
 tqdm==4.66.4
     # via openai
-typing-extensions==4.11.0
+typing-extensions==4.12.2
     # via
     #   azure-core
+    #   azure-identity
     #   openai
     #   pydantic
     #   pydantic-core
 urllib3==2.2.2
     # via requests
-uvicorn[standard]==0.29.0
+uvicorn[standard]==0.30.1
     # via quartapp (pyproject.toml)
 uvloop==0.19.0
     # via uvicorn
-watchfiles==0.21.0
+watchfiles==0.22.0
     # via uvicorn
 websockets==12.0
     # via uvicorn
