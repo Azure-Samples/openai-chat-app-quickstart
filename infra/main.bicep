@@ -17,16 +17,33 @@ param createRoleForUser bool = true
 
 param acaExists bool = false
 
+// Parameters for the Azure OpenAI resource:
 param openAiResourceName string = ''
 param openAiResourceGroupName string = ''
-param openAiResourceGroupLocation string = ''
+@minLength(1)
+@description('Location for the OpenAI resource')
+// Look for the desired model in availability table. Default model is gpt-4o-mini:
+// https://learn.microsoft.com/azure/ai-services/openai/concepts/models#standard-deployment-model-availability
+@allowed([
+  'eastus'
+  'swedencentral'
+])
+@metadata({
+  azd: {
+    type: 'location'
+  }
+})
+param openAiResourceLocation string
 param openAiSkuName string = ''
+param openAiApiVersion string = '' // Used by the SDK in the app code
+param disableKeyBasedAuth bool = true
+
+// Parameters for the specific Azure OpenAI deployment:
 param openAiDeploymentName string // Set in main.parameters.json
 param openAiModelName string // Set in main.parameters.json
-param openAiModelVersion string // Set in main.parameters.json  
-param openAiDeploymentCapacity int = 30
-param openAiApiVersion string = ''
-param disableKeyBasedAuth bool = true
+param openAiModelVersion string // Set in main.parameters.json
+param openAiDeploymentCapacity int // Set in main.parameters.json
+param openAiDeploymentSkuName string // Set in main.parameters.json
 
 @description('Flag to decide whether to create Azure OpenAI instance or not')
 param createAzureOpenAi bool // Set in main.parameters.json
@@ -59,7 +76,7 @@ module openAi 'core/ai/cognitiveservices.bicep' = if (createAzureOpenAi) {
   scope: openAiResourceGroup
   params: {
     name: !empty(openAiResourceName) ? openAiResourceName : '${resourceToken}-cog'
-    location: !empty(openAiResourceGroupLocation) ? openAiResourceGroupLocation : location
+    location: !empty(openAiResourceLocation) ? openAiResourceLocation : location
     tags: tags
     disableLocalAuth: disableKeyBasedAuth
     sku: {
@@ -74,7 +91,7 @@ module openAi 'core/ai/cognitiveservices.bicep' = if (createAzureOpenAi) {
           version: openAiModelVersion
         }
         sku: {
-          name: 'Standard'
+          name: openAiDeploymentSkuName
           capacity: openAiDeploymentCapacity
         }
       }

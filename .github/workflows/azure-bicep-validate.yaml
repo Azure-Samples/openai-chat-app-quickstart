@@ -2,12 +2,12 @@ name: Validate bicep scripts
 on:
   workflow_dispatch:
   push:
-    branches: 
+    branches:
       - main
     paths:
       - "**/*.bicep"
   pull_request:
-    branches: 
+    branches:
       - main
     paths:
       - "**/*.bicep"
@@ -19,10 +19,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Azure CLI script
+      - name: Build Bicep for linting
         uses: azure/CLI@v2
         with:
-          inlineScript: az config set bicep.use_binary_from_path=false && az bicep build -f infra/main.bicep
+          inlineScript: |
+            export DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1
+            az config set bicep.use_binary_from_path=false && az bicep build -f infra/main.bicep --stdout
 
       - name: Run Microsoft Security DevOps Analysis
         uses: microsoft/security-devops-action@preview
