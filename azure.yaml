@@ -3,8 +3,12 @@
 name: simple-chatgpt-python
 metadata:
   template: simple-chatgpt-python@0.1.0-beta
+requiredVersions:
+    azd: ">= 1.10.0"
 services:
   aca:
     project: ./src
     language: py
     host: containerapp
+    docker:
+      remoteBuild: true

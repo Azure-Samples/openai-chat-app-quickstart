@@ -12,13 +12,13 @@
         "value": "${AZURE_PRINCIPAL_ID}"
       },
       "openAiDeploymentName": {
-        "value": "${AZURE_OPENAI_CHATGPT_DEPLOYMENT=gpt-35-turbo}"
+        "value": "${AZURE_OPENAI_CHATGPT_DEPLOYMENT=gpt-4o-mini}"
       },
       "openAiModelName": {
-        "value": "${AZURE_OPENAI_CHATGPT_MODEL=gpt-35-turbo}"
+        "value": "${AZURE_OPENAI_CHATGPT_MODEL=gpt-4o-mini}"
       },
       "openAiModelVersion": {
-        "value": "${AZURE_OPENAI_CHATGPT_MODEL_VERSION=0613}"
+        "value": "${AZURE_OPENAI_CHATGPT_MODEL_VERSION=2024-07-18}"
       },
       "openAiResourceName": {
         "value": "${AZURE_OPENAI_RESOURCE}"
@@ -26,8 +26,14 @@
       "openAiResourceGroupName": {
         "value": "${AZURE_OPENAI_RESOURCE_GROUP}"
       },
-      "openAiResourceGroupLocation": {
-        "value": "${AZURE_OPENAI_RESOURCE_GROUP_LOCATION}"
+      "openAiResourceLocation": {
+        "value": "${AZURE_OPENAI_RESOURCE_LOCATION}"
+      },
+      "openAiDeploymentCapacity": {
+        "value": "${AZURE_OPENAI_DEPLOYMENT_CAPACITY=30}"
+      },
+      "openAiDeploymentSkuName": {
+        "value": "${AZURE_OPENAI_DEPLOYMENT_SKU_NAME=Standard}"
       },
       "openAiSkuName": {
         "value": "${AZURE_OPENAI_SKU_NAME}"
