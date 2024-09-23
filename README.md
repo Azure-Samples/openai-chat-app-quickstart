@@ -72,7 +72,6 @@ If you're not using one of the above options for opening the project, then you'l
 
     * [Azure Developer CLI (azd)](https://aka.ms/install-azd)
     * [Python 3.10+](https://www.python.org/downloads/)
-    * [Redis](https://redis.io/download)
     * [Docker Desktop](https://www.docker.com/products/docker-desktop/)
     * [Git](https://git-scm.com/downloads)
 
