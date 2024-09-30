@@ -15,6 +15,7 @@ since the local app needs credentials for Azure OpenAI to work properly.
 * [Getting started](#getting-started)
   * [GitHub Codespaces](#github-codespaces)
   * [VS Code Dev Containers](#vs-code-dev-containers)
+  * [Local Environment](#local-environment)
 * [Deploying](#deploying)
 * [Development server](#development-server)
 * [Guidance](#guidance)
@@ -27,6 +28,7 @@ since the local app needs credentials for Azure OpenAI to work properly.
 * A Python [Quart](https://quart.palletsprojects.com/en/latest/) that uses the [openai](https://pypi.org/project/openai/) package to generate responses to user messages.
 * A basic HTML/JS frontend that streams responses from the backend using [JSON Lines](http://jsonlines.org/) over a [ReadableStream](https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream).
 * [Bicep files](https://docs.microsoft.com/azure/azure-resource-manager/bicep/) for provisioning Azure resources, including Azure OpenAI, Azure Container Apps, Azure Container Registry, Azure Log Analytics, and RBAC roles.
+* Support for using [local LLMs](/docs/local_ollama.md) during development.
 
 ![Screenshot of the chat app](docs/screenshot_chatapp.png)
 
@@ -62,9 +64,43 @@ A related option is VS Code Dev Containers, which will open the project in your 
 3. In the VS Code window that opens, once the project files show up (this may take several minutes), open a terminal window.
 4. Continue with the [deploying steps](#deploying)
 
+### Local Environment
+
+If you're not using one of the above options for opening the project, then you'll need to:
+
+1. Make sure the following tools are installed:
+
+    * [Azure Developer CLI (azd)](https://aka.ms/install-azd)
+    * [Python 3.10+](https://www.python.org/downloads/)
+    * [Redis](https://redis.io/download)
+    * [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+    * [Git](https://git-scm.com/downloads)
+
+2. Download the project code:
+
+    ```shell
+    azd init -t openai-chat-app-quickstart
+    ```
+
+3. Open the project folder
+4. Create a [Python virtual environment](https://docs.python.org/3/tutorial/venv.html#creating-virtual-environments) and activate it.
+5. Install required Python packages:
+
+    ```shell
+    pip install -r requirements-dev.txt
+    ```
+
+6. Install the app as an editable package:
+
+    ```shell
+    python3 -m pip install -e src
+    ```
+
+7. Continue with the [deploying steps](#deploying).
+
 ## Deploying
 
-Once you've opened the project in [Codespaces](#github-codespaces), or in [Dev Containers](#vs-code-dev-containers) you can deploy it to Azure.
+Once you've opened the project in [Codespaces](#github-codespaces), in [Dev Containers](#vs-code-dev-containers), or [locally](#local-environment), you can deploy it to Azure.
 
 ### Azure account setup
 
@@ -110,7 +146,7 @@ azd pipeline config
 
 ## Development server
 
-In order to run this app, you need to have an Azure OpenAI account deployed (from the [deploying steps](#deploying)).
+In order to run this app, you need to either have an Azure OpenAI account deployed (from the [deploying steps](#deploying)), use a model from [GitHub models](https://github.com/marketplace/models), or use a [local LLM server](/docs/local_ollama.md).
 
 1. Copy `.env.sample.azure` into `.env`:
 
@@ -124,7 +160,19 @@ In order to run this app, you need to have an Azure OpenAI account deployed (fro
     azd env get-value AZURE_OPENAI_ENDPOINT
     ```
 
-53. Start the development server:
+3. For use with GitHub models, change `OPENAI_HOST` to "github" in the `.env` file.
+
+    You'll need a `GITHUB_TOKEN` environment variable that stores a GitHub personal access token.
+    If you're running this inside a GitHub Codespace, the token will be automatically available.
+    If not, generate a new [personal access token](https://github.com/settings/tokens) and run this command to set the `GITHUB_TOKEN` environment variable:
+
+    ```shell
+    export GITHUB_TOKEN="<your-github-token-goes-here>"
+    ```
+
+4. For use with local models, change `OPENAI_HOST` to "local" in the `.env` file and change `LOCAL_MODELS_ENDPOINT` and `LOCAL_MODELS_NAME` to match the local server. See [local LLM server](/docs/local_ollama.md) for more information.
+
+5. Start the development server:
 
     ```shell
     python -m quart --app src.quartapp run --port 50505 --reload
