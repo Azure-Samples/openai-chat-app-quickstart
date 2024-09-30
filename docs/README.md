@@ -31,6 +31,7 @@ since the local app needs credentials for Azure OpenAI to work properly.
 * [Features](#features)
 * [Architecture diagram](#architecture-diagram)
 * [Opening the project](#opening-the-project)
+
 * [Deploying](#deploying)
 * [Development server](#development-server)
 * [Costs](#costs)

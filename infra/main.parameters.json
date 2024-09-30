@@ -33,7 +33,7 @@
         "value": "${AZURE_OPENAI_DEPLOYMENT_CAPACITY=30}"
       },
       "openAiDeploymentSkuName": {
-        "value": "${AZURE_OPENAI_DEPLOYMENT_SKU_NAME=GlobalStandard}"
+        "value": "${AZURE_OPENAI_DEPLOYMENT_SKU_NAME=Standard}"
       },
       "openAiSkuName": {
         "value": "${AZURE_OPENAI_SKU_NAME}"

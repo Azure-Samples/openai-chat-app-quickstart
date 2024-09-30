@@ -30,3 +30,6 @@ azd env set CREATE_AZURE_OPENAI false
 azd env set AZURE_OPENAI_CHATGPT_DEPLOYMENT gpt-35-turbo
 azd env set AZURE_OPENAI_ENDPOINT https://YOUR-ENDPOINT-HERE
 ```
+
+> [!NOTE]
+> Your existing endpoint needs to have the appropriate Role-based access control (RBAC) role assigned. For guidance, refer to [Role-based access control for Azure OpenAI Service](https://learn.microsoft.com/azure/ai-services/openai/how-to/role-based-access-control).

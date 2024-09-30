@@ -17,7 +17,6 @@ bp = Blueprint("chat", __name__, template_folder="templates", static_folder="sta
 
 @bp.before_app_serving
 async def configure_openai():
-    openai_host = os.getenv("OPENAI_HOST")
     client_args = {}
     # Authenticate using the default Azure credential chain
     # See https://docs.microsoft.com/azure/developer/python/azure-sdk-authenticate#defaultazurecredential
