@@ -17,52 +17,27 @@ bp = Blueprint("chat", __name__, template_folder="templates", static_folder="sta
 
 @bp.before_app_serving
 async def configure_openai():
-    openai_host = os.getenv("OPENAI_HOST")
-    if openai_host == "local":
-        current_app.logger.info("Using local OpenAI-compatible API with no key")
-        bp.openai_client = openai.AsyncOpenAI(
-            api_key="no-key-required",
-            base_url=os.environ["LOCAL_MODELS_ENDPOINT"],
-        )
-        bp.openai_model = os.environ["LOCAL_MODELS_NAME"]
-    elif openai_host == "github":
-        current_app.logger.info("Using GitHub-hosted model")
-        bp.openai_client = openai.AsyncOpenAI(
-            api_key=os.environ["GITHUB_TOKEN"],
-            base_url=os.environ["GITHUB_MODELS_ENDPOINT"],
-        )
-        bp.openai_model = os.environ["GITHUB_MODELS_NAME"]
-    else:
-        client_args = {}
-        # Use an Azure OpenAI endpoint instead,
-        # either with a key or with keyless authentication
-        if os.getenv("AZURE_OPENAI_KEY"):
-            # Authenticate using an Azure OpenAI API key
-            # This is generally discouraged, but is provided for developers
-            # that want to develop locally inside the Docker container.
-            current_app.logger.info("Using Azure OpenAI with key")
-            client_args["api_key"] = os.getenv("AZURE_OPENAI_KEY")
-        else:
-            # Authenticate using the default Azure credential chain
-            # See https://docs.microsoft.com/azure/developer/python/azure-sdk-authenticate#defaultazurecredential
-            # This will *not* work inside a local Docker container.
-            # If using managed user-assigned identity, make sure that AZURE_CLIENT_ID is set
-            # to the client ID of the user-assigned identity.
-            current_app.logger.info("Using Azure OpenAI with default credential")
-            default_credential = azure.identity.aio.DefaultAzureCredential(exclude_shared_token_cache_credential=True)
-            client_args["azure_ad_token_provider"] = azure.identity.aio.get_bearer_token_provider(
-                default_credential, "https://cognitiveservices.azure.com/.default"
-            )
-        if not os.getenv("AZURE_OPENAI_ENDPOINT"):
-            raise ValueError("AZURE_OPENAI_ENDPOINT is required for Azure OpenAI")
-        if not os.getenv("AZURE_OPENAI_CHATGPT_DEPLOYMENT"):
-            raise ValueError("AZURE_OPENAI_CHATGPT_DEPLOYMENT is required for Azure OpenAI")
-        bp.openai_client = openai.AsyncAzureOpenAI(
-            api_version=os.getenv("AZURE_OPENAI_API_VERSION") or "2024-02-15-preview",
-            azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
-            **client_args,
-        )
-        bp.openai_model = os.getenv("AZURE_OPENAI_CHATGPT_DEPLOYMENT")
+    client_args = {}
+    # Authenticate using the default Azure credential chain
+    # See https://docs.microsoft.com/azure/developer/python/azure-sdk-authenticate#defaultazurecredential
+    # This will *not* work inside a local Docker container.
+    # If using managed user-assigned identity, make sure that AZURE_CLIENT_ID is set
+    # to the client ID of the user-assigned identity.
+    current_app.logger.info("Using Azure OpenAI with default credential")
+    default_credential = azure.identity.aio.DefaultAzureCredential(exclude_shared_token_cache_credential=True)
+    client_args["azure_ad_token_provider"] = azure.identity.aio.get_bearer_token_provider(
+        default_credential, "https://cognitiveservices.azure.com/.default"
+    )
+    if not os.getenv("AZURE_OPENAI_ENDPOINT"):
+        raise ValueError("AZURE_OPENAI_ENDPOINT is required for Azure OpenAI")
+    if not os.getenv("AZURE_OPENAI_CHATGPT_DEPLOYMENT"):
+        raise ValueError("AZURE_OPENAI_CHATGPT_DEPLOYMENT is required for Azure OpenAI")
+    bp.openai_client = openai.AsyncAzureOpenAI(
+        api_version=os.getenv("AZURE_OPENAI_API_VERSION") or "2024-02-15-preview",
+        azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
+        **client_args,
+    )
+    bp.openai_model = os.getenv("AZURE_OPENAI_CHATGPT_DEPLOYMENT")
 
 
 @bp.after_app_serving

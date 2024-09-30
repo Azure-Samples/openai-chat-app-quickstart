@@ -153,31 +153,11 @@ In order to run this app, you need to either have an Azure OpenAI account deploy
     cp .env.sample .env
     ```
 
-2. For use with Azure OpenAI, run this command to get the value of `AZURE_OPENAI_ENDPOINT` from your deployed resource group and paste it in the `.env` file:
+2. Run this command to get the value of `AZURE_OPENAI_ENDPOINT` from your deployed resource group and paste it in the `.env` file:
 
     ```shell
     azd env get-value AZURE_OPENAI_ENDPOINT
     ```
-
-3. For use with GitHub models, change `OPENAI_HOST` to "github" in the `.env` file.
-
-    You'll need a `GITHUB_TOKEN` environment variable that stores a GitHub personal access token.
-    If you're running this inside a GitHub Codespace, the token will be automatically available.
-    If not, generate a new [personal access token](https://github.com/settings/tokens) and run this command to set the `GITHUB_TOKEN` environment variable:
-
-    ```shell
-    export GITHUB_TOKEN="<your-github-token-goes-here>"
-    ```
-
-4. For use with local models, change `OPENAI_HOST` to "local" in the `.env` file and change `LOCAL_MODELS_ENDPOINT` and `LOCAL_MODELS_NAME` to match the local server. See [local LLM server](/docs/local_ollama.md) for more information.
-
-5. Start the development server:
-
-    ```shell
-    python -m quart --app src.quartapp run --port 50505 --reload
-    ```
-
-    This will start the app on port 50505, and you can access it at `http://localhost:50505`.
 
 ## Guidance
 

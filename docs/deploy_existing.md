@@ -23,13 +23,13 @@ azd env set AZURE_OPENAI_RESOURCE_GROUP_LOCATION {location for that group}
 azd env set AZURE_OPENAI_SKU_NAME {name of the SKU, defaults to "S0"}
 ```
 
-If you don't want to deploy a new Azure OpenAI resource and just want to use an existing one via its endpoint and key, you can set the following values:
+If you don't want to deploy a new Azure OpenAI resource and just want to use an existing one via its endpoint, you can set the following values:
 
 ```shell
 azd env set CREATE_AZURE_OPENAI false
 azd env set AZURE_OPENAI_CHATGPT_DEPLOYMENT gpt-35-turbo
 azd env set AZURE_OPENAI_ENDPOINT https://YOUR-ENDPOINT-HERE
-azd env set AZURE_OPENAI_KEY YOUR-KEY-HERE
 ```
 
-⚠️ We don't recommend using key-based access in production, but it may be useful for testing or development purposes.
+> [!NOTE]
+> Your existing endpoint needs to have the appropriate Role-based access control (RBAC) role assigned. For guidance, refer to [Role-based access control for Azure OpenAI Service](https://learn.microsoft.com/azure/ai-services/openai/how-to/role-based-access-control).

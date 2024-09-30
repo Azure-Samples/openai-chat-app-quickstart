@@ -48,10 +48,6 @@ param openAiDeploymentSkuName string // Set in main.parameters.json
 @description('Flag to decide whether to create Azure OpenAI instance or not')
 param createAzureOpenAi bool // Set in main.parameters.json
 
-@description('Azure OpenAI key to use for authentication. If not provided, managed identity will be used (and is preferred)')
-@secure()
-param openAiKey string = ''
-
 @description('Azure OpenAI endpoint to use. If provided, no Azure OpenAI instance will be created.')
 param openAiEndpoint string = ''
 
@@ -137,7 +133,6 @@ module aca 'aca.bicep' = {
     openAiDeploymentName: openAiDeploymentName
     openAiEndpoint: createAzureOpenAi ? openAi.outputs.endpoint : openAiEndpoint
     openAiApiVersion: openAiApiVersion
-    openAiKey: openAiKey
     exists: acaExists
   }
 }
