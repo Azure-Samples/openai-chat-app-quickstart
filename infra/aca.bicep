@@ -10,8 +10,6 @@ param exists bool
 param openAiDeploymentName string
 param openAiEndpoint string
 param openAiApiVersion string
-@secure()
-param openAiKey string = ''
 
 resource acaIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
   name: identityName
@@ -42,17 +40,6 @@ var env = [
   }
 ]
 
-var envWithSecret = !empty(openAiKey) ? union(env, [
-  {
-    name: 'AZURE_OPENAI_KEY'
-    secretRef: 'azure-openai-key'
-  }
-]) : env
-
-var secrets = !empty(openAiKey) ? {
-  'azure-openai-key': openAiKey
-} : {}
-
 module app 'core/host/container-app-upsert.bicep' = {
   name: '${serviceName}-container-app-module'
   params: {
@@ -63,8 +50,7 @@ module app 'core/host/container-app-upsert.bicep' = {
     exists: exists
     containerAppsEnvironmentName: containerAppsEnvironmentName
     containerRegistryName: containerRegistryName
-    env: envWithSecret
-    secrets: secrets
+    env: env
     targetPort: 50505
   }
 }
