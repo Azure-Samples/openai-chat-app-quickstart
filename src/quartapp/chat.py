@@ -2,6 +2,13 @@ import json
 import os
 
 import azure.identity.aio
+from azure.identity.aio import (
+    AzureDeveloperCliCredential, 
+    ChainedTokenCredential, 
+    ManagedIdentityCredential, 
+    get_bearer_token_provider
+)
+from typing import Union
 from openai import AsyncAzureOpenAI
 from quart import (
     Blueprint,
@@ -17,26 +24,52 @@ bp = Blueprint("chat", __name__, template_folder="templates", static_folder="sta
 
 @bp.before_app_serving
 async def configure_openai():
-    # Authenticate using the default Azure credential chain
-    # See https://docs.microsoft.com/azure/developer/python/azure-sdk-authenticate#defaultazurecredential
-    # This will *not* work inside a local Docker container.
-    # If using managed user-assigned identity, make sure that AZURE_CLIENT_ID is set
-    # to the client ID of the user-assigned identity.
-    current_app.logger.info("Using Azure OpenAI with default credential")
-    default_credential = azure.identity.aio.DefaultAzureCredential(exclude_shared_token_cache_credential=True)
-    token_provider = azure.identity.aio.get_bearer_token_provider(
-        default_credential, "https://cognitiveservices.azure.com/.default"
+    # Configure Environment Variables
+    AZURE_TENANT_ID = os.getenv("AZURE_TENANT_ID")
+    AZURE_CLIENT_ID = os.getenv("AZURE_CLIENT_ID")
+
+    # Check if AZURE_CLIENT_ID is set
+    if not AZURE_CLIENT_ID:
+        raise ValueError("AZURE_CLIENT_ID is required for Authentication.") 
+    
+    # Check if AZURE_TENANT_ID is set, 
+    # If not set, use AzureDeveloperCliCredential with the default tenant.
+    if not AZURE_TENANT_ID:
+        azure_developer_cli_credential = AzureDeveloperCliCredential(tenant_id=AZURE_TENANT_ID, process_timeout=60)
+    else:
+        azure_developer_cli_credential = AzureDeveloperCliCredential(process_timeout=60)
+
+    # Create a ChainedTokenCredential with ManagedIdentityCredential and AzureDeveloperCliCredential
+    #  - ManagedIdentityCredential is used for Azure Functions and Azure App Service
+    #       This is a user-assigned managed identity. User-assigned managed identities are supported by passing the client_id to ManagedIdentityCredential
+    #  - AzureDeveloperCliCredential is used for local development
+    # The order of the credentials is important, as the first valid token is used
+    # for more information check out: 
+    # https://learn.microsoft.com/azure/developer/python/sdk/authentication/credential-chains?tabs=ctc#chainedtokencredential-overview
+    azure_credential = ChainedTokenCredential(
+    ManagedIdentityCredential(client_id=AZURE_CLIENT_ID),
+    azure_developer_cli_credential
+    )
+#TODO: link to managed identity docs ManagedIdentityCredential
+    current_app.logger.info("Using Azure OpenAI with credential")
+    
+    # Get the token provider for Azure OpenAI based on the selected Azure credential
+    token_provider = get_bearer_token_provider(
+        azure_credential, "https://cognitiveservices.azure.com/.default"
     )
     if not os.getenv("AZURE_OPENAI_ENDPOINT"):
         raise ValueError("AZURE_OPENAI_ENDPOINT is required for Azure OpenAI")
-    if not os.getenv("AZURE_OPENAI_CHATGPT_DEPLOYMENT"):
-        raise ValueError("AZURE_OPENAI_CHATGPT_DEPLOYMENT is required for Azure OpenAI")
+    if not os.getenv("AZURE_OPENAI_CHAT_DEPLOYMENT"):
+        raise ValueError("AZURE_OPENAI_CHAT_DEPLOYMENT is required for Azure OpenAI")
+    
+    # Create the Asynchronous Azure OpenAI client
     bp.openai_client = AsyncAzureOpenAI(
         api_version=os.getenv("AZURE_OPENAI_API_VERSION") or "2024-02-15-preview",
         azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
         azure_ad_token_provider=token_provider,
     )
-    bp.openai_model = os.getenv("AZURE_OPENAI_CHATGPT_DEPLOYMENT")
+    # Set the model name to the Azure OpenAI model deployment name
+    bp.openai_model = os.getenv("AZURE_OPENAI_CHAT_DEPLOYMENT")
 
 
 @bp.after_app_serving
