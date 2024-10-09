@@ -129,7 +129,7 @@ def mock_defaultazurecredential(monkeypatch):
 @pytest_asyncio.fixture
 async def client(monkeypatch, mock_openai_chatcompletion, mock_defaultazurecredential):
     monkeypatch.setenv("AZURE_OPENAI_ENDPOINT", "test-openai-service.openai.azure.com")
-    monkeypatch.setenv("AZURE_OPENAI_CHAT_DEPLOYMENT", "test-chatgpt")
+    monkeypatch.setenv("AZURE_OPENAI_CHATGPT_DEPLOYMENT", "test-chatgpt")
 
     quart_app = quartapp.create_app(testing=True)
 

@@ -24,33 +24,30 @@ bp = Blueprint("chat", __name__, template_folder="templates", static_folder="sta
 
 @bp.before_app_serving
 async def configure_openai():
-    # Configure Environment Variables
-    AZURE_TENANT_ID = os.getenv("AZURE_TENANT_ID")
-    AZURE_CLIENT_ID = os.getenv("AZURE_CLIENT_ID")
 
     # Check if AZURE_CLIENT_ID is set
-    if not AZURE_CLIENT_ID:
+    if not os.getenv("AZURE_CLIENT_ID"):
         raise ValueError("AZURE_CLIENT_ID is required for Authentication.") 
-    
+    managed_identity_credential = ManagedIdentityCredential(client_id=os.getenv("AZURE_CLIENT_ID"))
+
     # Check if AZURE_TENANT_ID is set, 
-    # If not set, use AzureDeveloperCliCredential with the default tenant.
-    if not AZURE_TENANT_ID:
-        azure_developer_cli_credential = AzureDeveloperCliCredential(tenant_id=AZURE_TENANT_ID, process_timeout=60)
+    # If set, use AzureDeveloperCliCredential with the default tenant.
+    if os.getenv("AZURE_TENANT_ID"):
+        azure_developer_cli_credential = AzureDeveloperCliCredential(tenant_id=os.getenv("AZURE_TENANT_ID"), process_timeout=60)
     else:
         azure_developer_cli_credential = AzureDeveloperCliCredential(process_timeout=60)
 
     # Create a ChainedTokenCredential with ManagedIdentityCredential and AzureDeveloperCliCredential
-    #  - ManagedIdentityCredential is used for Azure Functions and Azure App Service
-    #       This is a user-assigned managed identity. User-assigned managed identities are supported by passing the client_id to ManagedIdentityCredential
+    #  - ManagedIdentityCredential is used for Azure Container App Service and Azure OpenAI Service
+    #      - User-assigned managed identities are supported by passing the client_id to ManagedIdentityCredential
     #  - AzureDeveloperCliCredential is used for local development
     # The order of the credentials is important, as the first valid token is used
     # for more information check out: 
     # https://learn.microsoft.com/azure/developer/python/sdk/authentication/credential-chains?tabs=ctc#chainedtokencredential-overview
     azure_credential = ChainedTokenCredential(
-    ManagedIdentityCredential(client_id=AZURE_CLIENT_ID),
+    managed_identity_credential,
     azure_developer_cli_credential
     )
-#TODO: link to managed identity docs ManagedIdentityCredential
     current_app.logger.info("Using Azure OpenAI with credential")
     
     # Get the token provider for Azure OpenAI based on the selected Azure credential
