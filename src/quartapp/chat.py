@@ -28,7 +28,8 @@ async def configure_openai():
     # Check if AZURE_CLIENT_ID is set
     if not os.getenv("AZURE_CLIENT_ID"):
         raise ValueError("AZURE_CLIENT_ID is required for Authentication.") 
-    managed_identity_credential = ManagedIdentityCredential(client_id=os.getenv("AZURE_CLIENT_ID"))
+    
+    user_managed_identity_credential = ManagedIdentityCredential(client_id=os.getenv("AZURE_CLIENT_ID"))
 
     # Check if AZURE_TENANT_ID is set, 
     # If set, use AzureDeveloperCliCredential with the default tenant.
@@ -45,7 +46,7 @@ async def configure_openai():
     # for more information check out: 
     # https://learn.microsoft.com/azure/developer/python/sdk/authentication/credential-chains?tabs=ctc#chainedtokencredential-overview
     azure_credential = ChainedTokenCredential(
-    managed_identity_credential,
+    user_managed_identity_credential,
     azure_developer_cli_credential
     )
     current_app.logger.info("Using Azure OpenAI with credential")
