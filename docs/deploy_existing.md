@@ -27,7 +27,7 @@ If you don't want to deploy a new Azure OpenAI resource and just want to use an 
 
 ```shell
 azd env set CREATE_AZURE_OPENAI false
-azd env set AZURE_OPENAI_CHATGPT_DEPLOYMENT gpt-35-turbo
+azd env set AZURE_OPENAI_CHAT_DEPLOYMENT gpt-35-turbo
 azd env set AZURE_OPENAI_ENDPOINT https://YOUR-ENDPOINT-HERE
 ```
 
