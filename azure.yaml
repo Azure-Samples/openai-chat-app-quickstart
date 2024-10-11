@@ -1,8 +1,8 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
 
-name: simple-chatgpt-python
+name: azure-openai-chat-app-quickstart
 metadata:
-  template: simple-chatgpt-python@0.1.0-beta
+  template: azure-openai-chat-app-quickstart@0.2.0
 requiredVersions:
     azd: ">= 1.10.0"
 services:
@@ -23,4 +23,4 @@ hooks:
       shell: sh
       run: ./scripts/pre-down.sh
       continueOnError: false
-      interactive: true  
+      interactive: true
