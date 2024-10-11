@@ -34,24 +34,19 @@ async def configure_openai():
 
     #  - AzureDeveloperCliCredential is used for local development
     # The order of the credentials is important, as the first valid token is used
-    # For more information check out: 
+    # For more information check out:
 
     # https://learn.microsoft.com/azure/developer/python/sdk/authentication/credential-chains?tabs=ctc#chainedtokencredential-overview
-    azure_credential = ChainedTokenCredential(
-    user_assigned_managed_identity_credential,
-    azure_dev_cli_credential
-    )
+    azure_credential = ChainedTokenCredential(user_assigned_managed_identity_credential, azure_dev_cli_credential)
     current_app.logger.info("Using Azure OpenAI with credential")
-    
+
     # Get the token provider for Azure OpenAI based on the selected Azure credential
-    token_provider = get_bearer_token_provider(
-        azure_credential, "https://cognitiveservices.azure.com/.default"
-    )
+    token_provider = get_bearer_token_provider(azure_credential, "https://cognitiveservices.azure.com/.default")
     if not os.getenv("AZURE_OPENAI_ENDPOINT"):
         raise ValueError("AZURE_OPENAI_ENDPOINT is required for Azure OpenAI")
     if not os.getenv("AZURE_OPENAI_CHAT_DEPLOYMENT"):
         raise ValueError("AZURE_OPENAI_CHAT_DEPLOYMENT is required for Azure OpenAI")
-    
+
     # Create the Asynchronous Azure OpenAI client
     bp.openai_client = AsyncAzureOpenAI(
         api_version=os.getenv("AZURE_OPENAI_API_VERSION") or "2024-02-15-preview",
