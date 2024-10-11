@@ -1,10 +1,11 @@
 import json
 import os
+
 from azure.identity.aio import (
-    AzureDeveloperCliCredential, 
-    ChainedTokenCredential, 
-    ManagedIdentityCredential, 
-    get_bearer_token_provider
+    AzureDeveloperCliCredential,
+    ChainedTokenCredential,
+    ManagedIdentityCredential,
+    get_bearer_token_provider,
 )
 from openai import AsyncAzureOpenAI
 from quart import (
