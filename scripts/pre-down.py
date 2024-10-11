@@ -1,5 +1,5 @@
 import argparse
-
+import azure.core.exceptions
 from azure.identity import DefaultAzureCredential
 from azure.mgmt.cognitiveservices import CognitiveServicesManagementClient
 
@@ -10,6 +10,8 @@ parser.add_argument("--resource-group", required=True, help="The name of the Azu
 parser.add_argument("--deployment-name", required=True, help="The name of the deployment to delete.")
 parser.add_argument("--subscription-id", required=True, help="The Azure subscription ID.")
 
+print(f"Pre-down OpenAI script starting.")
+
 args = parser.parse_args()
 
 # Authenticate using DefaultAzureCredential
@@ -17,11 +19,14 @@ credential = DefaultAzureCredential()
 
 # Initialize the Cognitive Services client
 client = CognitiveServicesManagementClient(credential, subscription_id=args.subscription_id)
-
-# Begin delete the deployment
-poller = client.deployments.begin_delete(
-    resource_group_name=args.resource_group, account_name=args.resource_name, deployment_name=args.deployment_name
-)
+try:
+    # Begin delete the deployment
+    poller = client.deployments.begin_delete(
+        resource_group_name=args.resource_group, account_name=args.resource_name, deployment_name=args.deployment_name
+    )
+except azure.core.exceptions.ResourceNotFoundError:
+    print(f"Deployment {args.deployment_name} not found.")
+    exit(0)
 
 # Wait for the delete operation to complete
 poller.result()

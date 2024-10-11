@@ -15,10 +15,10 @@
         "value": "${AZURE_OPENAI_CHAT_DEPLOYMENT=gpt-4o-mini}"
       },
       "openAiModelName": {
-        "value": "${AZURE_OPENAI_CHATGPT_MODEL=gpt-4o-mini}"
+        "value": "${AZURE_OPENAI_CHAT_MODEL=gpt-4o-mini}"
       },
       "openAiModelVersion": {
-        "value": "${AZURE_OPENAI_CHATGPT_MODEL_VERSION=2024-07-18}"
+        "value": "${AZURE_OPENAI_CHAT_MODEL_VERSION=2024-07-18}"
       },
       "openAiResourceName": {
         "value": "${AZURE_OPENAI_RESOURCE}"
