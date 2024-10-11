@@ -25,18 +25,11 @@ bp = Blueprint("chat", __name__, template_folder="templates", static_folder="sta
 @bp.before_app_serving
 async def configure_openai():
 
-    # Check if AZURE_CLIENT_ID is set
-    if not os.getenv("AZURE_CLIENT_ID"):
-        raise ValueError("AZURE_CLIENT_ID is required for Authentication.") 
-    
-    user_managed_identity_credential = ManagedIdentityCredential(client_id=os.getenv("AZURE_CLIENT_ID"))
+    # Use ManagedIdentityCredential with the client_id for user-assigned managed identities
+    user_assigned_managed_identity_credential = ManagedIdentityCredential(client_id=os.getenv("AZURE_CLIENT_ID"))
 
-    # Check if AZURE_TENANT_ID is set, 
-    # If set, use AzureDeveloperCliCredential with the default tenant.
-    if os.getenv("AZURE_TENANT_ID"):
-        azure_developer_cli_credential = AzureDeveloperCliCredential(tenant_id=os.getenv("AZURE_TENANT_ID"), process_timeout=60)
-    else:
-        azure_developer_cli_credential = AzureDeveloperCliCredential(process_timeout=60)
+    # Use AzureDeveloperCliCredential with the current tenant.
+    azure_developer_cli_credential = AzureDeveloperCliCredential(tenant_id=os.getenv("AZURE_TENANT_ID"), process_timeout=60)
 
     # Create a ChainedTokenCredential with ManagedIdentityCredential and AzureDeveloperCliCredential
     #  - ManagedIdentityCredential is used for Azure Container App Service and Azure OpenAI Service
@@ -46,7 +39,7 @@ async def configure_openai():
     # for more information check out: 
     # https://learn.microsoft.com/azure/developer/python/sdk/authentication/credential-chains?tabs=ctc#chainedtokencredential-overview
     azure_credential = ChainedTokenCredential(
-    user_managed_identity_credential,
+    user_assigned_managed_identity_credential,
     azure_developer_cli_credential
     )
     current_app.logger.info("Using Azure OpenAI with credential")
