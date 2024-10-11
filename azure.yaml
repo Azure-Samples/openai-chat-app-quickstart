@@ -18,7 +18,9 @@ hooks:
       shell: pwsh
       run: ./scripts/pre-down.ps1
       continueOnError: false
+      interactive: true
     posix:
       shell: sh
       run: ./scripts/pre-down.sh
       continueOnError: false
+      interactive: true  
