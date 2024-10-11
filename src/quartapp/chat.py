@@ -32,11 +32,12 @@ async def configure_openai():
     azure_developer_cli_credential = AzureDeveloperCliCredential(tenant_id=os.getenv("AZURE_TENANT_ID"), process_timeout=60)
 
     # Create a ChainedTokenCredential with ManagedIdentityCredential and AzureDeveloperCliCredential
-    #  - ManagedIdentityCredential is used for Azure Container App Service and Azure OpenAI Service
-    #      - User-assigned managed identities are supported by passing the client_id to ManagedIdentityCredential
+    #  - ManagedIdentityCredential is used for deployment on Azure Container Apps
+
     #  - AzureDeveloperCliCredential is used for local development
     # The order of the credentials is important, as the first valid token is used
-    # for more information check out: 
+    # For more information check out: 
+
     # https://learn.microsoft.com/azure/developer/python/sdk/authentication/credential-chains?tabs=ctc#chainedtokencredential-overview
     azure_credential = ChainedTokenCredential(
     user_assigned_managed_identity_credential,

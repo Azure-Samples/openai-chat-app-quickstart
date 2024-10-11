@@ -144,7 +144,7 @@ azd pipeline config
 
 ## Development server
 
-In order to run this app, you need to have an Azure OpenAI account deployed (from the [deploying steps](#deploying)).
+Assuming you've run the steps in [Opening the project](#opening-the-project) and the steps in [Deploying](#deploying), you can now run the Quart app in your development environment:
 
 1. Copy `.env.sample.azure` into `.env`:
 
@@ -158,7 +158,7 @@ In order to run this app, you need to have an Azure OpenAI account deployed (fro
     azd env get-value AZURE_OPENAI_ENDPOINT
     ```
 
-Assuming you've run the steps in [Opening the project](#opening-the-project) and the steps in [Deploying](#deploying), you can now run the Quart app in your development environment:
+1. Run the development server:
 
 ```shell
 python -m quart --app src.quartapp run --port 50505 --reload
