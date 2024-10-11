@@ -158,8 +158,6 @@ In order to run this app, you need to have an Azure OpenAI account deployed (fro
     azd env get-value AZURE_OPENAI_ENDPOINT
     ```
 
-## Development server
-
 Assuming you've run the steps in [Opening the project](#opening-the-project) and the steps in [Deploying](#deploying), you can now run the Quart app in your development environment:
 
 ```shell
