@@ -160,9 +160,9 @@ Assuming you've run the steps in [Opening the project](#opening-the-project) and
 
 1. Run the development server:
 
-```shell
-python -m quart --app src.quartapp run --port 50505 --reload
-```
+    ```shell
+    python -m quart --app src.quartapp run --port 50505 --reload
+    ```
 
 This will start the app on port 50505, and you can access it at `http://localhost:50505`.
 

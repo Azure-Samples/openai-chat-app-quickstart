@@ -1,14 +1,11 @@
 import json
 import os
-
-import azure.identity.aio
 from azure.identity.aio import (
     AzureDeveloperCliCredential, 
     ChainedTokenCredential, 
     ManagedIdentityCredential, 
     get_bearer_token_provider
 )
-from typing import Union
 from openai import AsyncAzureOpenAI
 from quart import (
     Blueprint,
@@ -29,7 +26,7 @@ async def configure_openai():
     user_assigned_managed_identity_credential = ManagedIdentityCredential(client_id=os.getenv("AZURE_CLIENT_ID"))
 
     # Use AzureDeveloperCliCredential with the current tenant.
-    azure_developer_cli_credential = AzureDeveloperCliCredential(tenant_id=os.getenv("AZURE_TENANT_ID"), process_timeout=60)
+    azure_dev_cli_credential = AzureDeveloperCliCredential(tenant_id=os.getenv("AZURE_TENANT_ID"), process_timeout=60)
 
     # Create a ChainedTokenCredential with ManagedIdentityCredential and AzureDeveloperCliCredential
     #  - ManagedIdentityCredential is used for deployment on Azure Container Apps
@@ -41,7 +38,7 @@ async def configure_openai():
     # https://learn.microsoft.com/azure/developer/python/sdk/authentication/credential-chains?tabs=ctc#chainedtokencredential-overview
     azure_credential = ChainedTokenCredential(
     user_assigned_managed_identity_credential,
-    azure_developer_cli_credential
+    azure_dev_cli_credential
     )
     current_app.logger.info("Using Azure OpenAI with credential")
     
