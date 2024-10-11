@@ -15,7 +15,6 @@ page_type: sample
 urlFragment: openai-chat-app-quickstart
 ---
 <!-- YAML front-matter schema: https://review.learn.microsoft.com/en-us/help/contribute/samples/process/onboarding?branch=main#supported-metadata-fields-for-readmemd -->
-
 # Chat Application using Azure OpenAI (Python)
 
 [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/Azure-Samples/openai-chat-app-quickstart)
@@ -30,11 +29,15 @@ since the local app needs credentials for Azure OpenAI to work properly.
 
 * [Features](#features)
 * [Architecture diagram](#architecture-diagram)
-* [Opening the project](#opening-the-project)
+* [Getting started](#getting-started)
+  * [GitHub Codespaces](#github-codespaces)
+  * [VS Code Dev Containers](#vs-code-dev-containers)
+  * [Local Environment](#local-environment)
 * [Deploying](#deploying)
 * [Development server](#development-server)
-* [Costs](#costs)
-* [Security Guidelines](#security-guidelines)
+* [Guidance](#guidance)
+  * [Costs](#costs)
+  * [Security Guidelines](#security-guidelines)
 * [Resources](#resources)
 
 ## Features
@@ -43,13 +46,13 @@ since the local app needs credentials for Azure OpenAI to work properly.
 * A basic HTML/JS frontend that streams responses from the backend using [JSON Lines](http://jsonlines.org/) over a [ReadableStream](https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream).
 * [Bicep files](https://docs.microsoft.com/azure/azure-resource-manager/bicep/) for provisioning Azure resources, including Azure OpenAI, Azure Container Apps, Azure Container Registry, Azure Log Analytics, and RBAC roles.
 
-![Screenshot of the chat app](/docs/screenshot_chatapp.png)
+![Screenshot of the chat app](docs/screenshot_chatapp.png)
 
 ## Architecture diagram
 
-![Architecture diagram: Azure Container Apps inside Container Apps Environment, connected to Container Registry with Container, connected to Managed Identity for Azure OpenAI](/readme_diagram.png)
+![Architecture diagram: Azure Container Apps inside Container Apps Environment, connected to Container Registry with Container, connected to Managed Identity for Azure OpenAI](readme_diagram.png)
 
-## Opening the project
+## Getting started
 
 You have a few options for getting started with this template.
 The quickest way to get started is GitHub Codespaces, since it will setup all the tools for you, but you can also [set it up locally](#local-environment).
@@ -91,7 +94,7 @@ If you're not using one of the above options for opening the project, then you'l
 2. Download the project code:
 
     ```shell
-    azd init -t openai-chat-app-entra-auth-local
+    azd init -t openai-chat-app-quickstart
     ```
 
 3. Open the project folder
@@ -160,13 +163,29 @@ azd pipeline config
 
 Assuming you've run the steps in [Opening the project](#opening-the-project) and the steps in [Deploying](#deploying), you can now run the Quart app in your development environment:
 
-```shell
-python -m quart --app src.quartapp run --port 50505 --reload
-```
+1. Copy `.env.sample.azure` into `.env`:
+
+    ```shell
+    cp .env.sample .env
+    ```
+
+2. Run this command to get the value of `AZURE_OPENAI_ENDPOINT` from your deployed resource group and paste it in the `.env` file:
+
+    ```shell
+    azd env get-value AZURE_OPENAI_ENDPOINT
+    ```
+
+1. Run the development server:
+
+    ```shell
+    python -m quart --app src.quartapp run --port 50505 --reload
+    ```
 
 This will start the app on port 50505, and you can access it at `http://localhost:50505`.
 
-## Costs
+## Guidance
+
+### Costs
 
 Pricing varies per region and usage, so it isn't possible to predict exact costs for your usage.
 The majority of the Azure resources used in this infrastructure are on usage-based pricing tiers.
@@ -182,7 +201,7 @@ You can try the [Azure pricing calculator](https://azure.com/e/2176802ea14941e49
 ⚠️ To avoid unnecessary costs, remember to take down your app if it's no longer in use,
 either by deleting the resource group in the Portal or running `azd down`.
 
-## Security Guidelines
+### Security Guidelines
 
 This template uses [Managed Identity](https://learn.microsoft.com/entra/identity/managed-identities-azure-resources/overview) for authenticating to the Azure OpenAI service.
 
@@ -190,12 +209,11 @@ Additionally, we have added a [GitHub Action](https://github.com/microsoft/secur
 
 You may want to consider additional security measures, such as:
 
-* Protecting the Azure Container Apps instance with a [firewall](https://learn.microsoft.com/azure/container-apps/waf-app-gateway).
-* Using a [Virtual Network](https://learn.microsoft.com/azure/container-apps/networking?tabs=workload-profiles-env%2Cazure-cli) to restrict access to the Azure OpenAI service and Azure Container Apps.
+* Protecting the Azure Container Apps instance with a [firewall](https://learn.microsoft.com/azure/container-apps/waf-app-gateway) and/or [Virtual Network](https://learn.microsoft.com/azure/container-apps/networking?tabs=workload-profiles-env%2Cazure-cli).
 
 ## Resources
 
-* [OpenAI Chat Application with Microsoft Entra Authentication - MSAL SDK](https://github.com/Azure-Samples/openai-chat-app-entra-auth-local): Similar to this project, but adds user authentication with Microsoft Entra using the Microsoft Graph SDK and built-in authentication feature of Azure Container Apps.
-* [OpenAI Chat Application with Microsoft Entra Authentication - Built-in Auth](https://github.com/Azure-Samples/openai-chat-app-entra-auth-local): Similar to this project, but adds user authentication with Microsoft Entra using the Microsoft Graph SDK and MSAL SDK.
+* [OpenAI Chat Application with Microsoft Entra Authentication - MSAL SDK](https://github.com/Azure-Samples/openai-chat-app-entra-auth-local): Similar to this project, but adds user authentication with Microsoft Entra using the Microsoft Graph SDK and MSAL SDK.
+* [OpenAI Chat Application with Microsoft Entra Authentication - Built-in Auth](https://github.com/Azure-Samples/openai-chat-app-entra-auth-builtin): Similar to this project, but adds user authentication with Microsoft Entra using the Microsoft Graph SDK and built-in authentication feature of Azure Container Apps.
 * [RAG chat with Azure AI Search + Python](https://github.com/Azure-Samples/azure-search-openai-demo/): A more advanced chat app that uses Azure AI Search to ground responses in domain knowledge. Includes user authentication with Microsoft Entra as well as data access controls.
 * [Develop Python apps that use Azure AI services](https://learn.microsoft.com/azure/developer/python/azure-ai-for-python-developers)
