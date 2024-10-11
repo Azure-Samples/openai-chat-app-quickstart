@@ -144,7 +144,7 @@ azd pipeline config
 
 ## Development server
 
-In order to run this app, you need to either have an Azure OpenAI account deployed (from the [deploying steps](#deploying)), use a model from [GitHub models](https://github.com/marketplace/models), or use a [local LLM server](/docs/local_ollama.md).
+Assuming you've run the steps in [Opening the project](#opening-the-project) and the steps in [Deploying](#deploying), you can now run the Quart app in your development environment:
 
 1. Copy `.env.sample.azure` into `.env`:
 
@@ -157,6 +157,14 @@ In order to run this app, you need to either have an Azure OpenAI account deploy
     ```shell
     azd env get-value AZURE_OPENAI_ENDPOINT
     ```
+
+1. Run the development server:
+
+    ```shell
+    python -m quart --app src.quartapp run --port 50505 --reload
+    ```
+
+This will start the app on port 50505, and you can access it at `http://localhost:50505`.
 
 ## Guidance
 
