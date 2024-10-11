@@ -1,4 +1,5 @@
 import argparse
+
 import azure.core.exceptions
 from azure.identity import DefaultAzureCredential
 from azure.mgmt.cognitiveservices import CognitiveServicesManagementClient
@@ -10,7 +11,7 @@ parser.add_argument("--resource-group", required=True, help="The name of the Azu
 parser.add_argument("--deployment-name", required=True, help="The name of the deployment to delete.")
 parser.add_argument("--subscription-id", required=True, help="The Azure subscription ID.")
 
-print(f"Pre-down OpenAI script starting.")
+print("Pre-down OpenAI script starting.")
 
 args = parser.parse_args()
 
