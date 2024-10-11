@@ -144,7 +144,7 @@ azd pipeline config
 
 ## Development server
 
-Assuming you've run the steps in [Opening the project](#opening-the-project) and the steps in [Deploying](#deploying), you can now run the Quart app in your development environment:
+Assuming you've run the steps to [open the project](#getting-started) and the steps in [Deploying](#deploying), you can now run the Quart app in your development environment:
 
 1. Copy `.env.sample.azure` into `.env`:
 
@@ -158,7 +158,13 @@ Assuming you've run the steps in [Opening the project](#opening-the-project) and
     azd env get-value AZURE_OPENAI_ENDPOINT
     ```
 
-1. Run the development server:
+3. Run this command to get the value of `AZURE_TENANT_ID` from your deployed resource group and paste it in the `.env` file:
+
+    ```shell
+    azd env get-value AZURE_TENANT_ID
+    ```
+
+4. Run the development server:
 
     ```shell
     python -m quart --app src.quartapp run --port 50505 --reload
