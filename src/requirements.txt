@@ -6,20 +6,20 @@
 #
 aiofiles==24.1.0
     # via quart
-aiohappyeyeballs==2.3.4
+aiohappyeyeballs==2.4.3
     # via aiohttp
-aiohttp==3.10.0
+aiohttp==3.10.10
     # via quartapp (pyproject.toml)
 aiosignal==1.3.1
     # via aiohttp
 annotated-types==0.7.0
     # via pydantic
-anyio==4.4.0
+anyio==4.6.0
     # via
     #   httpx
     #   openai
     #   watchfiles
-attrs==23.2.0
+attrs==24.2.0
     # via aiohttp
 azure-core==1.31.0
     # via azure-identity
@@ -29,21 +29,21 @@ blinker==1.8.2
     # via
     #   flask
     #   quart
-certifi==2024.7.4
+certifi==2024.8.30
     # via
     #   httpcore
     #   httpx
     #   requests
-cffi==1.16.0
+cffi==1.17.1
     # via cryptography
-charset-normalizer==3.3.2
+charset-normalizer==3.4.0
     # via requests
 click==8.1.7
     # via
     #   flask
     #   quart
     #   uvicorn
-cryptography==43.0.0
+cryptography==43.0.1
     # via
     #   azure-identity
     #   msal
@@ -56,7 +56,7 @@ frozenlist==1.4.1
     # via
     #   aiohttp
     #   aiosignal
-gunicorn==22.0.0
+gunicorn==23.0.0
     # via quartapp (pyproject.toml)
 h11==0.14.0
     # via
@@ -68,17 +68,17 @@ h2==4.1.0
     # via hypercorn
 hpack==4.0.0
     # via h2
-httpcore==1.0.5
+httpcore==1.0.6
     # via httpx
 httptools==0.6.1
     # via uvicorn
-httpx==0.27.0
+httpx==0.27.2
     # via openai
 hypercorn==0.17.3
     # via quart
 hyperframe==6.0.1
     # via h2
-idna==3.7
+idna==3.10
     # via
     #   anyio
     #   httpx
@@ -92,22 +92,24 @@ jinja2==3.1.4
     # via
     #   flask
     #   quart
-markupsafe==2.1.5
+jiter==0.6.1
+    # via openai
+markupsafe==3.0.1
     # via
     #   jinja2
     #   quart
     #   werkzeug
-msal==1.30.0
+msal==1.31.0
     # via
     #   azure-identity
     #   msal-extensions
 msal-extensions==1.2.0
     # via azure-identity
-multidict==6.0.5
+multidict==6.1.0
     # via
     #   aiohttp
     #   yarl
-openai==1.37.2
+openai==1.51.2
     # via quartapp (pyproject.toml)
 packaging==24.1
     # via gunicorn
@@ -115,11 +117,13 @@ portalocker==2.10.1
     # via msal-extensions
 priority==2.0.0
     # via hypercorn
+propcache==0.2.0
+    # via yarl
 pycparser==2.22
     # via cffi
-pydantic==2.8.2
+pydantic==2.9.2
     # via openai
-pydantic-core==2.20.1
+pydantic-core==2.23.4
     # via pydantic
 pyjwt[crypto]==2.9.0
     # via msal
@@ -127,7 +131,7 @@ python-dotenv==1.0.1
     # via
     #   quartapp (pyproject.toml)
     #   uvicorn
-pyyaml==6.0.1
+pyyaml==6.0.2
     # via
     #   quartapp (pyproject.toml)
     #   uvicorn
@@ -144,7 +148,7 @@ sniffio==1.3.1
     #   anyio
     #   httpx
     #   openai
-tqdm==4.66.4
+tqdm==4.66.5
     # via openai
 typing-extensions==4.12.2
     # via
@@ -153,22 +157,22 @@ typing-extensions==4.12.2
     #   openai
     #   pydantic
     #   pydantic-core
-urllib3==2.2.2
+urllib3==2.2.3
     # via requests
-uvicorn[standard]==0.30.5
+uvicorn[standard]==0.31.1
     # via quartapp (pyproject.toml)
-uvloop==0.19.0
+uvloop==0.20.0
     # via uvicorn
-watchfiles==0.22.0
+watchfiles==0.24.0
     # via uvicorn
-websockets==12.0
+websockets==13.1
     # via uvicorn
-werkzeug==3.0.3
+werkzeug==3.0.4
     # via
     #   flask
     #   quart
     #   quartapp (pyproject.toml)
 wsproto==1.2.0
     # via hypercorn
-yarl==1.9.4
+yarl==1.14.0
     # via aiohttp
