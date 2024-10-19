@@ -1,5 +1,6 @@
 import json
 import os
+import datetime
 
 from azure.identity.aio import (
     AzureDeveloperCliCredential,
@@ -19,10 +20,15 @@ from quart import (
 
 bp = Blueprint("chat", __name__, template_folder="templates", static_folder="static")
 
+# Add a path for logs
+LOG_FILE_PATH = os.path.join(os.path.dirname(__file__), 'logs', 'chat_logs.json')
+
+# Ensure the logs directory exists
+if not os.path.exists(os.path.dirname(LOG_FILE_PATH)):
+    os.makedirs(os.path.dirname(LOG_FILE_PATH))
 
 @bp.before_app_serving
 async def configure_openai():
-
     # Use ManagedIdentityCredential with the client_id for user-assigned managed identities
     user_assigned_managed_identity_credential = ManagedIdentityCredential(client_id=os.getenv("AZURE_CLIENT_ID"))
 
@@ -30,13 +36,6 @@ async def configure_openai():
     azure_dev_cli_credential = AzureDeveloperCliCredential(tenant_id=os.getenv("AZURE_TENANT_ID"), process_timeout=60)
 
     # Create a ChainedTokenCredential with ManagedIdentityCredential and AzureDeveloperCliCredential
-    #  - ManagedIdentityCredential is used for deployment on Azure Container Apps
-
-    #  - AzureDeveloperCliCredential is used for local development
-    # The order of the credentials is important, as the first valid token is used
-    # For more information check out:
-
-    # https://learn.microsoft.com/azure/developer/python/sdk/authentication/credential-chains?tabs=ctc#chainedtokencredential-overview
     azure_credential = ChainedTokenCredential(user_assigned_managed_identity_credential, azure_dev_cli_credential)
     current_app.logger.info("Using Azure OpenAI with credential")
 
@@ -78,6 +77,8 @@ async def chat_handler():
             {"role": "system", "content": "You are a helpful assistant."},
         ] + request_messages
 
+        # Collect the response from Azure OpenAI
+        response_content = []
         chat_coroutine = bp.openai_client.chat.completions.create(
             # Azure Open AI takes the deployment name as the model name
             model=bp.openai_model,
@@ -88,9 +89,34 @@ async def chat_handler():
             async for event in await chat_coroutine:
                 event_dict = event.model_dump()
                 if event_dict["choices"]:
+                    response_content.append(event_dict["choices"][0])
                     yield json.dumps(event_dict["choices"][0], ensure_ascii=False) + "\n"
+
+            # Log the chat interaction to file
+            log_chat_interaction(request_messages, response_content)
+
         except Exception as e:
             current_app.logger.error(e)
             yield json.dumps({"error": str(e)}, ensure_ascii=False) + "\n"
 
     return Response(response_stream())
+
+
+def log_chat_interaction(user_messages, response_content):
+    """Log the interaction to a JSON file for analysis."""
+    log_entry = {
+        "timestamp": str(datetime.datetime.now()),
+        "user_messages": user_messages,
+        "assistant_responses": response_content
+    }
+
+    # Append to the JSON log file
+    if os.path.exists(LOG_FILE_PATH):
+        with open(LOG_FILE_PATH, 'r+', encoding='utf-8') as f:
+            logs = json.load(f)
+            logs.append(log_entry)
+            f.seek(0)
+            json.dump(logs, f, indent=4)
+    else:
+        with open(LOG_FILE_PATH, 'w', encoding='utf-8') as f:
+            json.dump([log_entry], f, indent=4)
