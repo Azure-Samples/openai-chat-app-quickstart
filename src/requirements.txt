@@ -174,5 +174,5 @@ werkzeug==3.0.4
     #   quartapp (pyproject.toml)
 wsproto==1.2.0
     # via hypercorn
-yarl==1.14.0
+yarl==1.15.5
     # via aiohttp
