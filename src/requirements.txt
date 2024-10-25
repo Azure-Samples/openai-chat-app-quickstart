@@ -131,7 +131,7 @@ python-dotenv==1.0.1
     # via quartapp (pyproject.toml)
 pyyaml==6.0.2
     # via quartapp (pyproject.toml)
-quart==0.19.6
+quart==0.19.7
     # via quartapp (pyproject.toml)
 requests==2.32.3
     # via
