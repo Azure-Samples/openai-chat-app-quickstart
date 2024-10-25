@@ -23,7 +23,7 @@ async def test_chat_stream_text(client, snapshot):
     )
     assert response.status_code == 200
     result = await response.get_data()
-    snapshot.assert_match(result, "result.json")
+    snapshot.assert_match(result, "result.jsonlines")
 
 
 @pytest.mark.asyncio
@@ -40,7 +40,7 @@ async def test_chat_stream_text_history(client, snapshot):
     )
     assert response.status_code == 200
     result = await response.get_data()
-    snapshot.assert_match(result, "result.json")
+    snapshot.assert_match(result, "result.jsonlines")
 
 
 @pytest.mark.asyncio
