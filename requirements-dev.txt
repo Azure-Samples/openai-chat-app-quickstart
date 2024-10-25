@@ -1,5 +1,4 @@
 -r src/requirements.txt
-azure-mgmt-cognitiveservices
 black
 ruff
 pre-commit
