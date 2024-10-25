@@ -1,3 +1,4 @@
+name: Deploy to Azure with azd
 on:
   workflow_dispatch:
   push:
