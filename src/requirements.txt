@@ -70,7 +70,7 @@ hpack==4.0.0
     # via h2
 httpcore==1.0.6
     # via httpx
-httptools==0.6.1
+httptools==0.6.4
     # via quartapp (pyproject.toml)
 httpx==0.27.2
     # via openai
