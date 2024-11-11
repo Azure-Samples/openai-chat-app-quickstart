@@ -123,7 +123,7 @@ pycparser==2.22
     # via cffi
 pydantic==2.9.2
     # via openai
-pydantic-core==2.23.4
+pydantic-core==2.26.0
     # via pydantic
 pyjwt[crypto]==2.9.0
     # via msal
