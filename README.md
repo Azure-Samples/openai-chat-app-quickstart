@@ -180,7 +180,7 @@ Pricing varies per region and usage, so it isn't possible to predict exact costs
 The majority of the Azure resources used in this infrastructure are on usage-based pricing tiers.
 However, Azure Container Registry has a fixed cost per registry per day.
 
-You can try the [Azure pricing calculator](https://azure.com/e/2176802ea14941e4959eae8ad335aeb5) for the resources:
+You can try the [Azure pricing calculator](https://azure.com/e/2c1c821757c8420fa99a91039fa92838) for the resources:
 
 * Azure OpenAI Service: S0 tier, ChatGPT model. Pricing is based on token count. [Pricing](https://azure.microsoft.com/pricing/details/cognitive-services/openai-service/)
 * Azure Container App: Consumption tier with 0.5 CPU, 1GiB memory/storage. Pricing is based on resource allocation, and each month allows for a certain amount of free usage. [Pricing](https://azure.microsoft.com/pricing/details/container-apps/)
