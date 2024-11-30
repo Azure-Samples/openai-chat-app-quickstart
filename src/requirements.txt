@@ -52,7 +52,7 @@ distro==1.9.0
     # via openai
 flask==3.0.3
     # via quart
-frozenlist==1.4.1
+frozenlist==1.5.0
     # via
     #   aiohttp
     #   aiosignal
