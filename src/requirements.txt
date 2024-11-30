@@ -25,7 +25,7 @@ azure-core==1.31.0
     # via azure-identity
 azure-identity==1.19.0
     # via quartapp (pyproject.toml)
-blinker==1.8.2
+blinker==1.9.0
     # via
     #   flask
     #   quart
