@@ -1,13 +1,13 @@
 import json
 import os
 
+from azure.ai.inference.aio import ChatCompletionsClient
+from azure.ai.inference.models import SystemMessage
 from azure.identity.aio import (
     AzureDeveloperCliCredential,
     ChainedTokenCredential,
     ManagedIdentityCredential,
-    get_bearer_token_provider,
 )
-from openai import AsyncAzureOpenAI
 from quart import (
     Blueprint,
     Response,
@@ -22,7 +22,6 @@ bp = Blueprint("chat", __name__, template_folder="templates", static_folder="sta
 
 @bp.before_app_serving
 async def configure_openai():
-
     # Use ManagedIdentityCredential with the client_id for user-assigned managed identities
     user_assigned_managed_identity_credential = ManagedIdentityCredential(client_id=os.getenv("AZURE_CLIENT_ID"))
 
@@ -40,26 +39,22 @@ async def configure_openai():
     azure_credential = ChainedTokenCredential(user_assigned_managed_identity_credential, azure_dev_cli_credential)
     current_app.logger.info("Using Azure OpenAI with credential")
 
-    # Get the token provider for Azure OpenAI based on the selected Azure credential
-    token_provider = get_bearer_token_provider(azure_credential, "https://cognitiveservices.azure.com/.default")
-    if not os.getenv("AZURE_OPENAI_ENDPOINT"):
-        raise ValueError("AZURE_OPENAI_ENDPOINT is required for Azure OpenAI")
-    if not os.getenv("AZURE_OPENAI_CHAT_DEPLOYMENT"):
-        raise ValueError("AZURE_OPENAI_CHAT_DEPLOYMENT is required for Azure OpenAI")
+    if not os.getenv("AZURE_INFERENCE_ENDPOINT"):
+        raise ValueError("AZURE_INFERENCE_ENDPOINT is required for Azure OpenAI")
 
     # Create the Asynchronous Azure OpenAI client
-    bp.openai_client = AsyncAzureOpenAI(
-        api_version=os.getenv("AZURE_OPENAI_API_VERSION") or "2024-02-15-preview",
-        azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
-        azure_ad_token_provider=token_provider,
+    bp.ai_client = ChatCompletionsClient(
+        endpoint=os.environ["AZURE_INFERENCE_ENDPOINT"],
+        credential=azure_credential,
+        credential_scopes=["https://cognitiveservices.azure.com/.default"],
+        model="DeepSeek-R1",
+        headers={"x-policy-id": "nil"},
     )
-    # Set the model name to the Azure OpenAI model deployment name
-    bp.openai_model = os.getenv("AZURE_OPENAI_CHAT_DEPLOYMENT")
 
 
 @bp.after_app_serving
 async def shutdown_openai():
-    await bp.openai_client.close()
+    await bp.ai_client.close()
 
 
 @bp.get("/")
@@ -75,22 +70,38 @@ async def chat_handler():
     async def response_stream():
         # This sends all messages, so API request may exceed token limits
         all_messages = [
-            {"role": "system", "content": "You are a helpful assistant."},
+            SystemMessage(content="You are a helpful assistant."),
         ] + request_messages
 
-        chat_coroutine = bp.openai_client.chat.completions.create(
-            # Azure Open AI takes the deployment name as the model name
-            model=bp.openai_model,
-            messages=all_messages,
-            stream=True,
-        )
+        client: ChatCompletionsClient = bp.ai_client
+        result = await client.complete(messages=all_messages, max_tokens=2048, stream=True)
+
         try:
-            async for event in await chat_coroutine:
-                event_dict = event.model_dump()
-                if event_dict["choices"]:
-                    yield json.dumps(event_dict["choices"][0], ensure_ascii=False) + "\n"
+            is_thinking = False
+            async for update in result:
+                if update.choices:
+                    content = update.choices[0].delta.content
+                    if content == "<think>":
+                        is_thinking = True
+                        update.choices[0].delta.content = None
+                        update.choices[0].delta.reasoning_content = ""
+                    elif content == "</think>":
+                        is_thinking = False
+                        update.choices[0].delta.content = None
+                        update.choices[0].delta.reasoning_content = ""
+                    elif content:
+                        if is_thinking:
+                            yield json.dumps(
+                                {"delta": {"content": None, "reasoning_content": content, "role": "assistant"}},
+                                ensure_ascii=False,
+                            ) + "\n"
+                        else:
+                            yield json.dumps(
+                                {"delta": {"content": content, "reasoning_content": None, "role": "assistant"}},
+                                ensure_ascii=False,
+                            ) + "\n"
         except Exception as e:
             current_app.logger.error(e)
             yield json.dumps({"error": str(e)}, ensure_ascii=False) + "\n"
 
-    return Response(response_stream())
+    return Response(response_stream(), mimetype="application/json")

@@ -17,3 +17,39 @@ html, body {
 .background-assistant {
     background-color: #2c8310;
 }
+
+.thoughts {
+    background-color: rgb(239, 239, 239);
+    border-radius: 3px;
+    padding: 6px 6px 0px 6px;
+}
+
+.loading-bar {
+    width: 30%;
+    background-color: #ffffff;
+    border-radius: 4px;
+    overflow: hidden;
+    height: 4px;
+    position: relative;
+}
+
+.loading-bar::before {
+    content: '';
+    display: block;
+    height: 100%;
+    width: 0;
+    background-color: #2c8310;
+    animation: loading 2s infinite;
+}
+
+@keyframes loading {
+    0% {
+        width: 0;
+    }
+    50% {
+        width: 100%;
+    }
+    100% {
+        width: 0;
+    }
+}

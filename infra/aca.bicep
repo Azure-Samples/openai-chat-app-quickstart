@@ -7,9 +7,8 @@ param containerAppsEnvironmentName string
 param containerRegistryName string
 param serviceName string = 'aca'
 param exists bool
-param openAiDeploymentName string
-param openAiEndpoint string
-param openAiApiVersion string
+param aiServicesDeploymentName string
+param aiServicesEndpoint string
 
 resource acaIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
   name: identityName
@@ -18,16 +17,12 @@ resource acaIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-3
 
 var env = [
   {
-    name: 'AZURE_OPENAI_CHAT_DEPLOYMENT'
-    value: openAiDeploymentName
+    name: 'AZURE_DEEPSEEK_DEPLOYMENT'
+    value: aiServicesDeploymentName
   }
   {
-    name: 'AZURE_OPENAI_ENDPOINT'
-    value: openAiEndpoint
-  }
-  {
-    name: 'AZURE_OPENAI_API_VERSION'
-    value: openAiApiVersion
+    name: 'AZURE_INFERENCE_ENDPOINT'
+    value: aiServicesEndpoint
   }
   {
     name: 'RUNNING_IN_PRODUCTION'

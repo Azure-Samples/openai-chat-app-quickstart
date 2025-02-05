@@ -11,42 +11,6 @@
       "principalId": {
         "value": "${AZURE_PRINCIPAL_ID}"
       },
-      "openAiDeploymentName": {
-        "value": "${AZURE_OPENAI_CHAT_DEPLOYMENT=gpt-4o-mini}"
-      },
-      "openAiModelName": {
-        "value": "${AZURE_OPENAI_CHAT_MODEL=gpt-4o-mini}"
-      },
-      "openAiModelVersion": {
-        "value": "${AZURE_OPENAI_CHAT_MODEL_VERSION=2024-07-18}"
-      },
-      "openAiResourceName": {
-        "value": "${AZURE_OPENAI_RESOURCE}"
-      },
-      "openAiResourceGroupName": {
-        "value": "${AZURE_OPENAI_RESOURCE_GROUP}"
-      },
-      "openAiResourceLocation": {
-        "value": "${AZURE_OPENAI_RESOURCE_LOCATION}"
-      },
-      "openAiDeploymentCapacity": {
-        "value": "${AZURE_OPENAI_DEPLOYMENT_CAPACITY=30}"
-      },
-      "openAiDeploymentSkuName": {
-        "value": "${AZURE_OPENAI_DEPLOYMENT_SKU_NAME=GlobalStandard}"
-      },
-      "openAiSkuName": {
-        "value": "${AZURE_OPENAI_SKU_NAME}"
-      },
-      "openAiApiVersion": {
-        "value": "${AZURE_OPENAI_API_VERSION}"
-      },
-      "createAzureOpenAi": {
-        "value": "${CREATE_AZURE_OPENAI=true}"
-      },
-      "openAiEndpoint": {
-        "value": "${AZURE_OPENAI_ENDPOINT}"
-      },
       "createRoleForUser": {
         "value": "${CREATE_ROLE_FOR_USER=true}"
       },

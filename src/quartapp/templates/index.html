@@ -43,7 +43,15 @@
                                 </strong>
                             </div>
                             <div class="toast-body message-content">
-                                <em class="typing-indicator">Typing...</em>
+                                <div class="loading-bar"></div>
+                                <div class="thoughts" style="display:none;">
+                                   <details open>
+                                    <summary>💡 Thinking ...</summary>
+                                    <p class="thoughts-content"></p>
+                                    </details>
+                                </div>
+                                <div class="answer-content" style="background-color: white">
+                                </div>
                             </div>
                         </div>
                 </div>
@@ -65,7 +73,7 @@
         </div>
 	</main>
     <script src="https://cdn.jsdelivr.net/npm/showdown@2.1.0/dist/showdown.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@microsoft/ai-chat-protocol@1.0.0-beta.20240610.1/dist/iife/index.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ndjson-readablestream@1.2.0/dist/ndjson-readablestream.umd.js"></script>
 
     <script>
         const form = document.getElementById("chat-form");
@@ -75,8 +83,6 @@
         const assistantTemplate = document.querySelector('#message-template-assistant');
         const converter = new showdown.Converter();
         const messages = [];
-
-        const client = new ChatProtocol.AIChatProtocolClient("/chat");
 
         form.addEventListener("submit", async function(e) {
             e.preventDefault();
@@ -95,35 +101,39 @@
                 "content": message
             });
 
-            try {
-                const result = await client.getStreamedCompletion(messages);
-
-                let answer = "";
-                for await (const response of result) {
-                    if (!response.delta) {
-                        continue;
+            const response = await fetch("/chat/stream", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({messages: messages})
+            });
+            let answer = "";
+            let thoughts = "";
+            for await (const event of readNDJSONStream(response.body)) {
+                if (!event.delta) {
+                    continue;
+                }
+                if (event.delta.reasoning_content) {
+                    thoughts += event.delta.reasoning_content;
+                    if (thoughts.trim().length > 0) {
+                        // Only show thoughts if they are more than just whitespace
+                        messageDiv.querySelector(".loading-bar").style.display = "none";
+                        messageDiv.querySelector(".thoughts").style.display = "block";
+                        messageDiv.querySelector(".thoughts-content").innerHTML = thoughts;
                     }
-                    if (response.delta.content) {
-                        // Clear out the DIV if its the first answer chunk we've received
-                        if (answer == "") {
-                            messageDiv.innerHTML = "";
-                        }
-                        answer += response.delta.content;
-                        messageDiv.innerHTML = converter.makeHtml(answer);
-                        messageDiv.scrollIntoView();
-                    }
-                    if (response.error) {
-                        messageDiv.innerHTML = "Error: " + response.error;
-                    }
+                } else {
+                    messageDiv.querySelector(".loading-bar").style.display = "none";
+                    answer += event.delta.content;
+                    messageDiv.querySelector(".answer-content").innerHTML = converter.makeHtml(answer);
+                }
+                messageDiv.scrollIntoView();
+                if (event.error) {
+                    messageDiv.innerHTML = "Error: " + event.error;
                 }
                 messages.push({
                     "role": "assistant",
                     "content": answer
                 });
-
                 messageInput.value = "";
-            } catch (error) {
-                messageDiv.innerHTML = "Error: " + error;
             }
         });
     </script>

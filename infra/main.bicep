@@ -12,40 +12,19 @@ param location string
 @description('Id of the user or app to assign application roles')
 param principalId string = ''
 
-@description('Flag to decide where to create OpenAI role for current user')
-param createRoleForUser bool = true
-
 param acaExists bool = false
 
-// Parameters for the Azure OpenAI resource:
-param openAiResourceName string = ''
-param openAiResourceGroupName string = ''
+// Parameters for the Azure AI resource:
+param aiServicesResourceGroupName string = ''
 @minLength(1)
-@description('Location for the OpenAI resource')
-// Look for the desired model in availability table. Default model is gpt-4o-mini:
-// https://learn.microsoft.com/azure/ai-services/openai/concepts/models#standard-deployment-model-availability
+@description('Location for the Azure AI resource')
+// https://learn.microsoft.com/azure/ai-studio/how-to/deploy-models-serverless-availability#deepseek-models-from-microsoft
 @allowed([
-  'australiaeast'
-  'brazilsouth'
-  'canadaeast'
   'eastus'
   'eastus2'
-  'francecentral'
-  'germanywestcentral'
-  'japaneast'
-  'koreacentral'
   'northcentralus'
-  'norwayeast'
-  'polandcentral'
-  'southafricanorth'
   'southcentralus'
-  'southindia'
-  'spaincentral'
-  'swedencentral'
-  'switzerlandnorth'
-  'uksouth'
-  'westeurope'
-  'westu'
+  'westus'
   'westus3'
 ])
 @metadata({
@@ -53,23 +32,11 @@ param openAiResourceGroupName string = ''
     type: 'location'
   }
 })
-param openAiResourceLocation string
-param openAiSkuName string = ''
-param openAiApiVersion string = '' // Used by the SDK in the app code
+param aiServicesResourceLocation string
 param disableKeyBasedAuth bool = true
 
-// Parameters for the specific Azure OpenAI deployment:
-param openAiDeploymentName string // Set in main.parameters.json
-param openAiModelName string // Set in main.parameters.json
-param openAiModelVersion string // Set in main.parameters.json
-param openAiDeploymentCapacity int // Set in main.parameters.json
-param openAiDeploymentSkuName string // Set in main.parameters.json
-
-@description('Flag to decide whether to create Azure OpenAI instance or not')
-param createAzureOpenAi bool // Set in main.parameters.json
-
-@description('Azure OpenAI endpoint to use. If provided, no Azure OpenAI instance will be created.')
-param openAiEndpoint string = ''
+// Parameters for the specific Azure AI deployment:
+param aiServicesDeploymentName string = 'DeepSeek-R1'
 
 
 var resourceToken = toLower(uniqueString(subscription().id, name, location))
@@ -81,35 +48,43 @@ resource resourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   tags: tags
 }
 
-resource openAiResourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' existing = if (!empty(openAiResourceGroupName)) {
-  name: !empty(openAiResourceGroupName) ? openAiResourceGroupName : resourceGroup.name
+resource aiServicesResourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' existing = if (!empty(aiServicesResourceGroupName)) {
+  name: !empty(aiServicesResourceGroupName) ? aiServicesResourceGroupName : resourceGroup.name
 }
 
 var prefix = '${name}-${resourceToken}'
 
-module openAi 'core/ai/cognitiveservices.bicep' = if (createAzureOpenAi) {
-  name: 'openai'
-  scope: openAiResourceGroup
+var aiServicesNameAndSubdomain = '${resourceToken}-aiservices'
+module aiServices 'br/public:avm/res/cognitive-services/account:0.7.2' = {
+  name: 'deepseek'
+  scope: resourceGroup
   params: {
-    name: !empty(openAiResourceName) ? openAiResourceName : '${resourceToken}-cog'
-    location: !empty(openAiResourceLocation) ? openAiResourceLocation : location
+    name: aiServicesNameAndSubdomain
+    location: aiServicesResourceLocation
     tags: tags
-    disableLocalAuth: disableKeyBasedAuth
-    sku: {
-      name: !empty(openAiSkuName) ? openAiSkuName : 'S0'
-    }
+    kind: 'AIServices'
+    customSubDomainName: aiServicesNameAndSubdomain
+    sku:  'S0'
+    publicNetworkAccess: 'Enabled'
     deployments: [
       {
-        name: openAiDeploymentName
+        name: aiServicesDeploymentName
         model: {
-          format: 'OpenAI'
-          name: openAiModelName
-          version: openAiModelVersion
+          format: 'DeepSeek'
+          name: 'DeepSeek-R1'
+          version: '1'
         }
         sku: {
-          name: openAiDeploymentSkuName
-          capacity: openAiDeploymentCapacity
+          name: 'GlobalStandard'
+          capacity: 1
         }
+      }]
+    disableLocalAuth: disableKeyBasedAuth
+    roleAssignments: [
+      {
+        principalId: principalId
+        principalType: 'User'
+        roleDefinitionIdOrName: 'Cognitive Services User'
       }
     ]
   }
@@ -150,31 +125,19 @@ module aca 'aca.bicep' = {
     identityName: '${prefix}-id-aca'
     containerAppsEnvironmentName: containerApps.outputs.environmentName
     containerRegistryName: containerApps.outputs.registryName
-    openAiDeploymentName: openAiDeploymentName
-    openAiEndpoint: createAzureOpenAi ? openAi.outputs.endpoint : openAiEndpoint
-    openAiApiVersion: openAiApiVersion
+    aiServicesDeploymentName: aiServicesDeploymentName
+    aiServicesEndpoint: 'https://${aiServices.outputs.name}.services.ai.azure.com/models'
     exists: acaExists
   }
 }
 
 
-module openAiRoleUser 'core/security/role.bicep' = if (createRoleForUser && createAzureOpenAi) {
-  scope: openAiResourceGroup
-  name: 'openai-role-user'
-  params: {
-    principalId: principalId
-    roleDefinitionId: '5e0bd9bd-7b93-4f28-af87-19fc36ad61bd'
-    principalType: 'User'
-  }
-}
-
-
-module openAiRoleBackend 'core/security/role.bicep' = if (createAzureOpenAi) {
-  scope: openAiResourceGroup
-  name: 'openai-role-backend'
+module aiServicesRoleBackend 'core/security/role.bicep' = {
+  scope: aiServicesResourceGroup
+  name: 'aiservices-role-backend'
   params: {
     principalId: aca.outputs.SERVICE_ACA_IDENTITY_PRINCIPAL_ID
-    roleDefinitionId: '5e0bd9bd-7b93-4f28-af87-19fc36ad61bd'
+    roleDefinitionId: 'a97b65f3-24c7-4388-baec-2e87135dc908'
     principalType: 'ServicePrincipal'
   }
 }
@@ -182,11 +145,8 @@ module openAiRoleBackend 'core/security/role.bicep' = if (createAzureOpenAi) {
 output AZURE_LOCATION string = location
 output AZURE_TENANT_ID string = tenant().tenantId
 
-output AZURE_OPENAI_RESOURCE_GROUP string = openAiResourceGroup.name
-output AZURE_OPENAI_RESOURCE_NAME string = openAi.outputs.name
-output AZURE_OPENAI_CHAT_DEPLOYMENT string = openAiDeploymentName
-output AZURE_OPENAI_API_VERSION string = openAiApiVersion
-output AZURE_OPENAI_ENDPOINT string = createAzureOpenAi ? openAi.outputs.endpoint : openAiEndpoint
+output AZURE_DEEPSEEK_DEPLOYMENT string = aiServicesDeploymentName
+output AZURE_INFERENCE_ENDPOINT string = 'https://${aiServices.outputs.name}.services.ai.azure.com/models'
 
 output SERVICE_ACA_IDENTITY_PRINCIPAL_ID string = aca.outputs.SERVICE_ACA_IDENTITY_PRINCIPAL_ID
 output SERVICE_ACA_NAME string = aca.outputs.SERVICE_ACA_NAME
@@ -196,4 +156,3 @@ output SERVICE_ACA_IMAGE_NAME string = aca.outputs.SERVICE_ACA_IMAGE_NAME
 output AZURE_CONTAINER_ENVIRONMENT_NAME string = containerApps.outputs.environmentName
 output AZURE_CONTAINER_REGISTRY_ENDPOINT string = containerApps.outputs.registryLoginServer
 output AZURE_CONTAINER_REGISTRY_NAME string = containerApps.outputs.registryName
-
