@@ -111,7 +111,7 @@ multidict==6.1.0
     #   yarl
 openai==1.64.0
     # via quartapp (pyproject.toml)
-packaging==24.1
+packaging==24.2
     # via gunicorn
 portalocker==2.10.1
     # via msal-extensions
