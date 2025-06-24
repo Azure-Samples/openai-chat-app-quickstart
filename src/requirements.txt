@@ -155,7 +155,7 @@ typing-extensions==4.12.2
     #   pydantic-core
 urllib3==2.5.0
     # via requests
-uvicorn==0.32.0
+uvicorn==0.34.3
     # via quartapp (pyproject.toml)
 uvloop==0.20.0 ; sys_platform != "win32" and (sys_platform != "cygwin" and platform_python_implementation != "PyPy")
     # via quartapp (pyproject.toml)
