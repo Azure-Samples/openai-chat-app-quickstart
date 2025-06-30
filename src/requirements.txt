@@ -58,7 +58,7 @@ frozenlist==1.5.0
     #   aiosignal
 gunicorn==23.0.0
     # via quartapp (pyproject.toml)
-h11==0.14.0
+h11==0.16.0
     # via
     #   httpcore
     #   hypercorn
