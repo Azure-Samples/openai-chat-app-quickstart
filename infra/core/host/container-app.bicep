@@ -126,6 +126,7 @@ resource app 'Microsoft.App/containerApps@2023-05-02-preview' = {
       } : { enabled: false }
       secrets: [for secret in items(secrets): {
         name: secret.key
+        #disable-next-line use-secure-value-for-secure-inputs
         value: secret.value
       }]
       service: !empty(serviceType) ? { type: serviceType } : null
