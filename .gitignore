@@ -5,3 +5,7 @@ __pycache__/
 .coverage
 .idea/
 .venv/
+
+# Bicep build artifacts (exclude .json files except parameters)
+infra/**/*.json
+!infra/**/main.parameters.json
