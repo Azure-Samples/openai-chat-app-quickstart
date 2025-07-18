@@ -4,9 +4,6 @@
 #
 #    pip-compile --output-file=requirements.txt pyproject.toml
 #
-# Note: h11 upgraded from 0.14.0 to 0.16.0 (Dependabot PR #279)
-# Required coordinated upgrade of httpcore to support h11>=0.16.0
-#
 aiofiles==24.1.0
     # via quart
 aiohappyeyeballs==2.6.0
