@@ -36,7 +36,7 @@ certifi==2024.8.30
     #   requests
 cffi==1.17.1
     # via cryptography
-charset-normalizer==3.4.0
+charset-normalizer==3.4.2
     # via requests
 click==8.1.7
     # via
@@ -111,7 +111,7 @@ multidict==6.1.0
     #   yarl
 openai==1.64.0
     # via quartapp (pyproject.toml)
-packaging==24.1
+packaging==25.0
     # via gunicorn
 portalocker==2.10.1
     # via msal-extensions
