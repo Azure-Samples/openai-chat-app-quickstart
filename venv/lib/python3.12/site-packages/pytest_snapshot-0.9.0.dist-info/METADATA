@@ -1,0 +1,277 @@
+Metadata-Version: 2.1
+Name: pytest-snapshot
+Version: 0.9.0
+Summary: A plugin for snapshot testing with pytest.
+Home-page: https://github.com/joseph-roitman/pytest-snapshot
+Author: Joseph Roitman
+Author-email: joseph.roitman@gmail.com
+Maintainer: Joseph Roitman
+Maintainer-email: joseph.roitman@gmail.com
+License: MIT
+Platform: UNKNOWN
+Classifier: Development Status :: 4 - Beta
+Classifier: Framework :: Pytest
+Classifier: Intended Audience :: Developers
+Classifier: Topic :: Software Development :: Testing
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.5
+Classifier: Programming Language :: Python :: 3.6
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: Implementation :: CPython
+Classifier: Programming Language :: Python :: Implementation :: PyPy
+Classifier: Operating System :: OS Independent
+Classifier: License :: OSI Approved :: MIT License
+Requires-Python: >=3.5
+License-File: LICENSE
+Requires-Dist: pytest (>=3.0.0)
+
+===============
+pytest-snapshot
+===============
+
+.. image:: https://img.shields.io/pypi/v/pytest-snapshot.svg
+    :target: https://pypi.org/project/pytest-snapshot
+    :alt: PyPI version
+
+.. image:: https://img.shields.io/pypi/pyversions/pytest-snapshot.svg
+    :target: https://pypi.org/project/pytest-snapshot
+    :alt: Python versions
+
+.. image:: https://github.com/joseph-roitman/pytest-snapshot/workflows/CI/badge.svg?branch=master
+   :target: https://github.com/joseph-roitman/pytest-snapshot/actions?workflow=CI
+   :alt: CI Status
+
+.. image:: https://img.shields.io/codecov/c/github/joseph-roitman/pytest-snapshot.svg?style=flat
+   :alt: Coverage
+   :target: https://codecov.io/gh/joseph-roitman/pytest-snapshot
+
+
+A plugin for snapshot testing with pytest.
+
+This library was inspired by `jest's snapshot testing`_.
+Snapshot testing can be used to test that the value of an expression does not change unexpectedly.
+The added benefits of snapshot testing are that
+
+* They are easy to create.
+* They are easy to update when the expected value of a test changes.
+
+Instead of manually updating tests when the expected value of an expression changes,
+the developer simply needs to
+
+1. run ``pytest --snapshot-update`` to update the snapshot tests
+2. verify that the snapshot files contain the new expected results
+3. commit the snapshot changes to version control
+
+
+Features
+--------
+
+* snapshot testing of strings and bytes
+* snapshot testing of (optionally nested) collections of strings and bytes
+* complete control of the snapshot file path and content
+
+
+Requirements
+------------
+
+* Python 3.5+ or `PyPy`_
+* `pytest`_ 3.0+
+
+
+Installation
+------------
+You can install "pytest-snapshot" via `pip`_ from `PyPI`_::
+
+    $ pip install pytest-snapshot
+
+
+Usage
+-----
+
+assert_match
+============
+A classic equality test looks like:
+
+.. code-block:: python
+
+    def test_function_output():
+        assert foo('function input') == 'expected result'
+
+It could be re-written using snapshot testing as:
+
+.. code-block:: python
+
+    def test_function_output_with_snapshot(snapshot):
+        snapshot.snapshot_dir = 'snapshots'  # This line is optional.
+        snapshot.assert_match(foo('function input'), 'foo_output.txt')
+
+The author of the test should then
+
+1. run ``pytest --snapshot-update`` to generate the snapshot file ``snapshots/foo_output.txt``
+   containing the output of ``foo()``.
+2. verify that the content of the snapshot file is valid.
+3. commit it to version control.
+
+Now, whenever the test is run, it will assert that the output of ``foo()`` is equal to the snapshot.
+
+What if the behaviour of ``foo()`` changes and the test starts to fail?
+
+In the first example, the developer would need to manually update the expected result in ``test_function_output``.
+This could be tedious if the expected result is large or there are many tests.
+
+In the second example, the developer would simply
+
+1. run ``pytest --snapshot-update``
+2. verify that the snapshot file contains the new expected result
+3. commit it to version control.
+
+Snapshot testing can be used for expressions whose values are strings or bytes.
+For other types, you should first create a *human readable* representation of the value.
+For example, to snapshot test a *json-serializable* value, you could either convert it into json
+or preferably convert it into the more readable yaml format using `PyYAML`_:
+
+.. code-block:: python
+
+    snapshot.assert_match(yaml.dump(foo()), 'foo_output.yml')
+
+assert_match_dir
+================
+When snapshot testing a *collection* of values, ``assert_match_dir`` comes in handy.
+It will save a snapshot of a collection of values as a directory of snapshot files.
+``assert_match_dir`` takes a dictionary from file name to value.
+Dictionaries can also be nested to create nested directories containing snapshot files.
+
+For example, the following code creates the directory ``snapshots/people``
+containing files ``john.json`` and ``jane.json``.
+
+.. code-block:: python
+
+    def test_something(snapshot):
+        snapshot.snapshot_dir = 'snapshots'
+        snapshot.assert_match_dir({
+            'john.json': '{"first name": "John", "last name": "Doe"}',
+            'jane.json': '{"first name": "Jane", "last name": "Doe"}',
+        }, 'people')
+
+When running ``pytest --snapshot-update``, snapshot files will be added, updated, or deleted as necessary.
+As a safety measure, snapshots will only be deleted when using the ``--allow-snapshot-deletion`` flag.
+
+Common use case
+===============
+A quick way to create snapshot tests is to create a directory containing many test case directories.
+In each test case, add files containing the inputs to the function you wish to test.
+For example:
+
+.. code-block::
+
+    test_cases
+        case1
+            input.json
+        case2
+            input.json
+        ...
+
+Next, add a test that is parametrized on all test case directories. The test should
+
+* read input from the test case directory
+* call the function to be tested
+* snapshot the result to the test case directory
+
+.. code-block:: python
+
+    import json
+    import os
+
+    import pytest
+    import yaml
+    from pathlib import Path
+
+
+    def json_to_yaml(json_string):
+        obj = json.loads(json_string)
+        return yaml.dump(obj, indent=2)
+
+
+    @pytest.mark.parametrize('case_dir', list(Path('test_cases').iterdir()))
+    def test_json(case_dir, snapshot):
+        # Read input files from the case directory.
+        input_json = case_dir.joinpath('input.json').read_text()
+
+        # Call the tested function.
+        output_yaml = json_to_yaml(input_json)
+
+        # Snapshot the return value.
+        snapshot.snapshot_dir = case_dir
+        snapshot.assert_match(output_yaml, 'output.yml')
+
+Now, we can run ``pytest --snapshot-update`` to create an ``output.yml`` snapshot for each test case.
+If we later decide to modify the tested function's behaviour,
+we can fix the test cases with another ``pytest --snapshot-update``.
+
+
+Similar Packages
+----------------
+Another python package that can be used for snapshot testing is `snapshottest`_.
+While this package and snapshottest fulfill the same role, there are some differences.
+
+With pytest-snapshot:
+
+* Every snapshot is saved to a separate file.
+* The paths to snapshot files are fully customizable.
+* The serialization of objects to snapshots is fully customizable (the library does not serialize).
+
+This allows the user to organize snapshots in the most human-readable and logical place in their code repository.
+This is highly beneficial since snapshots will be viewed by users many times during development and code reviews.
+
+
+Contributing
+------------
+Contributions are very welcome. Before contributing, please discuss the change with me.
+I wish to keep this plugin flexible and not enforce any project layout on the user.
+
+Tests can be run with `tox`_ or ``python -m pytest``.
+Note that the test suite does not pass when run with ``--assert=plain``.
+
+
+License
+-------
+Distributed under the terms of the `MIT`_ license, "pytest-snapshot" is free and open source software.
+
+
+Issues
+------
+If you encounter any problems, please `file an issue`_ along with a detailed description.
+
+
+Links
+-----
+* Releases: https://pypi.org/project/pytest-snapshot/
+* Code: https://github.com/joseph-roitman/pytest-snapshot
+
+
+----
+
+This `pytest`_ plugin was generated with `Cookiecutter`_ along with `@hackebrot`_'s `cookiecutter-pytest-plugin`_ template.
+
+.. _`Cookiecutter`: https://github.com/audreyr/cookiecutter
+.. _`@hackebrot`: https://github.com/hackebrot
+.. _`MIT`: http://opensource.org/licenses/MIT
+.. _`BSD-3`: http://opensource.org/licenses/BSD-3-Clause
+.. _`GNU GPL v3.0`: http://www.gnu.org/licenses/gpl-3.0.txt
+.. _`Apache Software License 2.0`: http://www.apache.org/licenses/LICENSE-2.0
+.. _`cookiecutter-pytest-plugin`: https://github.com/pytest-dev/cookiecutter-pytest-plugin
+.. _`file an issue`: https://github.com/joseph-roitman/pytest-snapshot/issues
+.. _`pytest`: https://github.com/pytest-dev/pytest
+.. _`tox`: https://tox.readthedocs.io/en/latest/
+.. _`pip`: https://pypi.org/project/pip/
+.. _`PyPI`: https://pypi.org
+.. _`PyPy`: https://www.pypy.org/
+.. _`jest's snapshot testing`: https://jestjs.io/docs/en/snapshot-testing
+.. _`PyYAML`: https://pypi.org/project/PyYAML/
+.. _`snapshottest`: https://github.com/syrusakbary/snapshottest
+
+
