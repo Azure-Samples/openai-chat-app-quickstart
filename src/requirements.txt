@@ -6,7 +6,7 @@
 #
 aiofiles==24.1.0
     # via quart
-aiohappyeyeballs==2.4.3
+aiohappyeyeballs==2.6.0
     # via aiohttp
 aiohttp==3.12.14
     # via quartapp (pyproject.toml)
