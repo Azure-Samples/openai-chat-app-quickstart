@@ -58,7 +58,7 @@ frozenlist==1.5.0
     #   aiosignal
 gunicorn==23.0.0
     # via quartapp (pyproject.toml)
-h11==0.14.0
+h11==0.16.0
     # via
     #   httpcore
     #   hypercorn
@@ -68,11 +68,11 @@ h2==4.1.0
     # via hypercorn
 hpack==4.0.0
     # via h2
-httpcore==1.0.6
+httpcore==1.0.9
     # via httpx
 httptools==0.6.4
     # via quartapp (pyproject.toml)
-httpx==0.27.2
+httpx==0.27.0
     # via openai
 hypercorn==0.17.3
     # via quart
