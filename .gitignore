@@ -5,8 +5,6 @@ __pycache__/
 .coverage
 .idea/
 .venv/
-test_env/
-verify_env/
 
 # Bicep build artifacts (exclude .json files except parameters)
 infra/**/*.json
