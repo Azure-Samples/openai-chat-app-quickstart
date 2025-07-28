@@ -15,7 +15,7 @@ dependencies = [
     "watchfiles",
     "openai",
     "azure-identity",
-    "aiohttp",
+    "aiohttp>=3.11.0",
     "python-dotenv",
     "pyyaml"
     ]
