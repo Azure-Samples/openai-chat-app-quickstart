@@ -29,7 +29,7 @@ blinker==1.9.0
     # via
     #   flask
     #   quart
-certifi==2025.7.14
+certifi==2025.8.3
     # via
     #   httpcore
     #   httpx
@@ -76,7 +76,7 @@ httpx==0.28.1
     # via openai
 hypercorn==0.17.3
     # via quart
-hyperframe==6.0.1
+hyperframe==6.1.0
     # via h2
 idna==3.10
     # via
