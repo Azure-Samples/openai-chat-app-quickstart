@@ -23,7 +23,7 @@ attrs==25.3.0
     # via aiohttp
 azure-core==1.35.0
     # via azure-identity
-azure-identity==1.23.1
+azure-identity==1.24.0
     # via quartapp (pyproject.toml)
 blinker==1.9.0
     # via
