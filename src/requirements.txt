@@ -23,7 +23,7 @@ attrs==25.3.0
     # via aiohttp
 azure-core==1.35.0
     # via azure-identity
-azure-identity==1.23.1
+azure-identity==1.24.0
     # via quartapp (pyproject.toml)
 blinker==1.9.0
     # via
@@ -50,7 +50,7 @@ cryptography==45.0.5
     #   pyjwt
 distro==1.9.0
     # via openai
-flask==3.1.1
+flask==3.1.2
     # via quart
 frozenlist==1.7.0
     # via
