@@ -23,7 +23,7 @@ attrs==25.3.0
     # via aiohttp
 azure-core==1.35.0
     # via azure-identity
-azure-identity==1.23.1
+azure-identity==1.24.0
     # via quartapp (pyproject.toml)
 blinker==1.9.0
     # via
@@ -43,14 +43,14 @@ click==8.2.1
     #   flask
     #   quart
     #   uvicorn
-cryptography==45.0.5
+cryptography==45.0.6
     # via
     #   azure-identity
     #   msal
     #   pyjwt
 distro==1.9.0
     # via openai
-flask==3.1.1
+flask==3.1.2
     # via quart
 frozenlist==1.7.0
     # via
@@ -64,7 +64,7 @@ h11==0.16.0
     #   hypercorn
     #   uvicorn
     #   wsproto
-h2==4.2.0
+h2==4.3.0
     # via hypercorn
 hpack==4.1.0
     # via h2
@@ -106,11 +106,11 @@ msal==1.33.0
     #   msal-extensions
 msal-extensions==1.3.1
     # via azure-identity
-multidict==6.6.3
+multidict==6.6.4
     # via
     #   aiohttp
     #   yarl
-openai==1.99.9
+openai==1.102.0
     # via quartapp (pyproject.toml)
 packaging==25.0
     # via gunicorn
@@ -136,7 +136,7 @@ pyyaml==6.0.2
     # via quartapp (pyproject.toml)
 quart==0.20.0
     # via quartapp (pyproject.toml)
-requests==2.32.4
+requests==2.32.5
     # via
     #   azure-core
     #   msal
