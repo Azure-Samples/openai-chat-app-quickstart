@@ -136,7 +136,7 @@ pyyaml==6.0.2
     # via quartapp (pyproject.toml)
 quart==0.20.0
     # via quartapp (pyproject.toml)
-requests==2.32.4
+requests==2.32.5
     # via
     #   azure-core
     #   msal
