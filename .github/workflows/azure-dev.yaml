@@ -41,10 +41,10 @@ jobs:
       DISABLE_KEY_BASED_AUTH: ${{ vars.DISABLE_KEY_BASED_AUTH }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Install azd
-        uses: Azure/setup-azd@v2.1.0
+        uses: Azure/setup-azd@v2.2.0
 
       - name: Log in with Azure (Federated Credentials)
         run: |
