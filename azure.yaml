@@ -2,7 +2,7 @@
 
 name: azure-openai-chat-app-quickstart
 metadata:
-  template: azure-openai-chat-app-quickstart@0.3.0
+  template: azure-openai-chat-app-quickstart@0.4.0
 requiredVersions:
   azd: ">= 1.17.0"
 services:
