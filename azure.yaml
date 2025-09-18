@@ -2,9 +2,9 @@
 
 name: azure-openai-chat-app-quickstart
 metadata:
-  template: azure-openai-chat-app-quickstart@0.2.0
+  template: azure-openai-chat-app-quickstart@0.4.0
 requiredVersions:
-    azd: ">= 1.10.0"
+  azd: ">= 1.17.0"
 services:
   aca:
     project: ./src
@@ -12,19 +12,3 @@ services:
     host: containerapp
     docker:
       remoteBuild: true
-pipeline:
-  variables:
-    - AZURE_OPENAI_CHAT_DEPLOYMENT
-    - AZURE_OPENAI_CHAT_MODEL
-    - AZURE_OPENAI_CHAT_MODEL_VERSION
-    - AZURE_OPENAI_RESOURCE
-    - AZURE_OPENAI_RESOURCE_GROUP
-    - AZURE_OPENAI_RESOURCE_LOCATION
-    - AZURE_OPENAI_DEPLOYMENT_CAPACITY
-    - AZURE_OPENAI_DEPLOYMENT_SKU_NAME
-    - AZURE_OPENAI_SKU_NAME
-    - AZURE_OPENAI_API_VERSION
-    - CREATE_AZURE_OPENAI
-    - AZURE_OPENAI_ENDPOINT
-    - SERVICE_ACA_RESOURCE_EXISTS
-    - DISABLE_KEY_BASED_AUTH
