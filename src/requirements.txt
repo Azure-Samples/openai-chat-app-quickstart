@@ -122,7 +122,7 @@ propcache==0.3.2
     #   yarl
 pycparser==2.23
     # via cffi
-pydantic==2.11.7
+pydantic==2.11.9
     # via openai
 pydantic-core==2.33.2
     # via pydantic
