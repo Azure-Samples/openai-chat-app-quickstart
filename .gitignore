@@ -10,3 +10,6 @@ venv/
 # Bicep build artifacts (exclude .json files except parameters)
 infra/**/*.json
 !infra/**/main.parameters.json
+
+# Pip artifacts and temporary files
+=*
