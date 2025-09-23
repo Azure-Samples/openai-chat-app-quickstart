@@ -55,7 +55,6 @@ param openAiResourceGroupName string = ''
 })
 param openAiResourceLocation string
 param openAiSkuName string = ''
-param openAiApiVersion string = '' // Used by the SDK in the app code
 param disableKeyBasedAuth bool = true
 
 // Parameters for the specific Azure OpenAI deployment:
@@ -152,7 +151,6 @@ module aca 'aca.bicep' = {
     containerRegistryName: containerApps.outputs.registryName
     openAiDeploymentName: openAiDeploymentName
     openAiEndpoint: createAzureOpenAi ? openAi.outputs.endpoint : openAiEndpoint
-    openAiApiVersion: openAiApiVersion
     exists: acaExists
   }
 }
@@ -185,7 +183,6 @@ output AZURE_TENANT_ID string = tenant().tenantId
 output AZURE_OPENAI_RESOURCE_GROUP string = openAiResourceGroup.name
 output AZURE_OPENAI_RESOURCE_NAME string = openAi.outputs.name
 output AZURE_OPENAI_CHAT_DEPLOYMENT string = openAiDeploymentName
-output AZURE_OPENAI_API_VERSION string = openAiApiVersion
 output AZURE_OPENAI_ENDPOINT string = createAzureOpenAi ? openAi.outputs.endpoint : openAiEndpoint
 
 output SERVICE_ACA_IDENTITY_PRINCIPAL_ID string = aca.outputs.SERVICE_ACA_IDENTITY_PRINCIPAL_ID

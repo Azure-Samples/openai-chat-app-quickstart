@@ -7,7 +7,7 @@ from azure.identity.aio import (
     ManagedIdentityCredential,
     get_bearer_token_provider,
 )
-from openai import AsyncAzureOpenAI
+from openai import AsyncOpenAI
 from quart import (
     Blueprint,
     Response,
@@ -47,11 +47,10 @@ async def configure_openai():
     if not os.getenv("AZURE_OPENAI_CHAT_DEPLOYMENT"):
         raise ValueError("AZURE_OPENAI_CHAT_DEPLOYMENT is required for Azure OpenAI")
 
-    # Create the Asynchronous Azure OpenAI client
-    bp.openai_client = AsyncAzureOpenAI(
-        api_version=os.getenv("AZURE_OPENAI_API_VERSION") or "2024-02-15-preview",
-        azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
-        azure_ad_token_provider=token_provider,
+    # Create the Asynchronous OpenAI client
+    bp.openai_client = AsyncOpenAI(
+        base_url=os.getenv("AZURE_OPENAI_ENDPOINT"),
+        api_key=token_provider,
     )
     # Set the model name to the Azure OpenAI model deployment name
     bp.openai_model = os.getenv("AZURE_OPENAI_CHAT_DEPLOYMENT")
