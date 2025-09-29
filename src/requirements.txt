@@ -100,7 +100,7 @@ markupsafe==3.0.2
     #   jinja2
     #   quart
     #   werkzeug
-msal==1.33.0
+msal==1.34.0
     # via
     #   azure-identity
     #   msal-extensions
