@@ -116,7 +116,7 @@ packaging==25.0
     # via gunicorn
 priority==2.0.0
     # via hypercorn
-propcache==0.3.2
+propcache==0.4.0
     # via
     #   aiohttp
     #   yarl
