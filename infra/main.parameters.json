@@ -38,9 +38,6 @@
       "openAiSkuName": {
         "value": "${AZURE_OPENAI_SKU_NAME}"
       },
-      "openAiApiVersion": {
-        "value": "${AZURE_OPENAI_API_VERSION}"
-      },
       "createAzureOpenAi": {
         "value": "${CREATE_AZURE_OPENAI=true}"
       },

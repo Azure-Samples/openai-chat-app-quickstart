@@ -7,7 +7,7 @@ from azure.identity.aio import (
     ManagedIdentityCredential,
     get_bearer_token_provider,
 )
-from openai import AsyncAzureOpenAI
+from openai import AsyncOpenAI
 from quart import (
     Blueprint,
     Response,
@@ -22,7 +22,6 @@ bp = Blueprint("chat", __name__, template_folder="templates", static_folder="sta
 
 @bp.before_app_serving
 async def configure_openai():
-
     # Use ManagedIdentityCredential with the client_id for user-assigned managed identities
     user_assigned_managed_identity_credential = ManagedIdentityCredential(client_id=os.getenv("AZURE_CLIENT_ID"))
 
@@ -47,12 +46,18 @@ async def configure_openai():
     if not os.getenv("AZURE_OPENAI_CHAT_DEPLOYMENT"):
         raise ValueError("AZURE_OPENAI_CHAT_DEPLOYMENT is required for Azure OpenAI")
 
-    # Create the Asynchronous Azure OpenAI client
-    bp.openai_client = AsyncAzureOpenAI(
-        api_version=os.getenv("AZURE_OPENAI_API_VERSION") or "2024-02-15-preview",
-        azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
-        azure_ad_token_provider=token_provider,
+    azure_endpoint = os.getenv("AZURE_OPENAI_ENDPOINT").rstrip("/")
+    if azure_endpoint.endswith("/openai/v1"):
+        base_url = azure_endpoint
+    else:
+        base_url = f"{azure_endpoint}/openai/v1"
+
+    # Create the Asynchronous OpenAI client for Azure OpenAI
+    bp.openai_client = AsyncOpenAI(
+        base_url=base_url,
+        api_key=token_provider,
     )
+    bp.openai_token_provider = token_provider
     # Set the model name to the Azure OpenAI model deployment name
     bp.openai_model = os.getenv("AZURE_OPENAI_CHAT_DEPLOYMENT")
 
@@ -73,24 +78,47 @@ async def chat_handler():
 
     @stream_with_context
     async def response_stream():
+        def to_response_message(message):
+            role = message.get("role")
+            content = message.get("content")
+            content_type = "input_text" if role in {"system", "user"} else "output_text"
+
+            if isinstance(content, list):
+                normalized = []
+                for part in content:
+                    if isinstance(part, dict) and part.get("type") == "text":
+                        normalized.append({"type": content_type, "text": part.get("text", "")})
+                    elif isinstance(part, dict):
+                        normalized.append(part)
+                    else:
+                        normalized.append({"type": content_type, "text": str(part)})
+                return {"role": role, "content": normalized}
+
+            if isinstance(content, str):
+                return {"role": role, "content": [{"type": content_type, "text": content}]}
+
+            return {"role": role, "content": [{"type": content_type, "text": str(content)}]}
+
         # This sends all messages, so API request may exceed token limits
         all_messages = [
-            {"role": "system", "content": "You are a helpful assistant."},
-        ] + request_messages
+            {"role": "system", "content": [{"type": "input_text", "text": "You are a helpful assistant."}]},
+        ] + [to_response_message(message) for message in request_messages]
 
-        chat_coroutine = bp.openai_client.chat.completions.create(
+        response_stream = await bp.openai_client.responses.create(
             # Azure OpenAI takes the deployment name as the model name
             model=bp.openai_model,
-            messages=all_messages,
+            input=all_messages,
             stream=True,
+            store=False,
         )
         try:
-            async for event in await chat_coroutine:
-                event_dict = event.model_dump()
-                if event_dict["choices"]:
-                    yield json.dumps(event_dict["choices"][0], ensure_ascii=False) + "\n"
+            async for event in response_stream:
+                if event.type == "response.output_text.delta":
+                    yield json.dumps({"type": event.type, "delta": event.delta}, ensure_ascii=False) + "\n"
+                elif event.type == "response.completed":
+                    yield json.dumps({"type": event.type}, ensure_ascii=False) + "\n"
         except Exception as e:
             current_app.logger.error(e)
-            yield json.dumps({"error": str(e)}, ensure_ascii=False) + "\n"
+            yield json.dumps({"type": "response.error", "error": str(e)}, ensure_ascii=False) + "\n"
 
     return Response(response_stream())
