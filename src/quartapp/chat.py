@@ -7,7 +7,7 @@ from azure.identity.aio import (
     ManagedIdentityCredential,
     get_bearer_token_provider,
 )
-from openai import AsyncAzureOpenAI
+from openai import AsyncOpenAI
 from quart import (
     Blueprint,
     Response,
@@ -22,7 +22,6 @@ bp = Blueprint("chat", __name__, template_folder="templates", static_folder="sta
 
 @bp.before_app_serving
 async def configure_openai():
-
     # Use ManagedIdentityCredential with the client_id for user-assigned managed identities
     user_assigned_managed_identity_credential = ManagedIdentityCredential(client_id=os.getenv("AZURE_CLIENT_ID"))
 
@@ -47,11 +46,11 @@ async def configure_openai():
     if not os.getenv("AZURE_OPENAI_CHAT_DEPLOYMENT"):
         raise ValueError("AZURE_OPENAI_CHAT_DEPLOYMENT is required for Azure OpenAI")
 
-    # Create the Asynchronous Azure OpenAI client
-    bp.openai_client = AsyncAzureOpenAI(
-        api_version=os.getenv("AZURE_OPENAI_API_VERSION") or "2024-02-15-preview",
-        azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
-        azure_ad_token_provider=token_provider,
+    # Create the Asynchronous OpenAI client with Azure OpenAI endpoint
+    azure_endpoint = os.getenv("AZURE_OPENAI_ENDPOINT").rstrip("/")
+    bp.openai_client = AsyncOpenAI(
+        base_url=f"{azure_endpoint}/openai/v1",
+        api_key=token_provider,
     )
     # Set the model name to the Azure OpenAI model deployment name
     bp.openai_model = os.getenv("AZURE_OPENAI_CHAT_DEPLOYMENT")
@@ -73,22 +72,33 @@ async def chat_handler():
 
     @stream_with_context
     async def response_stream():
-        # This sends all messages, so API request may exceed token limits
-        all_messages = [
-            {"role": "system", "content": "You are a helpful assistant."},
-        ] + request_messages
+        # Build input items for Responses API
+        input_items = [
+            {"role": "system", "content": [{"type": "input_text", "text": "You are a helpful assistant."}]},
+        ]
+        for msg in request_messages:
+            content_type = "output_text" if msg["role"] == "assistant" else "input_text"
+            input_items.append(
+                {
+                    "role": msg["role"],
+                    "content": [{"type": content_type, "text": msg["content"]}],
+                }
+            )
 
-        chat_coroutine = bp.openai_client.chat.completions.create(
+        response_stream = await bp.openai_client.responses.create(
             # Azure OpenAI takes the deployment name as the model name
             model=bp.openai_model,
-            messages=all_messages,
+            input=input_items,
             stream=True,
+            store=False,
         )
         try:
-            async for event in await chat_coroutine:
-                event_dict = event.model_dump()
-                if event_dict["choices"]:
-                    yield json.dumps(event_dict["choices"][0], ensure_ascii=False) + "\n"
+            async for event in response_stream:
+                if event.type == "response.output_text.delta":
+                    yield json.dumps({"delta": {"content": event.delta, "role": None}}, ensure_ascii=False) + "\n"
+                elif event.type == "response.completed":
+                    finish_event = {"delta": {"content": None, "role": None}, "finish_reason": "stop"}
+                    yield json.dumps(finish_event, ensure_ascii=False) + "\n"
         except Exception as e:
             current_app.logger.error(e)
             yield json.dumps({"error": str(e)}, ensure_ascii=False) + "\n"
