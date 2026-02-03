@@ -65,8 +65,6 @@
         </div>
 	</main>
     <script src="https://cdn.jsdelivr.net/npm/showdown@2.1.0/dist/showdown.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@microsoft/ai-chat-protocol@1.0.0-beta.20240610.1/dist/iife/index.js"></script>
-
     <script>
         const form = document.getElementById("chat-form");
         const messageInput = document.getElementById("message");
@@ -75,8 +73,6 @@
         const assistantTemplate = document.querySelector('#message-template-assistant');
         const converter = new showdown.Converter();
         const messages = [];
-
-        const client = new ChatProtocol.AIChatProtocolClient("/chat");
 
         form.addEventListener("submit", async function(e) {
             e.preventDefault();
@@ -96,26 +92,46 @@
             });
 
             try {
-                const result = await client.getStreamedCompletion(messages);
-
                 let answer = "";
-                for await (const response of result) {
-                    if (!response.delta) {
-                        continue;
-                    }
-                    if (response.delta.content) {
-                        // Clear out the DIV if its the first answer chunk we've received
-                        if (answer == "") {
-                            messageDiv.innerHTML = "";
+                const response = await fetch("/chat/stream", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ messages })
+                });
+
+                if (!response.ok || !response.body) {
+                    throw new Error(`Request failed (${response.status})`);
+                }
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = "";
+                while (true) {
+                    const { value, done } = await reader.read();
+                    if (done) break;
+
+                    buffer += decoder.decode(value, { stream: true });
+                    const lines = buffer.split("\n");
+                    buffer = lines.pop() || "";
+
+                    for (const line of lines) {
+                        if (!line.trim()) continue;
+                        const event = JSON.parse(line);
+                        if (event.type === "response.output_text.delta" && event.delta) {
+                            // Clear out the DIV if its the first answer chunk we've received
+                            if (answer === "") {
+                                messageDiv.innerHTML = "";
+                            }
+                            answer += event.delta;
+                            messageDiv.innerHTML = converter.makeHtml(answer);
+                            messageDiv.scrollIntoView();
                         }
-                        answer += response.delta.content;
-                        messageDiv.innerHTML = converter.makeHtml(answer);
-                        messageDiv.scrollIntoView();
-                    }
-                    if (response.error) {
-                        messageDiv.innerHTML = "Error: " + response.error;
+                        if (event.type === "response.error") {
+                            messageDiv.innerHTML = "Error: " + event.error;
+                        }
                     }
                 }
+
                 messages.push({
                     "role": "assistant",
                     "content": answer
