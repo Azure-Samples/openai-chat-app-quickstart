@@ -46,13 +46,13 @@ async def test_chat_stream_text_history(client, snapshot):
 @pytest.mark.asyncio
 async def test_openai_managedidentity(monkeypatch):
     monkeypatch.setenv("AZURE_OPENAI_CLIENT_ID", "test-client-id")
-    monkeypatch.setenv("AZURE_OPENAI_ENDPOINT", "test-openai-service.openai.azure.com")
+    monkeypatch.setenv("AZURE_OPENAI_ENDPOINT", "https://test-openai-service.openai.azure.com")
     monkeypatch.setenv("AZURE_OPENAI_CHAT_DEPLOYMENT", "test-chatgpt")
-    monkeypatch.setenv("AZURE_OPENAI_VERSION", "2023-10-01-preview")
 
     monkeypatch.setattr("azure.identity.aio.ManagedIdentityCredential", mock_cred.MockAzureCredential)
 
     quart_app = quartapp.create_app(testing=True)
 
     async with quart_app.test_app():
-        assert quart_app.blueprints["chat"].openai_client._azure_ad_token_provider is not None
+        # With the new AsyncOpenAI client, api_key is used instead of azure_ad_token_provider
+        assert quart_app.blueprints["chat"].openai_client.api_key is not None
