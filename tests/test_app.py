@@ -17,8 +17,17 @@ async def test_chat_stream_text(client, snapshot):
     response = await client.post(
         "/chat/stream",
         json={
-            "messages": [
-                {"role": "user", "content": "What is the capital of France?"},
+            "input": [
+                {
+                    "type": "message",
+                    "role": "system",
+                    "content": [{"type": "input_text", "text": "You are a helpful assistant."}],
+                },
+                {
+                    "type": "message",
+                    "role": "user",
+                    "content": [{"type": "input_text", "text": "What is the capital of France?"}],
+                },
             ]
         },
     )
@@ -32,10 +41,27 @@ async def test_chat_stream_text_history(client, snapshot):
     response = await client.post(
         "/chat/stream",
         json={
-            "messages": [
-                {"role": "user", "content": "What is the capital of France?"},
-                {"role": "assistant", "content": "Paris"},
-                {"role": "user", "content": "What is the capital of Germany?"},
+            "input": [
+                {
+                    "type": "message",
+                    "role": "system",
+                    "content": [{"type": "input_text", "text": "You are a helpful assistant."}],
+                },
+                {
+                    "type": "message",
+                    "role": "user",
+                    "content": [{"type": "input_text", "text": "What is the capital of France?"}],
+                },
+                {
+                    "type": "message",
+                    "role": "assistant",
+                    "content": [{"type": "output_text", "text": "Paris"}],
+                },
+                {
+                    "type": "message",
+                    "role": "user",
+                    "content": [{"type": "input_text", "text": "What is the capital of Germany?"}],
+                },
             ]
         },
     )

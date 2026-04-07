@@ -15,6 +15,12 @@ def mock_openai_responses_stream(monkeypatch):
         type: str
         delta: str | None = None
 
+        def model_dump(self) -> dict[str, str]:
+            payload = {"type": self.type}
+            if self.delta is not None:
+                payload["delta"] = self.delta
+            return payload
+
     class AsyncResponseStream:
         def __init__(self, answer: str):
             self._chunk_index = 0
@@ -47,6 +53,12 @@ def mock_openai_responses_stream(monkeypatch):
     def mock_stream(*args, **kwargs):
         response_input = kwargs.get("input")
         last_message = response_input[-1]["content"][0]["text"]
+
+        assert response_input[0] == {
+            "type": "message",
+            "role": "system",
+            "content": [{"type": "input_text", "text": "You are a helpful assistant."}],
+        }
 
         if len(response_input) > 2:
             assistant_message = response_input[-2]

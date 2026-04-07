@@ -1,6 +1,5 @@
 import json
 import os
-from typing import Any
 
 from azure.identity.aio import (
     AzureDeveloperCliCredential,
@@ -19,32 +18,6 @@ from quart import (
 )
 
 bp = Blueprint("chat", __name__, template_folder="templates", static_folder="static")
-
-
-def _content_to_text(content: Any) -> str:
-    if isinstance(content, str):
-        return content
-
-    if isinstance(content, list):
-        return "".join(
-            item["text"]
-            for item in content
-            if isinstance(item, dict)
-            and item.get("type") in {"text", "input_text", "output_text"}
-            and isinstance(item.get("text"), str)
-        )
-
-    raise ValueError("Message content must be a string or a list of text content items.")
-
-
-def _message_to_response_input(message: dict[str, Any]) -> dict[str, Any]:
-    content_type = "output_text" if message["role"] == "assistant" else "input_text"
-
-    return {
-        "type": "message",
-        "role": message["role"],
-        "content": [{"type": content_type, "text": _content_to_text(message["content"])}],
-    }
 
 
 @bp.before_app_serving
@@ -97,29 +70,19 @@ async def index():
 
 @bp.post("/chat/stream")
 async def chat_handler():
-    request_messages = (await request.get_json())["messages"]
+    request_input = (await request.get_json())["input"]
 
     @stream_with_context
     async def response_stream():
-        all_messages = [
-            {
-                "type": "message",
-                "role": "system",
-                "content": [{"type": "input_text", "text": "You are a helpful assistant."}],
-            },
-            *[_message_to_response_input(message) for message in request_messages],
-        ]
-
         try:
             async with bp.openai_client.responses.stream(
                 # Azure OpenAI takes the deployment name as the model name.
                 model=bp.openai_model,
-                input=all_messages,
+                input=request_input,
                 store=False,
             ) as openai_stream:
                 async for event in openai_stream:
-                    if event.type == "response.output_text.delta":
-                        yield json.dumps({"type": event.type, "delta": event.delta}, ensure_ascii=False) + "\n"
+                    yield json.dumps(event.model_dump(), ensure_ascii=False) + "\n"
         except Exception as e:
             current_app.logger.exception("Responses stream failed")
             yield json.dumps({"error": str(e)}, ensure_ascii=False) + "\n"

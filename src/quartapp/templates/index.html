@@ -74,7 +74,13 @@
         const userTemplate = document.querySelector('#message-template-user');
         const assistantTemplate = document.querySelector('#message-template-assistant');
         const converter = new showdown.Converter();
-        const messages = [];
+        const messages = [
+            {
+                type: "message",
+                role: "system",
+                content: [{ type: "input_text", text: "You are a helpful assistant." }]
+            }
+        ];
 
         form.addEventListener("submit", async function(e) {
             e.preventDefault();
@@ -89,8 +95,9 @@
             targetContainer.appendChild(assistantTemplateClone);
 
             messages.push({
-                "role": "user",
-                "content": message
+                type: "message",
+                role: "user",
+                content: [{ type: "input_text", text: message }]
             });
 
             try {
@@ -99,7 +106,7 @@
                     headers: {
                         "Content-Type": "application/json"
                     },
-                    body: JSON.stringify({ messages })
+                    body: JSON.stringify({ input: messages })
                 });
 
                 if (!response.ok) {
@@ -126,8 +133,9 @@
                     }
                 }
                 messages.push({
-                    "role": "assistant",
-                    "content": answer
+                    type: "message",
+                    role: "assistant",
+                    content: [{ type: "output_text", text: answer }]
                 });
 
                 messageInput.value = "";
