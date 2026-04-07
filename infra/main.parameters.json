@@ -12,13 +12,13 @@
         "value": "${AZURE_PRINCIPAL_ID}"
       },
       "openAiDeploymentName": {
-        "value": "${AZURE_OPENAI_CHAT_DEPLOYMENT=gpt-4o-mini}"
+        "value": "${AZURE_OPENAI_CHAT_DEPLOYMENT=gpt-5.4}"
       },
       "openAiModelName": {
-        "value": "${AZURE_OPENAI_CHAT_MODEL=gpt-4o-mini}"
+        "value": "${AZURE_OPENAI_CHAT_MODEL=gpt-5.4}"
       },
       "openAiModelVersion": {
-        "value": "${AZURE_OPENAI_CHAT_MODEL_VERSION=2024-07-18}"
+        "value": "${AZURE_OPENAI_CHAT_MODEL_VERSION=2026-03-05}"
       },
       "openAiResourceName": {
         "value": "${AZURE_OPENAI_RESOURCE}"
@@ -37,9 +37,6 @@
       },
       "openAiSkuName": {
         "value": "${AZURE_OPENAI_SKU_NAME}"
-      },
-      "openAiApiVersion": {
-        "value": "${AZURE_OPENAI_API_VERSION}"
       },
       "createAzureOpenAi": {
         "value": "${CREATE_AZURE_OPENAI=true}"

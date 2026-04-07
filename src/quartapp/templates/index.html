@@ -65,7 +65,7 @@
         </div>
 	</main>
     <script src="https://cdn.jsdelivr.net/npm/showdown@2.1.0/dist/showdown.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@microsoft/ai-chat-protocol@1.0.0-beta.20240610.1/dist/iife/index.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ndjson-readablestream@1.0.7/dist/ndjson-readablestream.umd.js"></script>
 
     <script>
         const form = document.getElementById("chat-form");
@@ -75,8 +75,6 @@
         const assistantTemplate = document.querySelector('#message-template-assistant');
         const converter = new showdown.Converter();
         const messages = [];
-
-        const client = new ChatProtocol.AIChatProtocolClient("/chat");
 
         form.addEventListener("submit", async function(e) {
             e.preventDefault();
@@ -96,24 +94,35 @@
             });
 
             try {
-                const result = await client.getStreamedCompletion(messages);
+                const response = await fetch("/chat/stream", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ messages })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Request failed with status ${response.status}`);
+                }
+
+                if (!response.body) {
+                    throw new Error("Streaming response body was empty.");
+                }
 
                 let answer = "";
-                for await (const response of result) {
-                    if (!response.delta) {
-                        continue;
-                    }
-                    if (response.delta.content) {
+                for await (const chunk of readNDJSONStream(response.body)) {
+                    if (chunk.type === "response.output_text.delta" && chunk.delta) {
                         // Clear out the DIV if its the first answer chunk we've received
                         if (answer == "") {
                             messageDiv.innerHTML = "";
                         }
-                        answer += response.delta.content;
+                        answer += chunk.delta;
                         messageDiv.innerHTML = converter.makeHtml(answer);
                         messageDiv.scrollIntoView();
                     }
-                    if (response.error) {
-                        messageDiv.innerHTML = "Error: " + response.error;
+                    if (chunk.error) {
+                        messageDiv.innerHTML = "Error: " + chunk.error;
                     }
                 }
                 messages.push({
