@@ -124,7 +124,7 @@ pycparser==2.23
     # via cffi
 pydantic==2.11.9
     # via openai
-pydantic-core==2.33.2
+pydantic-core==2.39.0
     # via pydantic
 pyjwt[crypto]==2.10.1
     # via
