@@ -94,7 +94,7 @@ jinja2==3.1.6
     #   quart
 jiter==0.10.0
     # via openai
-markupsafe==3.0.2
+markupsafe==3.0.3
     # via
     #   flask
     #   jinja2
