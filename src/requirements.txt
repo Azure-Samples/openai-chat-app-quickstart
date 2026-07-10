@@ -168,7 +168,7 @@ uvloop==0.21.0 ; sys_platform != "win32" and (sys_platform != "cygwin" and platf
     # via quartapp (pyproject.toml)
 watchfiles==1.1.0
     # via quartapp (pyproject.toml)
-werkzeug==3.1.3
+werkzeug==3.1.4
     # via
     #   flask
     #   quart
