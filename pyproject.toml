@@ -1,6 +1,6 @@
 [tool.ruff]
 lint.select = ["E", "F", "I", "UP"]
-target-version = "py311"
+target-version = "py314"
 line-length = 120
 src = ["src"]
 
@@ -8,7 +8,7 @@ src = ["src"]
 known-first-party = ["quartapp"]
 
 [tool.black]
-target-version =  ["py311"]
+target-version =  ["py314"]
 line-length = 120
 
 [tool.pytest.ini_options]
