@@ -13,6 +13,8 @@ updates:
       github-actions:
         patterns:
           - "*"
+    cooldown:
+      default-days: 7
   - package-ecosystem: "pip-compile" # See documentation for possible values
     directory: "/" # Location of package manifests
     schedule:
