@@ -43,7 +43,7 @@ click==8.2.1
     #   flask
     #   quart
     #   uvicorn
-cryptography==46.0.1
+cryptography==50.0.0
     # via
     #   azure-identity
     #   msal
