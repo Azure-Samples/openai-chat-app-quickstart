@@ -1,5 +1,5 @@
 # ------------------- Stage 0: Base Stage ------------------------------
-FROM python:3.11-alpine AS base
+FROM python:3.14-alpine AS base
 
 WORKDIR /code
 
@@ -23,7 +23,7 @@ FROM base AS final
 
 RUN addgroup -S app && adduser -S app -G app
 
-COPY --from=build --chown=app:app /usr/local/lib/python3.11 /usr/local/lib/python3.11
+COPY --from=build --chown=app:app /usr/local/lib/python3.14 /usr/local/lib/python3.14
 COPY --from=build --chown=app:app /usr/local/bin /usr/local/bin
 COPY --from=build --chown=app:app /code /code
 
