@@ -160,7 +160,7 @@ typing-extensions==4.15.0
     #   typing-inspection
 typing-inspection==0.4.1
     # via pydantic
-urllib3==2.5.0
+urllib3==2.8.0
     # via requests
 uvicorn==0.36.0
     # via quartapp (pyproject.toml)
