@@ -17,24 +17,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Build Bicep for linting
-        uses: azure/CLI@9f7ce6f37c31b777ec6c6b6d1dfe7db79f497956 # v2.2.0
+        uses: azure/CLI@9eb25b8360668fb0ecbafa808d40e2197b2f5f52 # v3.0.0
         with:
           inlineScript: |
             export DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1
             az config set bicep.use_binary_from_path=false && az bicep build -f infra/main.bicep --stdout
 
       - name: Run Microsoft Security DevOps Analysis
-        uses: microsoft/security-devops-action@08976cb623803b1b36d7112d4ff9f59eae704de0 # v1.12.0
+        uses: microsoft/security-devops-action@cf28f87c67770dbaa208cce3665fafc849f77507 # v1.12.1
         id: msdo
         continue-on-error: true
         with:
           tools: templateanalyzer
 
       - name: Upload alerts to Security tab
-        uses: github/codeql-action/upload-sarif@6f5948dfacef28e207b48d0905cf90c03365536d # v3.37.9
+        uses: github/codeql-action/upload-sarif@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4.39.1
         if: github.repository_owner == 'Azure-Samples'
         with:
           sarif_file: ${{ steps.msdo.outputs.sarifFile }}
